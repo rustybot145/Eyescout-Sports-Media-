@@ -57,13 +57,15 @@
     }
     .hero-img {
       position: absolute; inset: 0;
-      background: url('https://placehold.co/1920x1080/0d0d0d/1a1a1a') center/cover;
-      opacity: 0.35;
+      background: url('hero-photo.jpg') 65% center/cover;
+      opacity: 1;
     }
     .hero-img::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(to right, rgba(8,8,8,0.95) 35%, rgba(8,8,8,0.5) 70%, rgba(8,8,8,0.2) 100%);
+      background:
+        linear-gradient(to right, rgba(8,8,8,1) 25%, rgba(8,8,8,0.75) 50%, rgba(8,8,8,0.15) 100%),
+        linear-gradient(to top, rgba(8,8,8,0.7) 0%, transparent 35%);
     }
     .grain {
       position: absolute; inset: 0; pointer-events: none;
@@ -363,6 +365,7 @@
       </p>
       <div class="flex flex-wrap gap-4 fade fade-d3">
         <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Book a Session</a>
+        <a href="booking.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Receive Your Photos</a>
         <a href="gallery.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">View My Work</a>
       </div>
     </div>
