@@ -3,32 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>Services — Eyescout Sports</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root { --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: #080808; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-    h1,h2,h3,h4,.cond { font-family: 'Barlow Condensed', sans-serif; }
+    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
+    h1,h2,h3,h4,.cond { font-family: 'Arial Narrow', Arial, sans-serif; }
     .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .g-btn { background: var(--grad); transition: opacity 0.2s, transform 0.2s; }
     .g-btn:hover { opacity: 0.88; transform: translateY(-2px); }
     .g-line { height: 1px; background: var(--grad); opacity: 0.2; }
-    .s-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase; color: #555; }
+    .s-label { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase; color: #555; }
     .ghost { border: 1px solid rgba(255,255,255,0.2); transition: border-color 0.2s, background 0.2s, transform 0.2s; }
     .ghost:hover { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.04); transform: translateY(-2px); }
     nav { position: fixed; top: 0; width: 100%; z-index: 50; transition: background 0.3s; }
-    nav.scrolled { background: rgba(8,8,8,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    nav.scrolled { background: rgba(17,17,17,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.06); }
 
     /* Service row */
     .svc-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .svc-num { font-family: 'Barlow Condensed', sans-serif; font-size: 80px; font-weight: 900; line-height: 1; color: rgba(255,255,255,0.04); position: absolute; top: -10px; left: -8px; pointer-events: none; }
+    .svc-num { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 80px; font-weight: 900; line-height: 1; color: rgba(255,255,255,0.04); position: absolute; top: -10px; left: -8px; pointer-events: none; }
     .svc-img { overflow: hidden; position: relative; }
     .svc-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65) saturate(0.8); transition: transform 0.7s ease, filter 0.5s; }
     .svc-img:hover img { transform: scale(1.04); filter: brightness(0.85) saturate(1.05); }
-    .svc-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,8,8,0.5) 0%, transparent 60%); pointer-events: none; }
+    .svc-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(17,17,17,0.5) 0%, transparent 60%); pointer-events: none; }
 
     /* Bullet list */
     .svc-detail { list-style: none; padding: 0; }
@@ -36,9 +36,9 @@
     .svc-detail li::before { content: ''; display: block; width: 18px; height: 1px; background: var(--grad); margin-top: 11px; flex-shrink: 0; }
 
     /* Tag */
-    .svc-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; color: rgba(255,255,255,0.35); display: inline-block; }
+    .svc-tag { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; color: rgba(255,255,255,0.35); display: inline-block; }
 
-    #mobile-nav { display: none; position: fixed; inset: 0; background: #080808; z-index: 60; flex-direction: column; align-items: center; justify-content: center; gap: 36px; }
+    #mobile-nav { display: none; position: fixed; inset: 0; background: #111111; z-index: 60; flex-direction: column; align-items: center; justify-content: center; gap: 36px; }
     #mobile-nav.open { display: flex; }
     .fade { opacity: 0; transform: translateY(24px); transition: opacity 0.7s, transform 0.7s; }
     .fade.on { opacity: 1; transform: none; }
@@ -55,7 +55,6 @@
   <a href="index.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Home</a>
   <a href="gallery.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Gallery</a>
   <a href="services.html" class="cond text-3xl font-bold tracking-widest uppercase text-white hover:text-[#00C9A7] transition-colors">Services</a>
-  <a href="about.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">About</a>
   <a href="booking.html" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Book Now</a>
 </div>
 
@@ -72,7 +71,6 @@
       <a href="index.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Home</a>
       <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Gallery</a>
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white hover:text-white transition-colors">Services</a>
-      <a href="about.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">About</a>
       <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
     </div>
     <button id="mob-open" class="md:hidden text-white/60 hover:text-white transition-colors">
@@ -82,7 +80,7 @@
 </nav>
 
 <!-- PAGE HEADER -->
-<section class="pt-36 pb-20 bg-[#080808] relative overflow-hidden">
+<section class="pt-36 pb-20 bg-[#111111] relative overflow-hidden">
   <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 70% at 90% 50%, rgba(123,47,190,0.06) 0%, transparent 65%)"></div>
   <div class="max-w-7xl mx-auto px-6 md:px-12">
     <div class="s-label mb-4 fade">What We Offer</div>
@@ -96,7 +94,7 @@
 <div class="g-line mx-6 md:mx-12 max-w-7xl lg:mx-auto"></div>
 
 <!-- ── SERVICE 01 · PHOTOGRAPHY ── -->
-<section class="svc-row py-0 bg-[#080808]">
+<section class="svc-row py-0 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="svc-img aspect-[4/3] fade">
@@ -151,7 +149,7 @@
 </section>
 
 <!-- ── SERVICE 03 · HIGHLIGHT REELS ── -->
-<section class="svc-row py-0 bg-[#080808]">
+<section class="svc-row py-0 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="svc-img aspect-[4/3] fade">
@@ -206,7 +204,7 @@
 </section>
 
 <!-- ── SERVICE 05 · SCOUTING ── -->
-<section class="svc-row py-0 bg-[#080808]">
+<section class="svc-row py-0 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="svc-img aspect-[4/3] fade">
@@ -232,7 +230,7 @@
 </section>
 
 <!-- CTA -->
-<section class="py-28 bg-[#0d0d0d] border-t border-white/[0.05] text-center relative overflow-hidden">
+<section class="py-28 bg-[#171717] border-t border-white/[0.05] text-center relative overflow-hidden">
   <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(30,144,255,0.05) 0%, transparent 70%)"></div>
   <div class="relative z-10 max-w-3xl mx-auto px-6">
     <div class="s-label mb-5 fade">No Pricing Sticker Shock</div>
@@ -252,7 +250,6 @@
       <a href="index.html" class="cond text-xs tracking-[0.12em] uppercase text-white/30 hover:text-white transition-colors">Home</a>
       <a href="gallery.html" class="cond text-xs tracking-[0.12em] uppercase text-white/30 hover:text-white transition-colors">Gallery</a>
       <a href="services.html" class="cond text-xs tracking-[0.12em] uppercase text-white/30 hover:text-white transition-colors">Services</a>
-      <a href="about.html" class="cond text-xs tracking-[0.12em] uppercase text-white/30 hover:text-white transition-colors">About</a>
       <a href="booking.html" class="cond text-xs tracking-[0.12em] uppercase text-white/30 hover:text-white transition-colors">Book</a>
     </div>
     <p class="cond text-xs tracking-[0.15em] uppercase text-white/20">© 2025 Eyescout Sports</p>

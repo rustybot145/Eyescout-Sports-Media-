@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>Eyescout Sports — Film Em. Scout Em. Stardom.</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
@@ -13,8 +13,8 @@
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: #080808; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-    h1,h2,h3,h4,.cond { font-family: 'Barlow Condensed', sans-serif; }
+    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
+    h1,h2,h3,h4,.cond { font-family: 'Arial Narrow', Arial, sans-serif; }
 
     /* Gradient utilities */
     .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -24,7 +24,7 @@
 
     /* Gradient border card */
     .g-card {
-      background: linear-gradient(#121212, #121212) padding-box, var(--grad) border-box;
+      background: linear-gradient(#1c1c1c, #1c1c1c) padding-box, var(--grad) border-box;
       border: 1.5px solid transparent;
     }
     .g-card-top {
@@ -32,12 +32,12 @@
       border-left: 2px solid transparent;
       border-right: 2px solid transparent;
       border-bottom: none;
-      background: linear-gradient(#141414, #141414) padding-box, var(--grad) border-box;
+      background: linear-gradient(#1e1e1e, #1e1e1e) padding-box, var(--grad) border-box;
     }
 
     /* Nav */
     nav { position: fixed; top: 0; width: 100%; z-index: 50; transition: background 0.3s, border-color 0.3s; }
-    nav.scrolled { background: rgba(8,8,8,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    nav.scrolled { background: rgba(17,17,17,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.06); }
 
     /* Hero */
     .hero {
@@ -45,7 +45,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      background: #080808;
+      background: #111111;
       overflow: hidden;
     }
     .hero-bg {
@@ -64,8 +64,8 @@
       content: '';
       position: absolute; inset: 0;
       background:
-        linear-gradient(to right, rgba(8,8,8,1) 25%, rgba(8,8,8,0.75) 50%, rgba(8,8,8,0.15) 100%),
-        linear-gradient(to top, rgba(8,8,8,0.7) 0%, transparent 35%);
+        linear-gradient(to right, rgba(17,17,17,1) 25%, rgba(17,17,17,0.75) 50%, rgba(17,17,17,0.15) 100%),
+        linear-gradient(to top, rgba(17,17,17,0.7) 0%, transparent 35%);
     }
     .grain {
       position: absolute; inset: 0; pointer-events: none;
@@ -93,7 +93,7 @@
     }
     .three-panel > div .panel-label {
       position: absolute; bottom: 14px; left: 16px;
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: 'Arial Narrow', Arial, sans-serif;
       font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
       color: rgba(255,255,255,0.5);
     }
@@ -124,13 +124,13 @@
     .nine-grid > div::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(8,8,8,0.4) 0%, transparent 60%);
+      background: linear-gradient(to top, rgba(17,17,17,0.4) 0%, transparent 60%);
       pointer-events: none;
     }
 
     /* Section label */
     .s-label {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: 'Arial Narrow', Arial, sans-serif;
       font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase; color: #555;
     }
 
@@ -141,7 +141,7 @@
 
     /* Service card */
     .svc-card {
-      background: #111111;
+      background: #1a1a1a;
       border: 1px solid rgba(255,255,255,0.06);
       transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
       position: relative; overflow: hidden;
@@ -157,8 +157,8 @@
 
     /* Sport pills */
     .sport-pill {
-      background: #111; border: 1px solid rgba(255,255,255,0.07);
-      font-family: 'Barlow Condensed', sans-serif;
+      background: #1a1a1a; border: 1px solid rgba(255,255,255,0.07);
+      font-family: 'Arial Narrow', Arial, sans-serif;
       font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
       transition: border-color 0.2s, color 0.2s, background 0.2s;
       cursor: default;
@@ -169,12 +169,12 @@
     .g-line { height: 1px; background: var(--grad); opacity: 0.25; }
 
     /* Stats */
-    .stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 800; line-height: 1; }
+    .stat-num { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 52px; font-weight: 800; line-height: 1; }
 
     /* CTA banner */
     .cta-banner {
       position: relative; overflow: hidden;
-      background: #0d0d0d;
+      background: #171717;
       border-top: 1px solid rgba(255,255,255,0.05);
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
@@ -186,7 +186,7 @@
 
     /* Mobile nav overlay */
     #mobile-nav {
-      display: none; position: fixed; inset: 0; background: #080808;
+      display: none; position: fixed; inset: 0; background: #111111;
       z-index: 60; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
     }
     #mobile-nav.open { display: flex; }
@@ -313,7 +313,6 @@
   <a href="index.html" class="cond text-3xl font-bold tracking-widest uppercase text-white hover:text-[#00C9A7] transition-colors">Home</a>
   <a href="gallery.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Gallery</a>
   <a href="services.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Services</a>
-  <a href="about.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">About</a>
   <a href="booking.html" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Book Now</a>
 </div>
 
@@ -333,7 +332,6 @@
       <a href="index.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/90 hover:text-white transition-colors">Home</a>
       <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Gallery</a>
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Services</a>
-      <a href="about.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">About</a>
       <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
     </div>
     <!-- Hamburger -->
@@ -378,7 +376,7 @@
 </section>
 
 <!-- ═══ STATS BAR ═══ -->
-<section class="py-10 border-y border-white/[0.05] bg-[#0d0d0d]">
+<section class="py-10 border-y border-white/[0.05] bg-[#171717]">
   <div class="max-w-7xl mx-auto px-6 md:px-12">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-white/[0.07]">
       <div class="text-center fade">
@@ -402,7 +400,7 @@
 </section>
 
 <!-- ═══ THREE-PANEL GALLERY PREVIEW (reference-image inspired) ═══ -->
-<section class="py-24 bg-[#080808]">
+<section class="py-24 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12">
     <div class="flex items-end justify-between mb-10 fade">
       <div>
@@ -517,7 +515,7 @@
 </section>
 
 <!-- ═══ GALLERY GRID ═══ -->
-<section class="py-24 bg-[#080808]">
+<section class="py-24 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12">
     <div class="mb-10 fade">
       <div class="s-label mb-3">Arizona's Athletes</div>
@@ -540,39 +538,8 @@
   </div>
 </section>
 
-<!-- ═══ ABOUT TEASER ═══ -->
-<section class="py-24 bg-[#0a0a0a] border-y border-white/[0.04]">
-  <div class="max-w-7xl mx-auto px-6 md:px-12">
-    <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
-      <!-- Image -->
-      <div class="relative fade">
-        <div class="aspect-[4/5] bg-[#111] overflow-hidden">
-          <img src="https://placehold.co/600x750/111111/252525?text=Xavier+Perez" alt="Xavier Perez — Eyescout Sports" class="w-full h-full object-cover opacity-75">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-        </div>
-        <!-- Gradient border accent -->
-        <div class="absolute -bottom-3 -right-3 w-24 h-24 opacity-15" style="background: var(--grad-d); border-radius: 2px;"></div>
-        <div class="absolute -top-3 -left-3 w-16 h-16 opacity-10" style="background: var(--grad-d); border-radius: 2px;"></div>
-      </div>
-      <!-- Text -->
-      <div class="fade fade-d1">
-        <div class="s-label mb-4">The Story Behind the Lens</div>
-        <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-tight leading-none mb-6">Xavier<br>Perez</h2>
-        <div class="g-line mb-6"></div>
-        <p class="text-white/50 text-base font-300 leading-relaxed mb-4">
-          I built Eyescout Sports because I believe every athlete deserves to be seen. From Phoenix to the entire Valley — I'm on the sidelines, behind the lens, making sure your moment gets captured and your talent gets noticed.
-        </p>
-        <p class="text-white/35 text-sm font-300 leading-relaxed mb-8">
-          Parents spend everything on travel sports then hand college coaches iPhone footage. I fix that. Professional equipment, real results, real connections.
-        </p>
-        <a href="about.html" class="ghost cond text-sm font-700 tracking-[0.15em] uppercase text-white px-8 py-3.5 rounded-sm inline-block">My Story</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ═══ SPORTS COVERED ═══ -->
-<section class="py-20 bg-[#080808]">
+<section class="py-20 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12 text-center">
     <div class="s-label mb-8 fade">Sports We Cover</div>
     <div class="flex flex-wrap justify-center gap-3 fade">
@@ -598,7 +565,7 @@
     <p class="text-white/40 text-lg font-300 max-w-lg mx-auto mb-10 fade fade-d2">Book your session today. Fast turnaround. Real results. Xavier responds within 24 hours.</p>
     <div class="flex flex-wrap justify-center gap-4 fade fade-d3">
       <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-10 py-4 rounded-sm inline-block">Book Now</a>
-      <a href="https://instagram.com/eyescoutsports" target="_blank" class="ghost ripple-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-10 py-4 rounded-sm inline-block">@eyescoutsports</a>
+      <a href="https://instagram.com/eyescoutsports" target="_blank" rel="noopener noreferrer" class="ghost ripple-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-10 py-4 rounded-sm inline-block">@eyescoutsports</a>
     </div>
   </div>
 </section>
@@ -610,7 +577,8 @@
       <!-- Brand -->
       <div>
         <div class="flex items-center gap-3 mb-4"><img src="logo.png" alt="Eyescout Sports" class="h-12 w-12 object-contain flex-shrink-0"></div>
-        <p class="text-white/30 text-xs font-300 leading-relaxed">Serving Phoenix, Gilbert, Scottsdale &amp; all of Greater Arizona.</p>
+        <p class="text-white/30 text-xs font-300 leading-relaxed mb-3">Founded by Xavier Perez — a Phoenix-based sports media creator who launched Eyescout Sports in 2025 after seeing talented athletes get overlooked simply because their families couldn't afford professional coverage.</p>
+        <p class="text-white/20 text-xs font-300 leading-relaxed">Serving Phoenix, Gilbert, Scottsdale &amp; all of Greater Arizona.</p>
       </div>
       <!-- Links -->
       <div>
@@ -619,7 +587,6 @@
           <a href="index.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Home</a>
           <a href="gallery.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Gallery</a>
           <a href="services.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Services</a>
-          <a href="about.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">About</a>
           <a href="booking.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Book a Session</a>
         </div>
       </div>
@@ -627,13 +594,13 @@
       <div>
         <div class="s-label mb-4">Follow the Journey</div>
         <div class="flex gap-4 mb-4">
-          <a href="https://instagram.com/eyescoutsports" target="_blank" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
+          <a href="https://instagram.com/eyescoutsports" target="_blank" rel="noopener noreferrer" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
           </a>
-          <a href="https://facebook.com/p/Eyescout-Sports-61576586320358/" target="_blank" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
+          <a href="https://facebook.com/p/Eyescout-Sports-61576586320358/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           </a>
-          <a href="https://linkedin.com" target="_blank" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
           </a>
         </div>
