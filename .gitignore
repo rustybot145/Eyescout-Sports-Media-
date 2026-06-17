@@ -1,0 +1,5 @@
+# Client photo libraries — too large for Git and protected from public download
+images/
+
+# Unreferenced raw assets
+hero-photo.jpg

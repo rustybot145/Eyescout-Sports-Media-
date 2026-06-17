@@ -57,8 +57,13 @@
     }
     .hero-img {
       position: absolute; inset: 0;
-      background: url('hero-photo.jpg') 65% center/cover;
       opacity: 1;
+    }
+    .hero-img video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: 85% center;
     }
     .hero-img::after {
       content: '';
@@ -273,6 +278,44 @@
     /* ── TYPEWRITER CURSOR ── */
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
+    /* ── SPORT TABS ── */
+    .sport-tab {
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      border-radius: 2px;
+    }
+    .sport-tab:hover { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.8); }
+    .sport-tab.active { background: var(--grad); border-color: transparent; color: white; }
+
+    /* ── SPORT GRID ── */
+    .sport-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    .sport-grid-item {
+      aspect-ratio: 4/3; overflow: hidden; position: relative; cursor: pointer;
+    }
+    .sport-grid-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.7) saturate(0.8);
+      transition: transform 0.5s ease, filter 0.4s;
+    }
+    .sport-grid-item:hover img { transform: scale(1.06); filter: brightness(0.95) saturate(1.15); }
+    .sport-grid-item::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(17,17,17,0.4) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    @media (max-width: 768px) { .sport-grid { grid-template-columns: repeat(2, 1fr); } }
+
     /* ── PANEL HOVER ZOOM LABEL ── */
     .three-panel > div .panel-label {
       transition: opacity 0.3s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
@@ -298,15 +341,27 @@
     /* ── SECTION NUMBER COUNTER ── */
     @keyframes countUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 
+    /* ── SKIP LINK ── */
+    #skip-link { position: absolute; transform: translateX(-200%); z-index: 9999; background: var(--grad); color: #fff; padding: 10px 20px; border-radius: 2px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+    #skip-link:focus { transform: none; position: fixed; top: 16px; left: 16px; }
+
+    /* ── FOCUS VISIBLE ── */
+    :focus-visible { outline: 2px solid #00C9A7; outline-offset: 3px; }
+
+    /* ── CONTRAST: s-label ── */
+    .s-label { color: #888 !important; }
+
   </style>
 </head>
 <body>
 
+<a id="skip-link" href="#main-content">Skip to main content</a>
+
 <!-- Scroll progress bar -->
-<div id="scroll-bar"></div>
+<div id="scroll-bar" aria-hidden="true"></div>
 
 <!-- ═══ MOBILE NAV OVERLAY ═══ -->
-<div id="mobile-nav">
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
   <button id="mob-close" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors" aria-label="Close menu">
     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
   </button>
@@ -335,25 +390,32 @@
       <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
     </div>
     <!-- Hamburger -->
-    <button id="mob-open" class="md:hidden text-white/60 hover:text-white transition-colors">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 </nav>
 
+<!-- ═══ MAIN CONTENT ═══ -->
+<main id="main-content" tabindex="-1">
+
 <!-- ═══ HERO ═══ -->
 <section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-img"></div>
-  <div class="grain"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div id="cursor-spotlight"></div>
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-img" aria-hidden="true">
+    <video id="hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true">
+      <source src="landing-page-video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+  <div id="cursor-spotlight" aria-hidden="true"></div>
   <div class="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-32">
     <div class="max-w-3xl">
       <div class="s-label mb-6 fade">Phoenix, AZ — Serving All of Greater Phoenix</div>
-      <h1 class="cond text-[clamp(64px,12vw,148px)] font-black leading-[0.88] tracking-[0.04em] uppercase mb-6">
+      <h1 class="cond text-[clamp(52px,9vw,118px)] font-black leading-[0.88] tracking-[0.04em] uppercase mb-6">
         <span class="hero-word" style="animation-delay:0.25s">Film</span>&nbsp;<span class="hero-word" style="animation-delay:0.38s">Em.</span><br>
         <span class="hero-word" style="animation-delay:0.52s">Scout</span>&nbsp;<span class="hero-word" style="animation-delay:0.65s">Em.</span><br>
         <span class="hero-word g-text" style="animation-delay:0.82s">Stardom.</span>
@@ -412,15 +474,15 @@
 
     <div class="three-panel fade">
       <div>
-        <img src="https://placehold.co/900x600/0f0f0f/252525?text=Football+Action" alt="Football action shot">
+        <img src="images/football/IMG_0424_NoLogo.JPG" alt="Football action">
         <span class="panel-label">Football</span>
       </div>
       <div>
-        <img src="https://placehold.co/700x600/0d0d0d/222222?text=Baseball+Coverage" alt="Baseball game coverage">
-        <span class="panel-label">Baseball</span>
+        <img src="images/soccer/IMG_3694.jpg" alt="Soccer">
+        <span class="panel-label">Soccer</span>
       </div>
       <div>
-        <img src="https://placehold.co/500x600/111111/282828?text=Cheer+Competition" alt="Cheer competition">
+        <img src="images/cheer/IMG_0265_NoLogo.jpg" alt="Cheer">
         <span class="panel-label">Cheer</span>
       </div>
     </div>
@@ -514,24 +576,26 @@
   </div>
 </section>
 
-<!-- ═══ GALLERY GRID ═══ -->
+<!-- ═══ SPORT GALLERY ═══ -->
 <section class="py-24 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12">
-    <div class="mb-10 fade">
-      <div class="s-label mb-3">Arizona's Athletes</div>
-      <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em]">The Gallery</h2>
+    <div class="flex items-end justify-between mb-10 fade">
+      <div>
+        <div class="s-label mb-3">Arizona's Athletes</div>
+        <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em]">Browse by Sport</h2>
+      </div>
+      <a href="gallery.html" class="ghost cond text-sm font-600 tracking-[0.15em] uppercase text-white/60 hover:text-white px-6 py-3 rounded-sm transition-colors hidden md:inline-block">Full Gallery →</a>
     </div>
-    <div class="nine-grid fade">
-      <div><img src="https://placehold.co/600x450/0d0d0d/1e1e1e?text=Football" alt="Football"></div>
-      <div><img src="https://placehold.co/600x450/111111/252525?text=Baseball" alt="Baseball"></div>
-      <div><img src="https://placehold.co/600x450/0f0f0f/202020?text=Soccer" alt="Soccer"></div>
-      <div><img src="https://placehold.co/600x450/0a0a0a/1a1a1a?text=Basketball" alt="Basketball"></div>
-      <div><img src="https://placehold.co/600x450/121212/272727?text=Volleyball" alt="Volleyball"></div>
-      <div><img src="https://placehold.co/600x450/0e0e0e/1c1c1c?text=Softball" alt="Softball"></div>
-      <div><img src="https://placehold.co/600x450/0c0c0c/1d1d1d?text=Cheer" alt="Cheer"></div>
-      <div><img src="https://placehold.co/600x450/101010/222222?text=Tennis" alt="Tennis"></div>
-      <div><img src="https://placehold.co/600x450/0d0d0d/202020?text=Highlight+Reel" alt="Highlight Reel"></div>
+    <div class="flex flex-wrap gap-2 mb-8 fade" id="sport-tabs" role="tablist" aria-label="Browse by sport">
+      <button class="sport-tab active" data-sport="football" role="tab" aria-selected="true" id="tab-football" aria-controls="sport-grid">Football</button>
+      <button class="sport-tab" data-sport="baseball" role="tab" aria-selected="false" id="tab-baseball" aria-controls="sport-grid">Baseball</button>
+      <button class="sport-tab" data-sport="soccer" role="tab" aria-selected="false" id="tab-soccer" aria-controls="sport-grid">Soccer</button>
+      <button class="sport-tab" data-sport="basketball" role="tab" aria-selected="false" id="tab-basketball" aria-controls="sport-grid">Basketball</button>
+      <button class="sport-tab" data-sport="volleyball" role="tab" aria-selected="false" id="tab-volleyball" aria-controls="sport-grid">Volleyball</button>
+      <button class="sport-tab" data-sport="softball" role="tab" aria-selected="false" id="tab-softball" aria-controls="sport-grid">Softball</button>
+      <button class="sport-tab" data-sport="cheer" role="tab" aria-selected="false" id="tab-cheer" aria-controls="sport-grid">Cheer</button>
     </div>
+    <div class="sport-grid" id="sport-grid" role="tabpanel" aria-live="polite" aria-label="Sport gallery"></div>
     <div class="mt-8 text-center fade">
       <a href="gallery.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-10 py-4 rounded-sm inline-block">See Full Gallery</a>
     </div>
@@ -569,6 +633,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ═══ FOOTER ═══ -->
 <footer class="bg-[#060606] border-t border-white/[0.05] py-16">
@@ -623,8 +689,32 @@
   }, { passive: true });
 
   // ── MOBILE NAV ──
-  document.getElementById('mob-open').addEventListener('click', () => document.getElementById('mobile-nav').classList.add('open'));
-  document.getElementById('mob-close').addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
+  const mobileNav = document.getElementById('mobile-nav');
+  const mobOpen = document.getElementById('mob-open');
+  const mobClose = document.getElementById('mob-close');
+  const FOCUSABLE_SEL = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function openMobileNav() {
+    mobileNav.classList.add('open');
+    mobOpen.setAttribute('aria-expanded', 'true');
+    const first = mobileNav.querySelectorAll(FOCUSABLE_SEL)[0];
+    if (first) first.focus();
+    document.addEventListener('keydown', trapMobileNav);
+  }
+  function closeMobileNav() {
+    mobileNav.classList.remove('open');
+    mobOpen.setAttribute('aria-expanded', 'false');
+    mobOpen.focus();
+    document.removeEventListener('keydown', trapMobileNav);
+  }
+  function trapMobileNav(e) {
+    const items = [...mobileNav.querySelectorAll(FOCUSABLE_SEL)];
+    if (e.key === 'Escape') { closeMobileNav(); return; }
+    if (e.key !== 'Tab' || !items.length) return;
+    if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === items[items.length - 1]) { e.preventDefault(); items[0].focus(); }
+  }
+  mobOpen.addEventListener('click', openMobileNav);
+  mobClose.addEventListener('click', closeMobileNav);
 
   // ── SCROLL PROGRESS BAR ──
   const bar = document.getElementById('scroll-bar');
@@ -750,6 +840,103 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } });
   }, { threshold: 0.1 });
   faders.forEach(f => io.observe(f));
+
+  // ── SPORT GALLERY ──
+  const SPORT_PHOTOS = {
+    football: [
+      ['football', 'IMG_0424_NoLogo.JPG'],
+      ['football', 'IMG_0436_NoLogo.jpg'],
+      ['football', 'IMG_0527_NoLogo.JPG'],
+      ['football', 'IMG_0555_NoLogo.JPG'],
+      ['football', '603882274_3911414932492552_7133293299687518284_n_Logo.jpg'],
+      ['football', 'IMG_0321_NoLogo.jpg'],
+    ],
+    baseball: [
+      ['baseball', 'FB_IMG_1757562219357.jpg'],
+      ['baseball', 'IMG_6597_LogoRN.jpg'],
+      ['baseball', 'IMG_6929_MarteLogo.jpg'],
+      ['baseball', 'IMG_7354_Out.JPG'],
+      ['baseball', 'PerezChamp1.jpg'],
+      ['baseball', 'ZPerezChamp2.jpg'],
+    ],
+    soccer: [
+      ['soccer', '599949119_3898956843738361_1070158023975895140_n.jpg'],
+      ['soccer', 'IMG_3694.jpg'],
+      ['soccer', 'IMG_7768.jpg'],
+      ['soccer', 'IMG_7029.jpg'],
+      ['soccer', 'IMG_7053_Logo.jpg'],
+      ['soccer', 'IMG_7110.jpg'],
+    ],
+    basketball: [
+      ['basketball', '548196032_3815919595375420_1274746523035374581_n.jpg'],
+      ['basketball', 'IMG_4328_Logo.jpg'],
+      ['basketball', '531845790_3781135042187209_3645621867856368789_n.jpg'],
+      ['basketball', 'IMG_2090_2.JPG'],
+      ['basketball', 'IMG_4123.jpg'],
+    ],
+    volleyball: [
+      ['volleyball', 'IMG_4073_TeamA_1.jpg'],
+      ['volleyball', 'IMG_4728_#23_1.jpg'],
+      ['volleyball', 'IMG_6023_#4_2.jpg'],
+      ['volleyball', 'IMG_09922e.jpg'],
+      ['volleyball', 'IMG_6540_#13_2.jpg'],
+      ['volleyball', 'IMG_7065_4_1.jpg'],
+    ],
+    softball: [
+      ['softball', '27Jas3.JPG'],
+      ['softball', '651105720_3981649332135778_8589362175518966011_n.jpg'],
+      ['softball', 'IMG_8350.jpg'],
+      ['softball', '27Jas2.JPG'],
+    ],
+    cheer: [
+      ['cheer', 'IMG_0242_NoLogo.jpg'],
+      ['cheer', 'IMG_0265_NoLogo.jpg'],
+      ['cheer', 'IMG_0279_NoLogo.jpg'],
+    ],
+  };
+
+  function renderSportGrid(sport) {
+    const grid = document.getElementById('sport-grid');
+    const photos = SPORT_PHOTOS[sport] || [];
+    grid.innerHTML = '';
+    const sportLabel = sport.charAt(0).toUpperCase() + sport.slice(1);
+    photos.forEach(([folder, file]) => {
+      const div = document.createElement('div');
+      div.className = 'sport-grid-item';
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('role', 'link');
+      div.setAttribute('aria-label', `View ${sportLabel} gallery`);
+      const img = document.createElement('img');
+      img.src = 'images/' + folder + '/' + encodeURIComponent(file);
+      img.alt = '';
+      img.setAttribute('aria-hidden', 'true');
+      img.loading = 'lazy';
+      div.appendChild(img);
+      function goToGallery() { window.location.href = 'gallery.html?sport=' + sport; }
+      div.addEventListener('click', goToGallery);
+      div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToGallery(); } });
+      grid.appendChild(div);
+    });
+  }
+
+  document.getElementById('sport-tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.sport-tab');
+    if (!btn) return;
+    document.querySelectorAll('.sport-tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    renderSportGrid(btn.dataset.sport);
+  });
+
+  renderSportGrid('football');
+
+  // Force video autoplay across all browsers
+  const heroVideo = document.getElementById('hero-video');
+  if (heroVideo) {
+    heroVideo.play().catch(() => {});
+    heroVideo.addEventListener('canplay', () => { heroVideo.play().catch(() => {}); });
+    heroVideo.addEventListener('loadedmetadata', () => { heroVideo.play().catch(() => {}); });
+  }
 </script>
 </body>
 </html>

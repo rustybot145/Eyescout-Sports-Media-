@@ -44,11 +44,18 @@
     .fade.on { opacity: 1; transform: none; }
     .fade-d1 { transition-delay: 0.1s; }
     .fade-d2 { transition-delay: 0.2s; }
+
+    #skip-link { position: absolute; transform: translateX(-200%); z-index: 9999; background: var(--grad); color: #fff; padding: 10px 20px; border-radius: 2px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+    #skip-link:focus { transform: none; position: fixed; top: 16px; left: 16px; }
+    :focus-visible { outline: 2px solid #00C9A7; outline-offset: 3px; }
+    .s-label { color: #888 !important; }
   </style>
 </head>
 <body>
 
-<div id="mobile-nav">
+<a id="skip-link" href="#main-content">Skip to main content</a>
+
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
   <button id="mob-close" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
   </button>
@@ -73,11 +80,13 @@
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white hover:text-white transition-colors">Services</a>
       <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
     </div>
-    <button id="mob-open" class="md:hidden text-white/60 hover:text-white transition-colors">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 </nav>
+
+<main id="main-content" tabindex="-1">
 
 <!-- PAGE HEADER -->
 <section class="pt-36 pb-20 bg-[#111111] relative overflow-hidden">
@@ -98,7 +107,7 @@
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="svc-img aspect-[4/3] fade">
-        <img src="https://placehold.co/800x600/0d0d0d/1e1e1e?text=Game-Day+Photography" alt="Game-Day Photography">
+        <div style="width:100%;aspect-ratio:4/3;background:#0d0d0d;border:1px solid #1e1e1e;"></div>
       </div>
       <div class="relative fade fade-d1">
         <span class="svc-num">01</span>
@@ -128,7 +137,7 @@
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="md:order-2 svc-img aspect-[4/3] fade">
-        <img src="https://placehold.co/800x600/111111/252525?text=Sports+Videography" alt="Sports Videography">
+        <div style="width:100%;aspect-ratio:4/3;background:#111111;border:1px solid #252525;"></div>
       </div>
       <div class="md:order-1 relative fade fade-d1">
         <span class="svc-num">02</span>
@@ -153,7 +162,7 @@
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="svc-img aspect-[4/3] fade">
-        <img src="https://placehold.co/800x600/0f0f0f/222222?text=Athlete+Highlight+Reels" alt="Athlete Highlight Reels">
+        <div style="width:100%;aspect-ratio:4/3;background:#0f0f0f;border:1px solid #222222;"></div>
       </div>
       <div class="relative fade fade-d1">
         <span class="svc-num">03</span>
@@ -179,7 +188,7 @@
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="md:order-2 svc-img aspect-[4/3] fade">
-        <img src="https://placehold.co/800x600/0e0e0e/202020?text=Event+Coverage" alt="Event Coverage">
+        <div style="width:100%;aspect-ratio:4/3;background:#0e0e0e;border:1px solid #202020;"></div>
       </div>
       <div class="md:order-1 relative fade fade-d1">
         <span class="svc-num">04</span>
@@ -208,7 +217,7 @@
   <div class="max-w-7xl mx-auto px-6 md:px-12 py-20">
     <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
       <div class="svc-img aspect-[4/3] fade">
-        <img src="https://placehold.co/800x600/101010/232323?text=Scouting+Exposure" alt="Scouting Exposure">
+        <div style="width:100%;aspect-ratio:4/3;background:#101010;border:1px solid #232323;"></div>
       </div>
       <div class="relative fade fade-d1">
         <span class="svc-num">05</span>
@@ -240,6 +249,8 @@
   </div>
 </section>
 
+</main>
+
 <!-- FOOTER -->
 <footer class="bg-[#060606] border-t border-white/[0.05] py-12">
   <div class="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -259,8 +270,29 @@
 <script>
   const nav = document.getElementById('main-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
-  document.getElementById('mob-open').addEventListener('click', () => document.getElementById('mobile-nav').classList.add('open'));
-  document.getElementById('mob-close').addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
+
+  const mobileNav = document.getElementById('mobile-nav');
+  const mobOpen = document.getElementById('mob-open');
+  const mobClose = document.getElementById('mob-close');
+  const FOCUSABLE_SEL = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function openMobileNav() {
+    mobileNav.classList.add('open'); mobOpen.setAttribute('aria-expanded', 'true');
+    const first = mobileNav.querySelectorAll(FOCUSABLE_SEL)[0]; if (first) first.focus();
+    document.addEventListener('keydown', trapMobileNav);
+  }
+  function closeMobileNav() {
+    mobileNav.classList.remove('open'); mobOpen.setAttribute('aria-expanded', 'false');
+    mobOpen.focus(); document.removeEventListener('keydown', trapMobileNav);
+  }
+  function trapMobileNav(e) {
+    const items = [...mobileNav.querySelectorAll(FOCUSABLE_SEL)];
+    if (e.key === 'Escape') { closeMobileNav(); return; }
+    if (e.key !== 'Tab' || !items.length) return;
+    if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === items[items.length - 1]) { e.preventDefault(); items[0].focus(); }
+  }
+  mobOpen.addEventListener('click', openMobileNav);
+  mobClose.addEventListener('click', closeMobileNav);
   const faders = document.querySelectorAll('.fade');
   const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { threshold: 0.1 });
   faders.forEach(f => io.observe(f));

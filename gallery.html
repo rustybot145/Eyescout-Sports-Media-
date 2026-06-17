@@ -54,12 +54,12 @@
       overflow: hidden;
       cursor: pointer;
     }
-    .masonry-item img {
+    .masonry-item img, .masonry-item video {
       width: 100%; display: block;
       filter: brightness(0.7) saturate(0.8);
       transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.4s;
     }
-    .masonry-item:hover img { transform: scale(1.04); filter: brightness(0.95) saturate(1.1); }
+    .masonry-item:hover img, .masonry-item:hover video { transform: scale(1.04); filter: brightness(0.95) saturate(1.1); }
     .masonry-item .overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
@@ -81,13 +81,20 @@
     }
     #lightbox.open { display: flex; }
     #lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; }
-    #lb-close { position: absolute; top: 20px; right: 24px; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 28px; transition: color 0.2s; }
+    #lb-close { position: absolute; top: 20px; right: 24px; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 28px; transition: color 0.2s; background: none; border: none; line-height: 1; }
     #lb-close:hover { color: white; }
-    #lb-prev, #lb-next { position: absolute; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4); cursor: pointer; padding: 16px; font-size: 24px; transition: color 0.2s; }
+    #lb-prev, #lb-next { position: absolute; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4); cursor: pointer; padding: 16px; font-size: 24px; transition: color 0.2s; background: none; border: none; line-height: 1; }
     #lb-prev:hover, #lb-next:hover { color: white; }
     #lb-prev { left: 16px; }
     #lb-next { right: 16px; }
     #lb-caption { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-family: 'Arial Narrow', Arial, sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+
+    /* Skip link */
+    #skip-link { position: absolute; transform: translateX(-200%); z-index: 9999; background: var(--grad); color: #fff; padding: 10px 20px; border-radius: 2px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+    #skip-link:focus { transform: none; position: fixed; top: 16px; left: 16px; }
+    :focus-visible { outline: 2px solid #00C9A7; outline-offset: 3px; }
+    .s-label { color: #888 !important; }
+    .masonry-item { cursor: pointer; }
 
     #mobile-nav { display: none; position: fixed; inset: 0; background: #111111; z-index: 60; flex-direction: column; align-items: center; justify-content: center; gap: 36px; }
     #mobile-nav.open { display: flex; }
@@ -100,7 +107,9 @@
 </head>
 <body>
 
-<div id="mobile-nav">
+<a id="skip-link" href="#main-content">Skip to main content</a>
+
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
   <button id="mob-close" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
   </button>
@@ -125,11 +134,13 @@
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Services</a>
       <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
     </div>
-    <button id="mob-open" class="md:hidden text-white/60 hover:text-white transition-colors">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 </nav>
+
+<main id="main-content" tabindex="-1">
 
 <!-- PAGE HEADER -->
 <section class="pt-36 pb-16 bg-[#111111] relative overflow-hidden">
@@ -162,152 +173,7 @@
 <!-- GALLERY GRID -->
 <section class="py-8 bg-[#111111]">
   <div class="max-w-7xl mx-auto px-6 md:px-12">
-    <div class="masonry" id="gallery">
-
-      <!-- FOOTBALL -->
-      <div class="masonry-item" data-sport="football" data-index="0">
-        <img src="https://placehold.co/600x800/0d0d0d/1e1e1e?text=Football+01" alt="Football action">
-        <div class="overlay"><span class="sport-tag">Football</span></div>
-      </div>
-      <div class="masonry-item" data-sport="football" data-index="1">
-        <img src="https://placehold.co/600x500/111111/242424?text=Football+02" alt="Football game">
-        <div class="overlay"><span class="sport-tag">Football</span></div>
-      </div>
-      <div class="masonry-item" data-sport="football" data-index="2">
-        <img src="https://placehold.co/600x700/0f0f0f/202020?text=Football+03" alt="Football sideline">
-        <div class="overlay"><span class="sport-tag">Football</span></div>
-      </div>
-      <div class="masonry-item" data-sport="football" data-index="3">
-        <img src="https://placehold.co/600x550/0a0a0a/1a1a1a?text=Football+04" alt="Football night game">
-        <div class="overlay"><span class="sport-tag">Football</span></div>
-      </div>
-      <div class="masonry-item" data-sport="football" data-index="4">
-        <img src="https://placehold.co/600x650/0d0d0d/1d1d1d?text=Football+05" alt="Football play">
-        <div class="overlay"><span class="sport-tag">Football</span></div>
-      </div>
-
-      <!-- BASEBALL -->
-      <div class="masonry-item" data-sport="baseball" data-index="5">
-        <img src="https://placehold.co/600x750/111111/252525?text=Baseball+01" alt="Baseball batter">
-        <div class="overlay"><span class="sport-tag">Baseball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="baseball" data-index="6">
-        <img src="https://placehold.co/600x500/0e0e0e/1e1e1e?text=Baseball+02" alt="Baseball pitcher">
-        <div class="overlay"><span class="sport-tag">Baseball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="baseball" data-index="7">
-        <img src="https://placehold.co/600x700/101010/222222?text=Baseball+03" alt="Baseball fielder">
-        <div class="overlay"><span class="sport-tag">Baseball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="baseball" data-index="8">
-        <img src="https://placehold.co/600x600/0c0c0c/1c1c1c?text=Baseball+04" alt="Baseball dugout">
-        <div class="overlay"><span class="sport-tag">Baseball</span></div>
-      </div>
-
-      <!-- BASKETBALL -->
-      <div class="masonry-item" data-sport="basketball" data-index="9">
-        <img src="https://placehold.co/600x800/0d0d0d/202020?text=Basketball+01" alt="Basketball player">
-        <div class="overlay"><span class="sport-tag">Basketball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="basketball" data-index="10">
-        <img src="https://placehold.co/600x550/111111/242424?text=Basketball+02" alt="Basketball dunk">
-        <div class="overlay"><span class="sport-tag">Basketball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="basketball" data-index="11">
-        <img src="https://placehold.co/600x650/0f0f0f/212121?text=Basketball+03" alt="Basketball game">
-        <div class="overlay"><span class="sport-tag">Basketball</span></div>
-      </div>
-
-      <!-- SOCCER -->
-      <div class="masonry-item" data-sport="soccer" data-index="12">
-        <img src="https://placehold.co/600x700/0a0a0a/1b1b1b?text=Soccer+01" alt="Soccer action">
-        <div class="overlay"><span class="sport-tag">Soccer</span></div>
-      </div>
-      <div class="masonry-item" data-sport="soccer" data-index="13">
-        <img src="https://placehold.co/600x500/0e0e0e/1e1e1e?text=Soccer+02" alt="Soccer goal">
-        <div class="overlay"><span class="sport-tag">Soccer</span></div>
-      </div>
-      <div class="masonry-item" data-sport="soccer" data-index="14">
-        <img src="https://placehold.co/600x750/111111/252525?text=Soccer+03" alt="Soccer team">
-        <div class="overlay"><span class="sport-tag">Soccer</span></div>
-      </div>
-
-      <!-- VOLLEYBALL -->
-      <div class="masonry-item" data-sport="volleyball" data-index="15">
-        <img src="https://placehold.co/600x600/0d0d0d/1e1e1e?text=Volleyball+01" alt="Volleyball spike">
-        <div class="overlay"><span class="sport-tag">Volleyball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="volleyball" data-index="16">
-        <img src="https://placehold.co/600x800/101010/222222?text=Volleyball+02" alt="Volleyball serve">
-        <div class="overlay"><span class="sport-tag">Volleyball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="volleyball" data-index="17">
-        <img src="https://placehold.co/600x500/0c0c0c/1c1c1c?text=Volleyball+03" alt="Volleyball block">
-        <div class="overlay"><span class="sport-tag">Volleyball</span></div>
-      </div>
-
-      <!-- SOFTBALL -->
-      <div class="masonry-item" data-sport="softball" data-index="18">
-        <img src="https://placehold.co/600x700/0e0e0e/1f1f1f?text=Softball+01" alt="Softball pitch">
-        <div class="overlay"><span class="sport-tag">Softball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="softball" data-index="19">
-        <img src="https://placehold.co/600x550/111111/252525?text=Softball+02" alt="Softball game">
-        <div class="overlay"><span class="sport-tag">Softball</span></div>
-      </div>
-      <div class="masonry-item" data-sport="softball" data-index="20">
-        <img src="https://placehold.co/600x650/0a0a0a/1a1a1a?text=Softball+03" alt="Softball fielding">
-        <div class="overlay"><span class="sport-tag">Softball</span></div>
-      </div>
-
-      <!-- CHEER -->
-      <div class="masonry-item" data-sport="cheer" data-index="21">
-        <img src="https://placehold.co/600x800/0d0d0d/1e1e1e?text=Cheer+01" alt="Cheer competition">
-        <div class="overlay"><span class="sport-tag">Cheer</span></div>
-      </div>
-      <div class="masonry-item" data-sport="cheer" data-index="22">
-        <img src="https://placehold.co/600x600/111111/242424?text=Cheer+02" alt="Cheer stunt">
-        <div class="overlay"><span class="sport-tag">Cheer</span></div>
-      </div>
-      <div class="masonry-item" data-sport="cheer" data-index="23">
-        <img src="https://placehold.co/600x700/0f0f0f/202020?text=Cheer+03" alt="Cheer routine">
-        <div class="overlay"><span class="sport-tag">Cheer</span></div>
-      </div>
-      <div class="masonry-item" data-sport="cheer" data-index="24">
-        <img src="https://placehold.co/600x500/0c0c0c/1c1c1c?text=Cheer+04" alt="Cheer squad">
-        <div class="overlay"><span class="sport-tag">Cheer</span></div>
-      </div>
-
-      <!-- VIDEO REELS (play icon overlay) -->
-      <div class="masonry-item" data-sport="reels" data-index="25">
-        <img src="https://placehold.co/600x700/0d0d0d/1e1e1e?text=Video+Reel+01" alt="Highlight Reel">
-        <div class="overlay" style="opacity:1; background: rgba(0,0,0,0.4);">
-          <div class="w-12 h-12 rounded-full border-2 border-white/40 flex items-center justify-center mx-auto absolute inset-0 m-auto">
-            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
-          </div>
-          <span class="sport-tag">Video Reel</span>
-        </div>
-      </div>
-      <div class="masonry-item" data-sport="reels" data-index="26">
-        <img src="https://placehold.co/600x550/111111/242424?text=Video+Reel+02" alt="Game Reel">
-        <div class="overlay" style="opacity:1; background: rgba(0,0,0,0.4);">
-          <div class="w-12 h-12 rounded-full border-2 border-white/40 flex items-center justify-center mx-auto absolute inset-0 m-auto">
-            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
-          </div>
-          <span class="sport-tag">Video Reel</span>
-        </div>
-      </div>
-      <div class="masonry-item" data-sport="reels" data-index="27">
-        <img src="https://placehold.co/600x800/0f0f0f/202020?text=Video+Reel+03" alt="Athlete Reel">
-        <div class="overlay" style="opacity:1; background: rgba(0,0,0,0.4);">
-          <div class="w-12 h-12 rounded-full border-2 border-white/40 flex items-center justify-center mx-auto absolute inset-0 m-auto">
-            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
-          </div>
-          <span class="sport-tag">Video Reel</span>
-        </div>
-      </div>
-
-    </div>
+    <div class="masonry" id="gallery"></div>
   </div>
 </section>
 
@@ -320,6 +186,8 @@
     <a href="booking.html" class="g-btn cond text-base font-700 tracking-[0.15em] uppercase text-white px-10 py-4 rounded-sm inline-block">Book Now</a>
   </div>
 </section>
+
+</main>
 
 <!-- FOOTER -->
 <footer class="bg-[#060606] border-t border-white/[0.05] py-12">
@@ -338,83 +206,387 @@
 </footer>
 
 <!-- LIGHTBOX -->
-<div id="lightbox">
-  <span id="lb-close">&#x2715;</span>
-  <span id="lb-prev">&#8592;</span>
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer" aria-labelledby="lb-caption">
+  <button id="lb-close" aria-label="Close image viewer">&#x2715;</button>
+  <button id="lb-prev" aria-label="Previous image">&#8592;</button>
   <img id="lb-img" src="" alt="">
-  <span id="lb-next">&#8594;</span>
-  <div id="lb-caption"></div>
+  <video id="lb-video" controls preload="auto" style="display:none;max-width:90vw;max-height:85vh;object-fit:contain;"></video>
+  <button id="lb-next" aria-label="Next image">&#8594;</button>
+  <div id="lb-caption" aria-live="polite"></div>
 </div>
 
 <script>
   // Nav
   const nav = document.getElementById('main-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
-  document.getElementById('mob-open').addEventListener('click', () => document.getElementById('mobile-nav').classList.add('open'));
-  document.getElementById('mob-close').addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
 
-  // Filter
-  const items = document.querySelectorAll('.masonry-item');
+  // Mobile nav with focus management
+  const mobileNav = document.getElementById('mobile-nav');
+  const mobOpen = document.getElementById('mob-open');
+  const mobClose = document.getElementById('mob-close');
+  const FOCUSABLE_SEL = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function openMobileNav() {
+    mobileNav.classList.add('open');
+    mobOpen.setAttribute('aria-expanded', 'true');
+    const first = mobileNav.querySelectorAll(FOCUSABLE_SEL)[0];
+    if (first) first.focus();
+    document.addEventListener('keydown', trapMobileNav);
+  }
+  function closeMobileNav() {
+    mobileNav.classList.remove('open');
+    mobOpen.setAttribute('aria-expanded', 'false');
+    mobOpen.focus();
+    document.removeEventListener('keydown', trapMobileNav);
+  }
+  function trapMobileNav(e) {
+    const items = [...mobileNav.querySelectorAll(FOCUSABLE_SEL)];
+    if (e.key === 'Escape') { closeMobileNav(); return; }
+    if (e.key !== 'Tab' || !items.length) return;
+    if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === items[items.length - 1]) { e.preventDefault(); items[0].focus(); }
+  }
+  mobOpen.addEventListener('click', openMobileNav);
+  mobClose.addEventListener('click', closeMobileNav);
+
+  // ── Gallery data ──────────────────────────────────────────────
+  // Featured photos (shown first in All view, served from front-page-gallery folder)
+  const FEATURED = [
+    ['27Jas3.JPG',                                                      'softball'],
+    ['548196032_3815919595375420_1274746523035374581_n.jpg',            'basketball'],
+    ['599949119_3898956843738361_1070158023975895140_n.jpg',            'soccer'],
+    ['603882274_3911414932492552_7133293299687518284_n_Logo.jpg',       'football'],
+    ['651105720_3981649332135778_8589362175518966011_n.jpg',            'softball'],
+    ['FB_IMG_1757562219357.jpg',                                         'baseball'],
+    ['IMG_0242_NoLogo.jpg',                                              'cheer'],
+    ['IMG_0265_NoLogo.jpg',                                              'cheer'],
+    ['IMG_0279_NoLogo.jpg',                                              'cheer'],
+    ['IMG_0424_NoLogo.JPG',                                              'football'],
+    ['IMG_0436_NoLogo.jpg',                                              'football'],
+    ['IMG_0527_NoLogo.JPG',                                              'football'],
+    ['IMG_0555_NoLogo.JPG',                                              'football'],
+    ['IMG_3694.jpg',                                                     'soccer'],
+    ['IMG_4073_TeamA_1.jpg',                                             'volleyball'],
+    ['IMG_4328_Logo copy.jpg',                                           'basketball'],
+    ['IMG_4728_#23_1.jpg',                                               'volleyball'],
+    ['IMG_6023_#4_2.jpg',                                                'volleyball'],
+    ['IMG_6597_LogoRN.jpg',                                              'baseball'],
+    ['IMG_6929_MarteLogo.jpg',                                           'baseball'],
+    ['IMG_7354_Out.JPG',                                                 'baseball'],
+    ['IMG_7768.jpg',                                                     'soccer'],
+    ['IMG_8350.jpg',                                                     'softball'],
+    ['PerezChamp1.jpg',                                                  'baseball'],
+  ];
+  const FEATURED_SET = new Set(FEATURED.map(([fn]) => fn));
+
+  const FOOTBALL = [
+    '518259809_3753109248323122_6097285160122520934_n.jpg',
+    '577015860_3864476353853077_2400986784217703739_n.jpg',
+    '603882274_3911414932492552_7133293299687518284_n_Logo.jpg',
+    '605516816_3911414609159251_5661107446656363947_n.jpg',
+    '606059114_3914041578896554_6009799703696177595_n_Logo.jpg',
+    '608493253_3911502489150463_4427171688340907176_n_Logo.jpg',
+    'IMG_0040_Logo.jpg',
+    'IMG_0321_NoLogo.jpg',
+    'IMG_0330_NoLogo.jpg',
+    'IMG_0391_NoLogo.jpg',
+    'IMG_0392_NoLogo.jpg',
+    'IMG_0398_NoLogo.jpg',
+    'IMG_0409_NoLogo.jpg',
+    'IMG_0411_NoLogo.jpg',
+    'IMG_0424_NoLogo.JPG',
+    'IMG_0436_NoLogo.jpg',
+    'IMG_0527_NoLogo.JPG',
+    'IMG_0544_NoLogo.JPG',
+    'IMG_0555_NoLogo.JPG',
+    'IMG_0569_NoLogo.JPG',
+    'IMG_0655_NoLogo.jpg',
+    'IMG_0666_NoLogo.jpg',
+    'IMG_0684_NoLogo.jpg',
+    'IMG_0739_NoLogo.jpg',
+    'IMG_2743_logo.JPG',
+    'IMG_5700_Logo.JPG',
+    'IMG_8020_Logo.JPG',
+    'IMG_9974_Logo.JPG',
+    'IMG_9985_Logo.JPG',
+  ];
+
+  const BASEBALL = [
+    'FB_IMG_1757562219357.jpg',
+    'FB_IMG_1757562224097.jpg',
+    'FB_IMG_1758444719773.jpg',
+    'FB_IMG_1758444836484.jpg',
+    'FB_IMG_1766427013887.jpg',
+    'FB_IMG_1766427029548.jpg',
+    'IMG_0001.jpg',
+    'IMG_0003.jpg',
+    'IMG_0044.jpg',
+    'IMG_0154_Logo.jpg',
+    'IMG_6597_LogoRN.jpg',
+    'IMG_6929_MarteLogo.jpg',
+    'IMG_7178_Shohei.JPG',
+    'IMG_7178_Shohei1.jpg',
+    'IMG_7354_Out.JPG',
+    'PerezChamp1.jpg',
+    'ZPerezChamp2.jpg',
+  ];
+
+  const BASKETBALL = [
+    '531845790_3781135042187209_3645621867856368789_n.jpg',
+    '548196032_3815919595375420_1274746523035374581_n.jpg',
+    'IMG_2090_2.JPG',
+    'IMG_4123.jpg',
+  ];
+
+  const SOCCER = [
+    '10th.jpg',
+    '11th.jpg',
+    '14th.jpg',
+    '15th.jpg',
+    '17th.jpg',
+    '19th.jpg',
+    '2nd.jpg',
+    '599949119_3898956843738361_1070158023975895140_n.jpg',
+    '605827486_3913086588992053_2985525923919663480_n.jpg',
+    '607896028_3917729518527760_6951532393304503307_n (1).jpg',
+    'CO12.JPG',
+    'IMG_2796_Logo.jpg',
+    'IMG_2807_Logo.jpg',
+    'IMG_2814_Logo.jpg',
+    'IMG_3694.jpg',
+    'IMG_4832_Logo.jpg',
+    'IMG_5480_Logo.jpg',
+    'IMG_5496_Logo.jpg',
+    'IMG_6848.jpg',
+    'IMG_7023_NoLogo.jpg',
+    'IMG_7029.jpg',
+    'IMG_7032.jpg',
+    'IMG_7043.jpg',
+    'IMG_7047_Logo.jpg',
+    'IMG_7053_Logo.jpg',
+    'IMG_7057_NoLogo.jpg',
+    'IMG_7072.jpg',
+    'IMG_7077.jpg',
+    'IMG_7110.jpg',
+    'IMG_7127.jpg',
+    'IMG_7139_Logo.jpg',
+    'IMG_7166_NoLogo.jpg',
+    'IMG_7228.jpg',
+    'IMG_7242.jpg',
+    'IMG_7302.jpg',
+    'IMG_7333.jpg',
+    'IMG_7405.jpg',
+    'IMG_7662_Logo.jpg',
+    'IMG_7768.jpg',
+    'IMG_7869_#11_GoalTackleKick.jpg',
+    'IMG_7886_#11_GoalKick#2.jpg',
+    'IMG_8019.jpg',
+    'IMG_8112.jpg',
+  ];
+
+  const VOLLEYBALL = [
+    'IMG_09922e.jpg',
+    'IMG_4073_TeamA_1.jpg',
+    'IMG_4728_#23_1.jpg',
+    'IMG_6023_#4_2.jpg',
+    'IMG_6540_#13_2.jpg',
+    'IMG_7065_4_1.jpg',
+  ];
+
+  const SOFTBALL = [
+    '27Jas2.JPG',
+    '27Jas3.JPG',
+    '651105720_3981649332135778_8589362175518966011_n.jpg',
+    'IMG_8350.jpg',
+  ];
+
+  const CHEER = [
+    'IMG_0242_NoLogo.jpg',
+    'IMG_0265_NoLogo.jpg',
+    'IMG_0279_NoLogo.jpg',
+  ];
+
+  const VIDEO_REELS = [
+    'AZYFL Reel.mp4',
+    'Arsenal_Final_Final.mp4',
+    'BoyerRD.mp4',
+    'HardwoodNationFinal.mp4',
+    'IBallTiurneyHL.mp4',
+    'MayaOden#5_EyescoutFinal.mp4',
+    'delivery file_2.mp4',
+  ];
+
+  // ── Build gallery ─────────────────────────────────────────────
+  const gallery = document.getElementById('gallery');
+  let idx = 0;
+
+  function makePhotoItem(src, sport) {
+    const div = document.createElement('div');
+    div.className = 'masonry-item';
+    div.dataset.sport = sport;
+    div.dataset.index = idx++;
+    const label = sport.charAt(0).toUpperCase() + sport.slice(1);
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('role', 'button');
+    div.setAttribute('aria-label', `View ${label} photo`);
+    div.innerHTML = `<img src="${src}" alt="" aria-hidden="true" loading="lazy"><div class="overlay" aria-hidden="true"><span class="sport-tag">${label}</span></div>`;
+    function activate() { openLightbox(parseInt(div.dataset.index)); }
+    div.addEventListener('click', activate);
+    div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
+    gallery.appendChild(div);
+  }
+
+  function makeVideoItem(src, poster, sport) {
+    const div = document.createElement('div');
+    div.className = 'masonry-item';
+    div.dataset.sport = sport;
+    div.dataset.index = idx++;
+    div.dataset.video = src;
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('role', 'button');
+    div.setAttribute('aria-label', 'Play video reel');
+    div.innerHTML = `
+      <img src="${poster}" alt="" aria-hidden="true" loading="lazy" style="width:100%;display:block;">
+      <div class="overlay" aria-hidden="true" style="opacity:1;background:rgba(0,0,0,0.35);">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+          <div style="width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);transition:transform 0.2s,border-color 0.2s;">
+            <svg width="20" height="20" fill="white" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+          </div>
+        </div>
+        <span class="sport-tag" style="position:absolute;bottom:14px;left:14px;">Video Reel</span>
+      </div>`;
+    function activate() { openLightbox(parseInt(div.dataset.index)); }
+    div.addEventListener('click', activate);
+    div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
+    gallery.appendChild(div);
+  }
+
+  function addPhotos(folder, filenames, sport) {
+    filenames.filter(fn => !FEATURED_SET.has(fn)).forEach(fn =>
+      makePhotoItem('images/' + folder + '/' + encodeURIComponent(fn), sport)
+    );
+  }
+
+  // Featured photos first (they appear at top of All view)
+  FEATURED.forEach(([fn, sport]) =>
+    makePhotoItem('images/front-page-gallery/' + encodeURIComponent(fn), sport)
+  );
+
+  addPhotos('football',           FOOTBALL,    'football');
+  addPhotos('baseball',           BASEBALL,    'baseball');
+  addPhotos('basketball',         BASKETBALL,  'basketball');
+  addPhotos('soccer',             SOCCER,      'soccer');
+  addPhotos('volleyball',         VOLLEYBALL,  'volleyball');
+  addPhotos('softball',           SOFTBALL,    'softball');
+  addPhotos('cheer',              CHEER,       'cheer');
+
+  // Videos (hero in site root + video reels folder) — only shown in Video Reels tab
+  makeVideoItem('hero-video.mp4', 'hero-poster.jpg', 'reels');
+  VIDEO_REELS.forEach(fn => {
+    const posterName = fn.replace(/\.mp4$/i, '.jpg');
+    makeVideoItem(
+      'images/video-reels/' + encodeURIComponent(fn),
+      'images/video-reels/posters/' + encodeURIComponent(posterName),
+      'reels'
+    );
+  });
+
+  // ── Filter ────────────────────────────────────────────────────
+  function applyFilter(f) {
+    document.querySelectorAll('.masonry-item').forEach(item => {
+      if (f === 'all') {
+        item.classList.toggle('hidden-item', item.dataset.sport === 'reels');
+      } else {
+        item.classList.toggle('hidden-item', item.dataset.sport !== f);
+      }
+    });
+  }
+
+  // Apply on load so videos don't appear in All
+  applyFilter('all');
+
   document.getElementById('filter-bar').addEventListener('click', e => {
     const btn = e.target.closest('.filter-btn');
     if (!btn) return;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const f = btn.dataset.filter;
-    items.forEach(item => {
-      if (f === 'all' || item.dataset.sport === f) {
-        item.classList.remove('hidden-item');
-      } else {
-        item.classList.add('hidden-item');
-      }
-    });
+    applyFilter(btn.dataset.filter);
   });
 
-  // Lightbox
+  // ── Lightbox ──────────────────────────────────────────────────
   const lb = document.getElementById('lightbox');
   const lbImg = document.getElementById('lb-img');
+  const lbVideo = document.getElementById('lb-video');
   const lbCap = document.getElementById('lb-caption');
+  const lbClose = document.getElementById('lb-close');
+  const lbPrev = document.getElementById('lb-prev');
+  const lbNext = document.getElementById('lb-next');
   let currentIdx = 0;
   let visibleItems = [];
+  let lbTriggerEl = null;
 
   function openLightbox(idx) {
     visibleItems = [...document.querySelectorAll('.masonry-item:not(.hidden-item)')];
     currentIdx = visibleItems.findIndex(i => parseInt(i.dataset.index) === idx);
+    lbTriggerEl = document.activeElement;
     showLightbox();
+    lbClose.focus();
+    document.addEventListener('keydown', trapLightbox);
+  }
+
+  function closeLightbox() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    lbVideo.pause(); lbVideo.src = '';
+    document.removeEventListener('keydown', trapLightbox);
+    if (lbTriggerEl) lbTriggerEl.focus();
+  }
+
+  function trapLightbox(e) {
+    if (!lb.classList.contains('open')) return;
+    const focusable = [lbClose, lbPrev, lbNext].filter(el => el);
+    if (e.key === 'Escape') { closeLightbox(); return; }
+    if (e.key === 'ArrowLeft') { lbPrev.click(); return; }
+    if (e.key === 'ArrowRight') { lbNext.click(); return; }
+    if (e.key === 'Tab') {
+      if (e.shiftKey && document.activeElement === focusable[0]) { e.preventDefault(); focusable[focusable.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === focusable[focusable.length - 1]) { e.preventDefault(); focusable[0].focus(); }
+    }
   }
 
   function showLightbox() {
     const item = visibleItems[currentIdx];
-    lbImg.src = item.querySelector('img').src;
-    lbCap.textContent = item.dataset.sport.toUpperCase() + '  —  @eyescoutsports';
+    const videoSrc = item.dataset.video;
+    const sportLabel = item.dataset.sport.charAt(0).toUpperCase() + item.dataset.sport.slice(1);
+    if (videoSrc) {
+      lbImg.style.display = 'none';
+      lbVideo.style.display = 'block';
+      lbVideo.src = videoSrc;
+      lbVideo.play().catch(() => {});
+      lbImg.alt = '';
+    } else {
+      lbVideo.pause();
+      lbVideo.src = '';
+      lbVideo.style.display = 'none';
+      lbImg.style.display = '';
+      lbImg.src = item.querySelector('img').src;
+      lbImg.alt = `${sportLabel} photo by Eyescout Sports`;
+    }
+    lbCap.textContent = sportLabel.toUpperCase() + '  —  @eyescoutsports';
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
-  items.forEach(item => {
-    item.addEventListener('click', () => openLightbox(parseInt(item.dataset.index)));
-  });
-
-  document.getElementById('lb-close').addEventListener('click', () => {
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-  });
-  document.getElementById('lb-prev').addEventListener('click', () => {
+  lbClose.addEventListener('click', closeLightbox);
+  lbPrev.addEventListener('click', () => {
     currentIdx = (currentIdx - 1 + visibleItems.length) % visibleItems.length;
     showLightbox();
   });
-  document.getElementById('lb-next').addEventListener('click', () => {
+  lbNext.addEventListener('click', () => {
     currentIdx = (currentIdx + 1) % visibleItems.length;
     showLightbox();
   });
-  document.addEventListener('keydown', e => {
-    if (!lb.classList.contains('open')) return;
-    if (e.key === 'ArrowLeft') document.getElementById('lb-prev').click();
-    if (e.key === 'ArrowRight') document.getElementById('lb-next').click();
-    if (e.key === 'Escape') document.getElementById('lb-close').click();
-  });
 
-  // Fade in
+  // ── Fade in ───────────────────────────────────────────────────
   const faders = document.querySelectorAll('.fade');
   const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { threshold: 0.1 });
   faders.forEach(f => io.observe(f));

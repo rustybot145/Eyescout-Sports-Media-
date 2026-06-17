@@ -42,8 +42,9 @@
     .form-input:focus {
       border-color: rgba(0,201,167,0.5);
       box-shadow: 0 0 0 3px rgba(0,201,167,0.07);
+      outline: 2px solid rgba(0,201,167,0.5);
+      outline-offset: -1px;
     }
-    .form-input:focus-visible { outline: none; }
     select.form-input {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
@@ -70,11 +71,18 @@
     .fade-d1 { transition-delay: 0.1s; }
     .fade-d2 { transition-delay: 0.2s; }
     .fade-d3 { transition-delay: 0.3s; }
+
+    #skip-link { position: absolute; transform: translateX(-200%); z-index: 9999; background: var(--grad); color: #fff; padding: 10px 20px; border-radius: 2px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+    #skip-link:focus { transform: none; position: fixed; top: 16px; left: 16px; }
+    :focus-visible { outline: 2px solid #00C9A7; outline-offset: 3px; }
+    .s-label { color: #888 !important; }
   </style>
 </head>
 <body>
 
-<div id="mobile-nav">
+<a id="skip-link" href="#main-content">Skip to main content</a>
+
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
   <button id="mob-close" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
   </button>
@@ -99,11 +107,13 @@
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Services</a>
       <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
     </div>
-    <button id="mob-open" class="md:hidden text-white/60 hover:text-white transition-colors">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 </nav>
+
+<main id="main-content" tabindex="-1">
 
 <!-- PAGE HEADER -->
 <section class="pt-36 pb-16 bg-[#111111] relative overflow-hidden">
@@ -204,7 +214,7 @@
         </form>
 
         <!-- SUCCESS STATE -->
-        <div id="form-success" class="text-center py-16">
+        <div id="form-success" class="text-center py-16" aria-live="polite" tabindex="-1">
           <div class="w-16 h-16 rounded-full g-btn flex items-center justify-center mx-auto mb-6">
             <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
           </div>
@@ -305,6 +315,8 @@
   </div>
 </section>
 
+</main>
+
 <!-- FOOTER -->
 <footer class="bg-[#060606] border-t border-white/[0.05] py-12">
   <div class="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -326,8 +338,29 @@
 
   const nav = document.getElementById('main-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
-  document.getElementById('mob-open').addEventListener('click', () => document.getElementById('mobile-nav').classList.add('open'));
-  document.getElementById('mob-close').addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
+
+  const mobileNav = document.getElementById('mobile-nav');
+  const mobOpen = document.getElementById('mob-open');
+  const mobClose = document.getElementById('mob-close');
+  const FOCUSABLE_SEL = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function openMobileNav() {
+    mobileNav.classList.add('open'); mobOpen.setAttribute('aria-expanded', 'true');
+    const first = mobileNav.querySelectorAll(FOCUSABLE_SEL)[0]; if (first) first.focus();
+    document.addEventListener('keydown', trapMobileNav);
+  }
+  function closeMobileNav() {
+    mobileNav.classList.remove('open'); mobOpen.setAttribute('aria-expanded', 'false');
+    mobOpen.focus(); document.removeEventListener('keydown', trapMobileNav);
+  }
+  function trapMobileNav(e) {
+    const items = [...mobileNav.querySelectorAll(FOCUSABLE_SEL)];
+    if (e.key === 'Escape') { closeMobileNav(); return; }
+    if (e.key !== 'Tab' || !items.length) return;
+    if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === items[items.length - 1]) { e.preventDefault(); items[0].focus(); }
+  }
+  mobOpen.addEventListener('click', openMobileNav);
+  mobClose.addEventListener('click', closeMobileNav);
 
   // Form success handler
   const form = document.getElementById('booking-form');
@@ -345,7 +378,9 @@
       });
       if (res.ok) {
         form.style.display = 'none';
-        document.getElementById('form-success').style.display = 'block';
+        const successEl = document.getElementById('form-success');
+        successEl.style.display = 'block';
+        successEl.focus();
       } else {
         btn.textContent = 'Error — Try Again';
         btn.style.opacity = '1';
