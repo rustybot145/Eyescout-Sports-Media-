@@ -249,6 +249,8 @@
   mobClose.addEventListener('click', closeMobileNav);
 
   // ── Gallery data ──────────────────────────────────────────────
+  const CDN = 'https://res.cloudinary.com/dboxgrnbu/image/upload/';
+
   // Featured photos (shown first in All view, served from front-page-gallery folder)
   const FEATURED = [
     ['27Jas3.JPG',                                                      'softball'],
@@ -462,13 +464,13 @@
 
   function addPhotos(folder, filenames, sport) {
     filenames.filter(fn => !FEATURED_SET.has(fn)).forEach(fn =>
-      makePhotoItem('images/' + folder + '/' + encodeURIComponent(fn), sport)
+      makePhotoItem(CDN + folder + '/' + encodeURIComponent(fn), sport)
     );
   }
 
   // Featured photos first (they appear at top of All view)
   FEATURED.forEach(([fn, sport]) =>
-    makePhotoItem('images/front-page-gallery/' + encodeURIComponent(fn), sport)
+    makePhotoItem(CDN + 'front-page-gallery/' + encodeURIComponent(fn), sport)
   );
 
   addPhotos('football',           FOOTBALL,    'football');
@@ -479,16 +481,8 @@
   addPhotos('softball',           SOFTBALL,    'softball');
   addPhotos('cheer',              CHEER,       'cheer');
 
-  // Videos (hero in site root + video reels folder) — only shown in Video Reels tab
+  // Videos — only shown in Video Reels tab
   makeVideoItem('hero-video.mp4', 'hero-poster.jpg', 'reels');
-  VIDEO_REELS.forEach(fn => {
-    const posterName = fn.replace(/\.mp4$/i, '.jpg');
-    makeVideoItem(
-      'images/video-reels/' + encodeURIComponent(fn),
-      'images/video-reels/posters/' + encodeURIComponent(posterName),
-      'reels'
-    );
-  });
 
   // ── Filter ────────────────────────────────────────────────────
   function applyFilter(f) {

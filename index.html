@@ -474,15 +474,15 @@
 
     <div class="three-panel fade">
       <div>
-        <img src="images/football/IMG_0424_NoLogo.JPG" alt="Football action">
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/football/IMG_0424_NoLogo.JPG" alt="Football action">
         <span class="panel-label">Football</span>
       </div>
       <div>
-        <img src="images/soccer/IMG_3694.jpg" alt="Soccer">
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/soccer/IMG_3694.jpg" alt="Soccer">
         <span class="panel-label">Soccer</span>
       </div>
       <div>
-        <img src="images/cheer/IMG_0265_NoLogo.jpg" alt="Cheer">
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/cheer/IMG_0265_NoLogo.jpg" alt="Cheer">
         <span class="panel-label">Cheer</span>
       </div>
     </div>
@@ -842,6 +842,7 @@
   faders.forEach(f => io.observe(f));
 
   // ── SPORT GALLERY ──
+  const CDN = 'https://res.cloudinary.com/dboxgrnbu/image/upload/';
   const SPORT_PHOTOS = {
     football: [
       ['football', 'IMG_0424_NoLogo.JPG'],
@@ -907,7 +908,7 @@
       div.setAttribute('role', 'link');
       div.setAttribute('aria-label', `View ${sportLabel} gallery`);
       const img = document.createElement('img');
-      img.src = 'images/' + folder + '/' + encodeURIComponent(file);
+      img.src = CDN + folder + '/' + encodeURIComponent(file);
       img.alt = '';
       img.setAttribute('aria-hidden', 'true');
       img.loading = 'lazy';
