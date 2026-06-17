@@ -249,7 +249,114 @@
   mobClose.addEventListener('click', closeMobileNav);
 
   // ── Gallery data ──────────────────────────────────────────────
-  const CDN = 'https://res.cloudinary.com/dboxgrnbu/image/upload/';
+  const CLOUDINARY_MAP = {
+    '10th.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735205/10th_set73c.jpg',
+    '11th.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735208/11th_qkofth.jpg',
+    '14th.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735837/14th_neyjio.jpg',
+    '15th.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735838/15th_wm8lkc.jpg',
+    '17th.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735838/17th_gmtfl1.jpg',
+    '19th.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735846/19th_berm4o.jpg',
+    '27Jas2.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735342/27Jas2_mqrcyj.jpg',
+    '27Jas3.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735343/27Jas3_qwhhec.jpg',
+    '2nd.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735833/2nd_zylyvu.jpg',
+    '518259809_3753109248323122_6097285160122520934_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/518259809_3753109248323122_6097285160122520934_n_pz3bsp.jpg',
+    '531845790_3781135042187209_3645621867856368789_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735155/531845790_3781135042187209_3645621867856368789_n_u7cgl8.jpg',
+    '548196032_3815919595375420_1274746523035374581_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735155/548196032_3815919595375420_1274746523035374581_n_xkmpwt.jpg',
+    '577015860_3864476353853077_2400986784217703739_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/577015860_3864476353853077_2400986784217703739_n_mxhmsv.jpg',
+    '599949119_3898956843738361_1070158023975895140_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735210/599949119_3898956843738361_1070158023975895140_n_bkptoy.jpg',
+    '603882274_3911414932492552_7133293299687518284_n_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/603882274_3911414932492552_7133293299687518284_n_Logo_o0gfu8.jpg',
+    '605516816_3911414609159251_5661107446656363947_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/605516816_3911414609159251_5661107446656363947_n_xdqjvl.jpg',
+    '605827486_3913086588992053_2985525923919663480_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735212/605827486_3913086588992053_2985525923919663480_n_yrvwxk.jpg',
+    '606059114_3914041578896554_6009799703696177595_n_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/606059114_3914041578896554_6009799703696177595_n_Logo_g5b1wo.jpg',
+    '608493253_3911502489150463_4427171688340907176_n_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735270/608493253_3911502489150463_4427171688340907176_n_Logo_dapghr.jpg',
+    '651105720_3981649332135778_8589362175518966011_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735344/651105720_3981649332135778_8589362175518966011_n_lwgzoq.jpg',
+    'CO12.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735213/CO12_alspvj.jpg',
+    'FB_IMG_1757562219357.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735137/FB_IMG_1757562219357_ejgn5p.jpg',
+    'FB_IMG_1757562224097.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735137/FB_IMG_1757562224097_hntonk.jpg',
+    'FB_IMG_1758444719773.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735137/FB_IMG_1758444719773_meti7n.jpg',
+    'FB_IMG_1758444836484.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735137/FB_IMG_1758444836484_yvgguc.jpg',
+    'FB_IMG_1766427013887.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735139/FB_IMG_1766427013887_wagzfk.jpg',
+    'FB_IMG_1766427029548.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735139/FB_IMG_1766427029548_oxey18.jpg',
+    'IMG_0001.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735756/IMG_0001_mkj21d.jpg',
+    'IMG_0003.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735146/IMG_0003_waydae.jpg',
+    'IMG_0040_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735276/IMG_0040_Logo_nykt0l.jpg',
+    'IMG_0044.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735141/IMG_0044_yt8fih.jpg',
+    'IMG_0154_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735151/IMG_0154_Logo_urrvmv.jpg',
+    'IMG_0242_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735787/IMG_0242_NoLogo_lgockr.jpg',
+    'IMG_0265_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735784/IMG_0265_NoLogo_dj89jz.jpg',
+    'IMG_0279_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735785/IMG_0279_NoLogo_q8oqey.jpg',
+    'IMG_0321_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735797/IMG_0321_NoLogo_f8f7qj.jpg',
+    'IMG_0330_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735795/IMG_0330_NoLogo_paeicc.jpg',
+    'IMG_0391_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735795/IMG_0391_NoLogo_ndjcp9.jpg',
+    'IMG_0392_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735802/IMG_0392_NoLogo_ufy0vv.jpg',
+    'IMG_0398_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735800/IMG_0398_NoLogo_ophlww.jpg',
+    'IMG_0409_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735802/IMG_0409_NoLogo_mt8gws.jpg',
+    'IMG_0411_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735804/IMG_0411_NoLogo_panaas.jpg',
+    'IMG_0424_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735802/IMG_0424_NoLogo_lvsbwx.jpg',
+    'IMG_0436_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735303/IMG_0436_NoLogo_oxm2dt.jpg',
+    'IMG_0527_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735807/IMG_0527_NoLogo_ertdbn.jpg',
+    'IMG_0544_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735315/IMG_0544_NoLogo_udedge.jpg',
+    'IMG_0555_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735810/IMG_0555_NoLogo_r6dwlv.jpg',
+    'IMG_0569_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735809/IMG_0569_NoLogo_vjks8j.jpg',
+    'IMG_0655_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735812/IMG_0655_NoLogo_eyvrgb.jpg',
+    'IMG_0666_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735815/IMG_0666_NoLogo_atuupy.jpg',
+    'IMG_0684_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735817/IMG_0684_NoLogo_gen2hm.jpg',
+    'IMG_0739_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735325/IMG_0739_NoLogo_znkzdk.jpg',
+    'IMG_09922e.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735363/IMG_09922e_lxi3gj.jpg',
+    'IMG_2090_2.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735158/IMG_2090_2_cvgydx.jpg',
+    'IMG_2743_logo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735334/IMG_2743_logo_avowj4.jpg',
+    'IMG_2796_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735847/IMG_2796_Logo_n66guz.jpg',
+    'IMG_2807_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735223/IMG_2807_Logo_dcrstu.jpg',
+    'IMG_2814_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735230/IMG_2814_Logo_p987zu.jpg',
+    'IMG_3694.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735232/IMG_3694_f2cl77.jpg',
+    'IMG_4073_TeamA_1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735359/IMG_4073_TeamA_1_hrqklz.jpg',
+    'IMG_4123.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735162/IMG_4123_juwkgs.jpg',
+    'IMG_4728_#23_1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735359/IMG_4728__23_1_bph56l.jpg',
+    'IMG_4832_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735852/IMG_4832_Logo_a3ty5z.jpg',
+    'IMG_5480_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735231/IMG_5480_Logo_bag2lc.jpg',
+    'IMG_5496_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735236/IMG_5496_Logo_mjuzxs.jpg',
+    'IMG_5700_Logo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735820/IMG_5700_Logo_gi6yux.jpg',
+    'IMG_6023_#4_2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781736498/IMG_6023__4_2_srsxj0.jpg',
+    'IMG_6540_#13_2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781736494/IMG_6540__13_2_cmelmp.jpg',
+    'IMG_6597_LogoRN.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735142/IMG_6597_LogoRN_jkijol.jpg',
+    'IMG_6848.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735231/IMG_6848_kl8qoo.jpg',
+    'IMG_6929_MarteLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735142/IMG_6929_MarteLogo_vynf5k.jpg',
+    'IMG_7023_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735251/IMG_7023_NoLogo_q5uw1u.jpg',
+    'IMG_7029.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735235/IMG_7029_hstcft.jpg',
+    'IMG_7032.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735236/IMG_7032_d97xhv.jpg',
+    'IMG_7043.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735241/IMG_7043_iwpnke.jpg',
+    'IMG_7047_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735243/IMG_7047_Logo_lsu84h.jpg',
+    'IMG_7053_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735243/IMG_7053_Logo_xp66ib.jpg',
+    'IMG_7057_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735246/IMG_7057_NoLogo_o73yon.jpg',
+    'IMG_7065_4_1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735364/IMG_7065_4_1_gfjzre.jpg',
+    'IMG_7072.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735240/IMG_7072_nm2zsy.jpg',
+    'IMG_7077.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735243/IMG_7077_vg78pp.jpg',
+    'IMG_7110.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735247/IMG_7110_vxtqac.jpg',
+    'IMG_7127.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735249/IMG_7127_ilfhtk.jpg',
+    'IMG_7139_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735257/IMG_7139_Logo_vsogn3.jpg',
+    'IMG_7166_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735250/IMG_7166_NoLogo_ahltl6.jpg',
+    'IMG_7178_Shohei.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735142/IMG_7178_Shohei_i0j1mj.jpg',
+    'IMG_7178_Shohei1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735143/IMG_7178_Shohei1_zbldak.jpg',
+    'IMG_7228.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735251/IMG_7228_xpztws.jpg',
+    'IMG_7242.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735255/IMG_7242_ajgi4x.jpg',
+    'IMG_7302.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735252/IMG_7302_gobjfq.jpg',
+    'IMG_7333.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735254/IMG_7333_dmgpiy.jpg',
+    'IMG_7354_Out.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735144/IMG_7354_Out_rv5gmi.jpg',
+    'IMG_7405.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735255/IMG_7405_kc1on8.jpg',
+    'IMG_7662_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735268/IMG_7662_Logo_pgscbd.jpg',
+    'IMG_7768.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735257/IMG_7768_yxv33b.jpg',
+    'IMG_7869_#11_GoalTackleKick.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735261/IMG_7869__11_GoalTackleKick_bc9wqp.jpg',
+    'IMG_7886_#11_GoalKick#2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735264/IMG_7886__11_GoalKick_2_uudftp.jpg',
+    'IMG_8019.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735261/IMG_8019_zru11j.jpg',
+    'IMG_8020_Logo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735334/IMG_8020_Logo_kz5oe1.jpg',
+    'IMG_8112.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735261/IMG_8112_s6ordb.jpg',
+    'IMG_8350.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735357/IMG_8350_hbqgkz.jpg',
+    'IMG_9974_Logo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735335/IMG_9974_Logo_soqwn4.jpg',
+    'IMG_9985_Logo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735823/IMG_9985_Logo_aqmvuo.jpg',
+    'PerezChamp1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735146/PerezChamp1_lajop2.jpg',
+    'ZPerezChamp2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735151/ZPerezChamp2_fuhlbx.jpg',
+  };
+  function cdnUrl(fn) { return CLOUDINARY_MAP[fn] || ''; }
 
   // Featured photos (shown first in All view, served from front-page-gallery folder)
   const FEATURED = [
@@ -464,13 +571,13 @@
 
   function addPhotos(folder, filenames, sport) {
     filenames.filter(fn => !FEATURED_SET.has(fn)).forEach(fn =>
-      makePhotoItem(CDN + folder + '/' + encodeURIComponent(fn), sport)
+      makePhotoItem(cdnUrl(fn), sport)
     );
   }
 
   // Featured photos first (they appear at top of All view)
   FEATURED.forEach(([fn, sport]) =>
-    makePhotoItem(CDN + 'front-page-gallery/' + encodeURIComponent(fn), sport)
+    makePhotoItem(cdnUrl(fn), sport)
   );
 
   addPhotos('football',           FOOTBALL,    'football');
