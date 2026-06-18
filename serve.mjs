@@ -18,6 +18,9 @@ http.createServer((req, res) => {
   let u = decodeURIComponent(req.url.split('?')[0]);
   if (u === '/' || u === '') u = '/index.html';
   let fp = path.join(__dirname, u);
+  if (!fp.startsWith(path.resolve(__dirname) + path.sep) && fp !== path.resolve(__dirname)) {
+    res.writeHead(403); res.end('Forbidden'); return;
+  }
   if (fs.existsSync(fp) && fs.statSync(fp).isDirectory()) fp = path.join(fp, 'index.html');
 
   fs.stat(fp, (err, stat) => {
