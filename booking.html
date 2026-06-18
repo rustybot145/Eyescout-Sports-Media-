@@ -55,6 +55,65 @@
     textarea.form-input { resize: vertical; min-height: 120px; }
     input[type="date"].form-input::-webkit-calendar-picker-indicator { filter: invert(0.3); cursor: pointer; }
 
+    /* Toggle button group */
+    .toggle-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .toggle-btn {
+      flex: 1;
+      min-width: 140px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45);
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 14px 20px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .toggle-btn:hover:not(.active) {
+      border-color: rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.7);
+      transform: translateY(-1px);
+    }
+    .toggle-btn.active {
+      background: var(--grad);
+      border-color: transparent;
+      color: #fff;
+      transform: none;
+    }
+    .toggle-btn:focus-visible { outline: 2px solid #00C9A7; outline-offset: 3px; }
+
+    /* Step divider */
+    .step-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 28px 0 20px;
+    }
+    .step-divider .step-line { flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+    .step-divider .step-label {
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      white-space: nowrap;
+    }
+
+    /* Conditional section fade-in */
+    .cond-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .cond-section.visible { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
     /* Trust signal cards */
     .trust-card { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.06); }
 
@@ -135,32 +194,29 @@
       <!-- FORM -->
       <div class="fade">
         <form id="booking-form" action="https://formspree.io/f/REPLACE_WITH_FORMSPREE_ID" method="POST">
-          <!-- Honeypot: bots fill this in, humans don't — submissions with a value here are silently dropped -->
+          <!-- Honeypot -->
           <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+          <!-- Hidden fields populated by JS -->
+          <input type="hidden" name="package_type" id="input-package-type">
+          <input type="hidden" name="package_format" id="input-package-format">
 
+          <!-- BASE FIELDS: always visible -->
           <div class="grid sm:grid-cols-2 gap-5 mb-5">
             <div class="form-group">
               <label class="form-label" for="name">Your Name <span class="text-[#00C9A7]">*</span></label>
               <input class="form-input" type="text" id="name" name="name" placeholder="Jane Smith" required maxlength="100" autocomplete="name">
             </div>
             <div class="form-group">
-              <label class="form-label" for="athlete">Athlete's Name <span class="text-[#00C9A7]">*</span></label>
-              <input class="form-input" type="text" id="athlete" name="athlete_name" placeholder="Tyler Smith" required maxlength="100" autocomplete="off">
+              <label class="form-label" for="email">Email Address <span class="text-[#00C9A7]">*</span></label>
+              <input class="form-input" type="email" id="email" name="email" placeholder="jane@email.com" required maxlength="254" autocomplete="email">
             </div>
           </div>
 
           <div class="grid sm:grid-cols-2 gap-5 mb-5">
-            <div class="form-group">
-              <label class="form-label" for="email">Email Address <span class="text-[#00C9A7]">*</span></label>
-              <input class="form-input" type="email" id="email" name="email" placeholder="jane@email.com" required maxlength="254" autocomplete="email">
-            </div>
             <div class="form-group">
               <label class="form-label" for="phone">Phone Number</label>
               <input class="form-input" type="tel" id="phone" name="phone" placeholder="(602) 555-0123" maxlength="20" autocomplete="tel">
             </div>
-          </div>
-
-          <div class="grid sm:grid-cols-2 gap-5 mb-5">
             <div class="form-group">
               <label class="form-label" for="sport">Sport <span class="text-[#00C9A7]">*</span></label>
               <select class="form-input" id="sport" name="sport" required>
@@ -172,45 +228,289 @@
                 <option>Volleyball</option>
                 <option>Softball</option>
                 <option>Cheerleading</option>
+                <option>Track &amp; Field</option>
                 <option>Tennis</option>
                 <option>Other</option>
               </select>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="service">Service Needed <span class="text-[#00C9A7]">*</span></label>
-              <select class="form-input" id="service" name="service" required>
-                <option value="" disabled selected>Select a service…</option>
-                <option>Game-Day Photography</option>
-                <option>Sports Videography</option>
-                <option>Athlete Highlight Reel</option>
-                <option>Event Coverage</option>
-                <option>Scouting Exposure</option>
-                <option>Not Sure — Let's Talk</option>
-              </select>
+          </div>
+
+          <!-- STEP 1: Package Type -->
+          <div class="step-divider">
+            <div class="step-line"></div>
+            <div class="step-label">Step 1 — Package Type</div>
+            <div class="step-line"></div>
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="form-label mb-2">Who is this package for? <span class="text-[#00C9A7]">*</span></label>
+            <div class="toggle-group" role="group" aria-label="Package type">
+              <button type="button" class="toggle-btn" data-group="type" data-value="Individual" id="btn-individual">
+                Individual Player
+              </button>
+              <button type="button" class="toggle-btn" data-group="type" data-value="Team" id="btn-team">
+                Team / Organization
+              </button>
             </div>
           </div>
 
-          <div class="grid sm:grid-cols-2 gap-5 mb-5">
-            <div class="form-group">
-              <label class="form-label" for="date">Event / Game Date</label>
-              <input class="form-input" type="date" id="date" name="event_date">
+          <!-- STEP 2: Package Format (revealed after Step 1) -->
+          <div id="step2-wrapper" style="display:none">
+            <div class="step-divider">
+              <div class="step-line"></div>
+              <div class="step-label">Step 2 — Package Format</div>
+              <div class="step-line"></div>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="location">Location / School / League</label>
-              <input class="form-input" type="text" id="location" name="location" placeholder="Phoenix High School, Phoenix AZ" maxlength="200" autocomplete="off">
+
+            <div class="form-group mb-2">
+              <label class="form-label mb-2">What type of coverage? <span class="text-[#00C9A7]">*</span></label>
+              <div class="toggle-group" role="group" aria-label="Package format">
+                <button type="button" class="toggle-btn" data-group="format" data-value="Photo" id="btn-photo">
+                  Photo Package
+                </button>
+                <button type="button" class="toggle-btn" data-group="format" data-value="Video" id="btn-video">
+                  Video Package
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="form-group mb-8">
-            <label class="form-label" for="message">Tell Us More</label>
-            <textarea class="form-input" id="message" name="message" placeholder="What do you need? Any details about the athlete, event, or what you're looking for…" maxlength="2000"></textarea>
+          <!-- STEP 3: Conditional sections -->
+
+          <!-- Individual + Photo -->
+          <div id="section-individual-photo" class="cond-section">
+            <div class="step-divider">
+              <div class="step-line"></div>
+              <div class="step-label">Step 3 — Individual Photo Details</div>
+              <div class="step-line"></div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="ip-athlete-name">Athlete's Name <span class="text-[#00C9A7]">*</span></label>
+                <input class="form-input cond-input" type="text" id="ip-athlete-name" name="athlete_name" placeholder="Tyler Smith" maxlength="100" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ip-jersey">Jersey Number</label>
+                <input class="form-input cond-input" type="text" id="ip-jersey" name="jersey_number" placeholder="12" maxlength="10" autocomplete="off">
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="ip-shot-type">Shot Type <span class="text-[#00C9A7]">*</span></label>
+                <select class="form-input cond-input" id="ip-shot-type" name="photo_shot_type">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Headshots Only</option>
+                  <option>Action Shots Only</option>
+                  <option>Headshots + Action Shots</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ip-num-athletes">Number of Athletes</label>
+                <select class="form-input cond-input" id="ip-num-athletes" name="num_athletes">
+                  <option value="" disabled selected>Select…</option>
+                  <option>1 Athlete</option>
+                  <option>2–4 Athletes</option>
+                  <option>5–10 Athletes</option>
+                  <option>10+ Athletes</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="ip-date">Event / Game Date</label>
+                <input class="form-input cond-input" type="date" id="ip-date" name="event_date">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ip-location">Location / School / League</label>
+                <input class="form-input cond-input" type="text" id="ip-location" name="location" placeholder="Phoenix High School, Phoenix AZ" maxlength="200" autocomplete="off">
+              </div>
+            </div>
+            <div class="form-group mb-8">
+              <label class="form-label" for="ip-notes">Additional Notes</label>
+              <textarea class="form-input cond-input" id="ip-notes" name="notes" placeholder="Uniform color, specific shots you want, anything else we should know…" maxlength="2000"></textarea>
+            </div>
           </div>
 
-          <button type="submit" class="g-btn cond text-base font-700 tracking-[0.15em] uppercase text-white w-full py-5 rounded-sm">
-            Send My Request
-          </button>
+          <!-- Individual + Video -->
+          <div id="section-individual-video" class="cond-section">
+            <div class="step-divider">
+              <div class="step-line"></div>
+              <div class="step-label">Step 3 — Individual Video Details</div>
+              <div class="step-line"></div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="iv-athlete-name">Athlete's Name <span class="text-[#00C9A7]">*</span></label>
+                <input class="form-input cond-input" type="text" id="iv-athlete-name" name="athlete_name" placeholder="Tyler Smith" maxlength="100" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="iv-video-type">Video Type <span class="text-[#00C9A7]">*</span></label>
+                <select class="form-input cond-input" id="iv-video-type" name="video_type">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Recruitment Highlight Reel</option>
+                  <option>Social Media Clips</option>
+                  <option>Game Film</option>
+                  <option>Full Season Package</option>
+                  <option>Custom — Let's Talk</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="iv-length">Target Length</label>
+                <select class="form-input cond-input" id="iv-length" name="video_length">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Under 1 Minute (social)</option>
+                  <option>1–2 Minutes</option>
+                  <option>3–5 Minutes</option>
+                  <option>Full Length / No Limit</option>
+                  <option>Not Sure</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="iv-footage">Footage Source</label>
+                <select class="form-input cond-input" id="iv-footage" name="footage_source">
+                  <option value="" disabled selected>Select…</option>
+                  <option>I'll provide existing footage</option>
+                  <option>Eyescout captures live</option>
+                  <option>Both — existing + new footage</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="iv-date">Event / Game Date</label>
+                <input class="form-input cond-input" type="date" id="iv-date" name="event_date">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="iv-location">Location / School / League</label>
+                <input class="form-input cond-input" type="text" id="iv-location" name="location" placeholder="Phoenix High School, Phoenix AZ" maxlength="200" autocomplete="off">
+              </div>
+            </div>
+            <div class="form-group mb-8">
+              <label class="form-label" for="iv-notes">Additional Notes</label>
+              <textarea class="form-input cond-input" id="iv-notes" name="notes" placeholder="Specific plays, music preference, turnaround needs, anything else…" maxlength="2000"></textarea>
+            </div>
+          </div>
 
-          <p class="text-white/20 text-xs font-300 mt-3 text-center">Xavier will respond within 24 hours.</p>
+          <!-- Team + Photo -->
+          <div id="section-team-photo" class="cond-section">
+            <div class="step-divider">
+              <div class="step-line"></div>
+              <div class="step-label">Step 3 — Team Photo Details</div>
+              <div class="step-line"></div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="tp-team-name">Team / Organization Name <span class="text-[#00C9A7]">*</span></label>
+                <input class="form-input cond-input" type="text" id="tp-team-name" name="team_name" placeholder="Desert Ridge Varsity Football" maxlength="150" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tp-num-athletes">Approximate # of Athletes</label>
+                <select class="form-input cond-input" id="tp-num-athletes" name="num_athletes">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Under 15</option>
+                  <option>15–30</option>
+                  <option>31–60</option>
+                  <option>60+</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="tp-coverage">Photo Coverage <span class="text-[#00C9A7]">*</span></label>
+                <select class="form-input cond-input" id="tp-coverage" name="team_photo_coverage">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Team Photo Only</option>
+                  <option>Individual Headshots Only</option>
+                  <option>Action Shots + Team Photo</option>
+                  <option>Full Package (Team + Individuals + Action)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tp-date">Event / Game Date</label>
+                <input class="form-input cond-input" type="date" id="tp-date" name="event_date">
+              </div>
+            </div>
+            <div class="form-group mb-5">
+              <label class="form-label" for="tp-location">Location / School / Venue</label>
+              <input class="form-input cond-input" type="text" id="tp-location" name="location" placeholder="Phoenix High School, Phoenix AZ" maxlength="200" autocomplete="off">
+            </div>
+            <div class="form-group mb-8">
+              <label class="form-label" for="tp-notes">Additional Notes</label>
+              <textarea class="form-input cond-input" id="tp-notes" name="notes" placeholder="Uniform colors, backdrop preference, timing constraints, anything else…" maxlength="2000"></textarea>
+            </div>
+          </div>
+
+          <!-- Team + Video -->
+          <div id="section-team-video" class="cond-section">
+            <div class="step-divider">
+              <div class="step-line"></div>
+              <div class="step-label">Step 3 — Team Video Details</div>
+              <div class="step-line"></div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="tv-team-name">Team / Organization Name <span class="text-[#00C9A7]">*</span></label>
+                <input class="form-input cond-input" type="text" id="tv-team-name" name="team_name" placeholder="Desert Ridge Varsity Football" maxlength="150" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tv-video-type">Video Type <span class="text-[#00C9A7]">*</span></label>
+                <select class="form-input cond-input" id="tv-video-type" name="video_type">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Single Game Film</option>
+                  <option>Season Highlight Package</option>
+                  <option>Event / Tournament Coverage</option>
+                  <option>Recruitment Video</option>
+                  <option>Custom — Let's Talk</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="tv-num-events">Number of Games / Events</label>
+                <select class="form-input cond-input" id="tv-num-events" name="num_events">
+                  <option value="" disabled selected>Select…</option>
+                  <option>1</option>
+                  <option>2–4</option>
+                  <option>5–10</option>
+                  <option>Full Season</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tv-turnaround">Turnaround Time</label>
+                <select class="form-input cond-input" id="tv-turnaround" name="turnaround_time">
+                  <option value="" disabled selected>Select…</option>
+                  <option>Standard (1–2 weeks)</option>
+                  <option>Rush (3–5 days)</option>
+                  <option>Flexible — No Rush</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-5 mb-5">
+              <div class="form-group">
+                <label class="form-label" for="tv-date">First Game / Event Date</label>
+                <input class="form-input cond-input" type="date" id="tv-date" name="event_date">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tv-location">Location / School / Venue</label>
+                <input class="form-input cond-input" type="text" id="tv-location" name="location" placeholder="Phoenix High School, Phoenix AZ" maxlength="200" autocomplete="off">
+              </div>
+            </div>
+            <div class="form-group mb-8">
+              <label class="form-label" for="tv-notes">Additional Notes</label>
+              <textarea class="form-input cond-input" id="tv-notes" name="notes" placeholder="Specific plays, music, branding, anything else your team needs…" maxlength="2000"></textarea>
+            </div>
+          </div>
+
+          <!-- SUBMIT (revealed after both steps are selected) -->
+          <div id="submit-wrapper" style="display:none">
+            <button type="submit" id="submit-btn" class="g-btn cond text-base font-700 tracking-[0.15em] uppercase text-white w-full py-5 rounded-sm">
+              Send My Request
+            </button>
+            <p class="text-white/20 text-xs font-300 mt-3 text-center">Xavier will respond within 24 hours.</p>
+          </div>
+
         </form>
 
         <!-- SUCCESS STATE -->
@@ -232,7 +532,6 @@
       <!-- SIDEBAR -->
       <div class="space-y-6 fade">
 
-        <!-- Trust signals -->
         <div>
           <div class="s-label mb-4">Why Eyescout</div>
           <div class="space-y-3">
@@ -277,7 +576,6 @@
 
         <div class="g-line"></div>
 
-        <!-- Alternate contact -->
         <div>
           <div class="s-label mb-4">Other Ways to Reach Xavier</div>
           <div class="space-y-3">
@@ -304,7 +602,6 @@
 
         <div class="g-line"></div>
 
-        <!-- Location -->
         <div class="trust-card rounded-sm p-5">
           <div class="s-label mb-2">Service Area</div>
           <p class="text-white/40 text-sm font-300 leading-relaxed">Based in <span class="text-white/60">Phoenix, AZ</span> — serving the entire Greater Phoenix Valley including Phoenix, Gilbert, Scottsdale, Tempe, Chandler &amp; surrounding areas.</p>
@@ -333,12 +630,14 @@
 </footer>
 
 <script>
-  const dateInput = document.getElementById('date');
-  if (dateInput) dateInput.min = new Date().toISOString().split('T')[0];
+  // Set date min to today
+  document.querySelectorAll('input[type="date"]').forEach(d => d.min = new Date().toISOString().split('T')[0]);
 
+  // Nav scroll
   const nav = document.getElementById('main-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
 
+  // Mobile nav
   const mobileNav = document.getElementById('mobile-nav');
   const mobOpen = document.getElementById('mob-open');
   const mobClose = document.getElementById('mob-close');
@@ -362,11 +661,73 @@
   mobOpen.addEventListener('click', openMobileNav);
   mobClose.addEventListener('click', closeMobileNav);
 
-  // Form success handler
+  // Conditional form logic
+  let selectedType = null;
+  let selectedFormat = null;
+
+  const allSections = ['individual-photo', 'individual-video', 'team-photo', 'team-video'];
+
+  function showSection(key) {
+    allSections.forEach(id => {
+      const el = document.getElementById('section-' + id);
+      const isTarget = id === key;
+      el.classList.toggle('visible', isTarget);
+      // Disable inputs in hidden sections so they don't submit
+      el.querySelectorAll('.cond-input').forEach(inp => { inp.disabled = !isTarget; });
+    });
+    document.getElementById('submit-wrapper').style.display = key ? 'block' : 'none';
+  }
+
+  function updateForm() {
+    // Show Step 2 once Step 1 is picked
+    document.getElementById('step2-wrapper').style.display = selectedType ? 'block' : 'none';
+
+    // Reset format if type changes
+    if (!selectedType) {
+      selectedFormat = null;
+      document.querySelectorAll('[data-group="format"]').forEach(b => b.classList.remove('active'));
+    }
+
+    // Show conditional section only when both are picked
+    const key = selectedType && selectedFormat ? (selectedType + '-' + selectedFormat).toLowerCase() : null;
+    showSection(key);
+
+    // Update hidden inputs
+    document.getElementById('input-package-type').value = selectedType || '';
+    document.getElementById('input-package-format').value = selectedFormat || '';
+  }
+
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group;
+      const val = btn.dataset.value;
+
+      // Deactivate siblings in same group
+      document.querySelectorAll('[data-group="' + group + '"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (group === 'type') {
+        selectedType = val;
+        selectedFormat = null;
+        document.querySelectorAll('[data-group="format"]').forEach(b => b.classList.remove('active'));
+      } else if (group === 'format') {
+        selectedFormat = val;
+      }
+
+      updateForm();
+    });
+  });
+
+  // Initialize: disable all cond inputs so they don't submit before selection
+  document.querySelectorAll('.cond-input').forEach(inp => { inp.disabled = true; });
+
+  // Form submit
   const form = document.getElementById('booking-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
+    if (!selectedType || !selectedFormat) return;
+
+    const btn = document.getElementById('submit-btn');
     btn.textContent = 'Sending…';
     btn.style.opacity = '0.7';
 
@@ -391,6 +752,7 @@
     }
   });
 
+  // Scroll fade-ins
   const faders = document.querySelectorAll('.fade');
   const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { threshold: 0.1 });
   faders.forEach(f => io.observe(f));
