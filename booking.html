@@ -193,8 +193,8 @@
 
       <!-- FORM -->
       <div class="fade">
-        <form id="booking-form" action="https://formspree.io/f/REPLACE_WITH_FORMSPREE_ID" method="POST">
-          <!-- Honeypot -->
+        <form id="booking-form" method="POST">
+          <!-- Honeypot: hidden from real users, bots fill it in -->
           <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
           <!-- Hidden fields populated by JS -->
           <input type="hidden" name="package_type" id="input-package-type">
@@ -731,11 +731,19 @@
     btn.textContent = 'Sending…';
     btn.style.opacity = '0.7';
 
+    // Collect all form fields into a plain object
+    const fd = new FormData(form);
+    const body = {};
+    fd.forEach((val, key) => { if (val !== '') body[key] = val; });
+
     try {
-      const res = await fetch(form.action, {
+      const res = await fetch('/api/submit', {
         method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
       if (res.ok) {
         form.style.display = 'none';
