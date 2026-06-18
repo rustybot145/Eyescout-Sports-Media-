@@ -474,7 +474,7 @@
 
     <div class="three-panel fade">
       <div>
-        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735802/IMG_0424_NoLogo_lvsbwx.jpg" alt="Football action">
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735303/IMG_0436_NoLogo_oxm2dt.jpg" alt="Football action">
         <span class="panel-label">Football</span>
       </div>
       <div>
@@ -482,8 +482,8 @@
         <span class="panel-label">Soccer</span>
       </div>
       <div>
-        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735784/IMG_0265_NoLogo_dj89jz.jpg" alt="Cheer">
-        <span class="panel-label">Cheer</span>
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735357/IMG_8350_hbqgkz.jpg" alt="Softball">
+        <span class="panel-label">Softball</span>
       </div>
     </div>
 
@@ -593,7 +593,6 @@
       <button class="sport-tab" data-sport="basketball" role="tab" aria-selected="false" id="tab-basketball" aria-controls="sport-grid">Basketball</button>
       <button class="sport-tab" data-sport="volleyball" role="tab" aria-selected="false" id="tab-volleyball" aria-controls="sport-grid">Volleyball</button>
       <button class="sport-tab" data-sport="softball" role="tab" aria-selected="false" id="tab-softball" aria-controls="sport-grid">Softball</button>
-      <button class="sport-tab" data-sport="cheer" role="tab" aria-selected="false" id="tab-cheer" aria-controls="sport-grid">Cheer</button>
     </div>
     <div class="sport-grid" id="sport-grid" role="tabpanel" aria-live="polite" aria-label="Sport gallery"></div>
     <div class="mt-8 text-center fade">
@@ -853,14 +852,7 @@
     '603882274_3911414932492552_7133293299687518284_n_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/603882274_3911414932492552_7133293299687518284_n_Logo_o0gfu8.jpg',
     '605516816_3911414609159251_5661107446656363947_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/605516816_3911414609159251_5661107446656363947_n_xdqjvl.jpg',
     'FB_IMG_1757562219357.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735137/FB_IMG_1757562219357_ejgn5p.jpg',
-    'IMG_0242_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735787/IMG_0242_NoLogo_lgockr.jpg',
-    'IMG_0265_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735784/IMG_0265_NoLogo_dj89jz.jpg',
-    'IMG_0279_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735785/IMG_0279_NoLogo_q8oqey.jpg',
-    'IMG_0321_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735797/IMG_0321_NoLogo_f8f7qj.jpg',
-    'IMG_0424_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735802/IMG_0424_NoLogo_lvsbwx.jpg',
     'IMG_0436_NoLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735303/IMG_0436_NoLogo_oxm2dt.jpg',
-    'IMG_0527_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735807/IMG_0527_NoLogo_ertdbn.jpg',
-    'IMG_0555_NoLogo.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735810/IMG_0555_NoLogo_r6dwlv.jpg',
     'IMG_2090_2.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735158/IMG_2090_2_cvgydx.jpg',
     'IMG_3694.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735232/IMG_3694_f2cl77.jpg',
     'IMG_4123.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735162/IMG_4123_juwkgs.jpg',
@@ -886,12 +878,11 @@
   function cdnUrl(fn) { return CLOUDINARY_MAP[fn] || ''; }
   const SPORT_PHOTOS = {
     football: [
-      ['football', 'IMG_0424_NoLogo.JPG'],
       ['football', 'IMG_0436_NoLogo.jpg'],
-      ['football', 'IMG_0527_NoLogo.JPG'],
-      ['football', 'IMG_0555_NoLogo.JPG'],
       ['football', '603882274_3911414932492552_7133293299687518284_n_Logo.jpg'],
-      ['football', 'IMG_0321_NoLogo.jpg'],
+      ['football', '518259809_3753109248323122_6097285160122520934_n.jpg'],
+      ['football', '577015860_3864476353853077_2400986784217703739_n.jpg'],
+      ['football', '605516816_3911414609159251_5661107446656363947_n.jpg'],
     ],
     baseball: [
       ['baseball', 'FB_IMG_1757562219357.jpg'],
@@ -930,11 +921,7 @@
       ['softball', 'IMG_8350.jpg'],
       ['softball', '27Jas2.JPG'],
     ],
-    cheer: [
-      ['cheer', 'IMG_0242_NoLogo.jpg'],
-      ['cheer', 'IMG_0265_NoLogo.jpg'],
-      ['cheer', 'IMG_0279_NoLogo.jpg'],
-    ],
+    cheer: [],
   };
 
   function renderSportGrid(sport) {
