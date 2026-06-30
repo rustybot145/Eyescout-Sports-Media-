@@ -19,7 +19,6 @@ module.exports = async function handler(req, res) {
 
   // Consolidate fields without dedicated Monday columns into notes
   const noteParts = [
-    b.athlete_name && b.name ? `Contact: ${b.name}` : null,
     b.photo_shot_type  ? `Shot Type: ${b.photo_shot_type}` : null,
     b.num_athletes     ? `# Athletes: ${b.num_athletes}` : null,
     b.video_type       ? `Video Type: ${b.video_type}` : null,
@@ -35,6 +34,7 @@ module.exports = async function handler(req, res) {
   const cv = {};
   if (b.email)        cv['email6nw22z6b']      = { email: b.email, text: b.email };
   if (b.phone)        cv['phonex1ygg6gn']       = { phone: b.phone, countryShortName: 'US' };
+  if (b.name)         cv['short_textbce7thp1']  = b.name;
   if (b.sport)        cv['short_textrsxcf77u']  = b.sport;
   if (packageTypeLabel) cv['single_select4yykhxn'] = { label: packageTypeLabel };
   if (productLabel)   cv['single_select0jtegqo'] = { label: productLabel };
