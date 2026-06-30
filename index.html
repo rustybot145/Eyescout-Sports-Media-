@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="google-site-verification" content="q9GucQmREDyS2QuTDRvll1AhE9WBgfZSCKd7vqdTNwg" />
+  <title>Eyescout Sports — Film Em. Scout Em. Stardom.</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+      --grad-d: linear-gradient(135deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
+    h1,h2,h3,h4,h1.cond,h2.cond,h3.cond,h4.cond { font-family: Impact, 'Arial Narrow', Arial, sans-serif; } .cond { font-family: 'Arial Narrow', Arial, sans-serif; }
+
+    /* Gradient utilities */
+    .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .g-btn { background: var(--grad); background-size: 200%; transition: background-position 0.4s ease, transform 0.2s, opacity 0.2s; }
+    .g-btn:hover { background-position: right; transform: translateY(-2px); }
+    .g-btn:active { transform: translateY(0); opacity: 0.9; }
+
+    /* Gradient border card */
+    .g-card {
+      background: linear-gradient(#1c1c1c, #1c1c1c) padding-box, var(--grad) border-box;
+      border: 1.5px solid transparent;
+    }
+    .g-card-top {
+      border-top: 2px solid transparent;
+      border-left: 2px solid transparent;
+      border-right: 2px solid transparent;
+      border-bottom: none;
+      background: linear-gradient(#1e1e1e, #1e1e1e) padding-box, var(--grad) border-box;
+    }
+
+    /* Nav */
+    nav { position: fixed; top: 0; width: 100%; z-index: 50; transition: background 0.3s, border-color 0.3s; }
+    nav.scrolled { background: rgba(17,17,17,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #111111;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 80% 50%, rgba(30,144,255,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 20% 80%, rgba(123,47,190,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 70% 20%, rgba(0,201,167,0.05) 0%, transparent 60%);
+    }
+    .hero-img {
+      position: absolute; inset: 0;
+      opacity: 1;
+    }
+    .hero-img video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: 85% center;
+    }
+    .hero-img::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to right, rgba(17,17,17,1) 25%, rgba(17,17,17,0.75) 50%, rgba(17,17,17,0.15) 100%),
+        linear-gradient(to top, rgba(17,17,17,0.7) 0%, transparent 35%);
+    }
+    .grain {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity: 0.6;
+    }
+
+    /* Three-panel gallery (reference image inspired) */
+    .three-panel {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 0.75fr;
+      gap: 5px;
+      height: 460px;
+    }
+    .three-panel > div {
+      overflow: hidden; position: relative; cursor: pointer;
+    }
+    .three-panel img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.75) saturate(0.8);
+      transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.5s;
+    }
+    .three-panel > div:hover img {
+      transform: scale(1.05); filter: brightness(0.95) saturate(1.1);
+    }
+    .three-panel > div .panel-label {
+      position: absolute; bottom: 14px; left: 16px;
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+    .three-panel > div::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Nine-grid gallery */
+    .nine-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    .nine-grid > div {
+      aspect-ratio: 4/3; overflow: hidden; position: relative;
+    }
+    .nine-grid img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.7) saturate(0.8);
+      transition: transform 0.5s ease, filter 0.4s;
+    }
+    .nine-grid > div:hover img {
+      transform: scale(1.06); filter: brightness(0.95) saturate(1.15);
+    }
+    .nine-grid > div::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(17,17,17,0.4) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Section label */
+    .s-label {
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase; color: #555;
+    }
+
+    /* Ghost button */
+    .ghost { border: 1px solid rgba(255,255,255,0.25); transition: border-color 0.2s, background 0.2s, transform 0.2s; }
+    .ghost:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); transform: translateY(-2px); }
+    .ghost:active { transform: translateY(0); }
+
+    /* Service card */
+    .svc-card {
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .svc-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--grad); opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .svc-card:hover { transform: translateY(-5px); border-color: rgba(123,47,190,0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .svc-card:hover::before { opacity: 1; }
+
+    /* Sport pills */
+    .sport-pill {
+      background: #1a1a1a; border: 1px solid rgba(255,255,255,0.07);
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      cursor: default;
+    }
+    .sport-pill:hover { border-color: rgba(0,201,167,0.4); color: #00C9A7; background: rgba(0,201,167,0.05); }
+
+    /* Divider line */
+    .g-line { height: 1px; background: var(--grad); opacity: 0.25; }
+
+    /* Stats */
+    .stat-num { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 52px; font-weight: 800; line-height: 1; }
+
+    /* CTA banner */
+    .cta-banner {
+      position: relative; overflow: hidden;
+      background: #171717;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .cta-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 100% at 50% 50%, rgba(30,144,255,0.06) 0%, transparent 70%);
+    }
+
+    /* Mobile nav overlay */
+    #mobile-nav {
+      display: none; position: fixed; inset: 0; background: #111111;
+      z-index: 60; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
+    }
+    #mobile-nav.open { display: flex; }
+
+    /* Fade-in on scroll */
+    .fade { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade.on { opacity: 1; transform: none; }
+    .fade-d1 { transition-delay: 0.1s; }
+    .fade-d2 { transition-delay: 0.2s; }
+    .fade-d3 { transition-delay: 0.3s; }
+    .fade-d4 { transition-delay: 0.4s; }
+
+    @media (max-width: 768px) {
+      .three-panel { grid-template-columns: 1fr; height: auto; }
+      .three-panel > div { height: 220px; }
+      .nine-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .nine-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── SCROLL PROGRESS BAR ── */
+    #scroll-bar {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+      background: var(--grad); z-index: 200;
+      transition: width 0.05s linear;
+    }
+
+    /* ── FLOATING ORBS ── */
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none; opacity: 0;
+      animation: orbFloat 0.8s ease forwards;
+    }
+    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(123,47,190,0.18) 0%, transparent 70%); top: -100px; right: 0; animation-name: orbPulse1; animation-duration: 10s; animation-delay: 0s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 1; }
+    .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(30,144,255,0.14) 0%, transparent 70%); bottom: 0; left: 10%; animation-name: orbPulse2; animation-duration: 13s; animation-delay: -3s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 1; }
+    .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,201,167,0.1) 0%, transparent 70%); top: 30%; right: 20%; animation-name: orbPulse3; animation-duration: 9s; animation-delay: -6s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 1; }
+    @keyframes orbPulse1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-40px,50px) scale(1.15)} }
+    @keyframes orbPulse2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(50px,-30px) scale(0.88)} }
+    @keyframes orbPulse3 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,40px) scale(1.1)} 66%{transform:translate(-20px,-20px) scale(0.92)} }
+
+    /* ── CURSOR SPOTLIGHT ── */
+    #cursor-spotlight {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(30,144,255,0.07) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none;
+      transform: translate(-50%,-50%);
+      transition: opacity 0.3s;
+      z-index: 1;
+    }
+
+    /* ── HERO WORD REVEAL ── */
+    .hero-word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(30px) skewY(3deg);
+      animation: wordUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+    @keyframes wordUp {
+      to { opacity: 1; transform: translateY(0) skewY(0deg); }
+    }
+
+    /* ── BUTTON RIPPLE ── */
+    .ripple-btn { position: relative; overflow: hidden; }
+    .ripple-wave {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transform: scale(0); animation: rippleOut 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes rippleOut {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ── MAGNETIC BUTTON ── */
+    .mag-btn { display: inline-block; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+
+    /* ── 3D CARD TILT ── */
+    .svc-card { transform-style: preserve-3d; }
+
+    /* ── COUNTER NUMBER ── */
+    .stat-num { transition: color 0.3s; }
+
+    /* ── TYPEWRITER CURSOR ── */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── SPORT TABS ── */
+    .sport-tab {
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      border-radius: 2px;
+    }
+    .sport-tab:hover { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.8); }
+    .sport-tab.active { background: var(--grad); border-color: transparent; color: white; }
+
+    /* ── SPORT GRID ── */
+    .sport-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    .sport-grid-item {
+      aspect-ratio: 4/3; overflow: hidden; position: relative; cursor: pointer;
+    }
+    .sport-grid-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.7) saturate(0.8);
+      transition: transform 0.5s ease, filter 0.4s;
+    }
+    .sport-grid-item:hover img { transform: scale(1.06); filter: brightness(0.95) saturate(1.15); }
+    .sport-grid-item::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(17,17,17,0.4) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    @media (max-width: 768px) { .sport-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    /* ── PANEL HOVER ZOOM LABEL ── */
+    .three-panel > div .panel-label {
+      transition: opacity 0.3s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      transform: translateY(6px);
+    }
+    .three-panel > div:hover .panel-label {
+      opacity: 1 !important;
+      transform: translateY(0);
+    }
+
+    /* ── NAV LINK UNDERLINE SLIDE ── */
+    nav a:not(.g-btn) {
+      position: relative;
+    }
+    nav a:not(.g-btn)::after {
+      content: '';
+      position: absolute; bottom: -3px; left: 0; width: 0; height: 1px;
+      background: var(--grad);
+      transition: width 0.25s ease;
+    }
+    nav a:not(.g-btn):hover::after { width: 100%; }
+
+    /* ── SECTION NUMBER COUNTER ── */
+    @keyframes countUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+    /* ── SKIP LINK ── */
+    #skip-link { position: absolute; transform: translateX(-200%); z-index: 9999; background: var(--grad); color: #fff; padding: 10px 20px; border-radius: 2px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+    #skip-link:focus { transform: none; position: fixed; top: 16px; left: 16px; }
+
+    /* ── FOCUS VISIBLE ── */
+    :focus-visible { outline: 2px solid #00C9A7; outline-offset: 3px; }
+
+    /* ── CONTRAST: s-label ── */
+    .s-label { color: #888 !important; }
+
+  </style>
+</head>
+<body>
+
+<a id="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- Scroll progress bar -->
+<div id="scroll-bar" aria-hidden="true"></div>
+
+<!-- ═══ MOBILE NAV OVERLAY ═══ -->
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
+  <button id="mob-close" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors" aria-label="Close menu">
+    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
+  </button>
+  <a href="index.html" class="cond text-3xl font-bold tracking-widest uppercase text-white hover:text-[#00C9A7] transition-colors">Home</a>
+  <a href="gallery.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Gallery</a>
+  <a href="services.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Services</a>
+  <button onclick="openRoleModal()" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm" style="border:none;cursor:pointer;">Create an Account</button>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav id="main-nav" class="px-6 md:px-12 py-5">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <!-- Logo -->
+    <a href="index.html" class="flex items-center gap-3 group">
+      <img src="logo.png" alt="Eyescout Sports" class="h-9 w-9 object-contain flex-shrink-0">
+      <div class="w-px h-6 bg-white/10 flex-shrink-0"></div>
+      <div class="leading-none">
+        <span class="cond text-base font-black tracking-[0.12em] uppercase text-white">Eyescout</span><span class="cond text-base font-black tracking-[0.12em] uppercase ml-1.5" style="background:linear-gradient(90deg,#1E90FF,#00C9A7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Sports</span>
+      </div>
+    </a>
+    <!-- Desktop links -->
+    <div class="hidden md:flex items-center gap-8">
+      <a href="index.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/90 hover:text-white transition-colors">Home</a>
+      <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Gallery</a>
+      <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Services</a>
+      <button onclick="openRoleModal()" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm" style="border:none;cursor:pointer;">Create an Account</button>
+    </div>
+    <!-- Hamburger -->
+    <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main id="main-content" tabindex="-1">
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-img" aria-hidden="true">
+    <video id="hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true">
+      <source src="landing-page-video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+  <div id="cursor-spotlight" aria-hidden="true"></div>
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-32">
+    <div class="max-w-3xl">
+      <div class="s-label mb-6 fade">Phoenix, AZ — Serving All of Greater Phoenix</div>
+      <h1 class="cond text-[clamp(52px,9vw,118px)] font-black leading-[0.88] tracking-[0.04em] uppercase mb-6">
+        <span class="hero-word" style="animation-delay:0.25s">Film</span>&nbsp;<span class="hero-word" style="animation-delay:0.38s">Em.</span><br>
+        <span class="hero-word" style="animation-delay:0.52s">Scout</span>&nbsp;<span class="hero-word" style="animation-delay:0.65s">Em.</span><br>
+        <span class="hero-word g-text" style="animation-delay:0.82s">Stardom.</span>
+      </h1>
+      <p class="text-white/55 text-lg md:text-xl font-300 leading-relaxed max-w-xl mb-10 fade fade-d2">
+        Arizona's sports videography, photography &amp; scouting agency — scouting and capturing the moments that get athletes seen and recognized by college coaches.
+      </p>
+      <div class="flex flex-wrap gap-4 fade fade-d3">
+        <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Book a Session</a>
+        <a href="gallery.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Browse the Gallery</a>
+      </div>
+    </div>
+  </div>
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
+    <div class="s-label text-[9px]">Scroll</div>
+    <div class="w-px h-10 bg-white/30 animate-pulse"></div>
+  </div>
+</section>
+
+<!-- ═══ STATS BAR ═══ -->
+<section class="py-10 border-y border-white/[0.05] bg-[#171717]">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-white/[0.07]">
+      <div class="text-center fade">
+        <div class="stat-num g-text">300+</div>
+        <div class="s-label mt-2">Sessions Captured</div>
+      </div>
+      <div class="text-center md:pl-8 fade fade-d1">
+        <div class="stat-num g-text">8</div>
+        <div class="s-label mt-2">Sports Covered</div>
+      </div>
+      <div class="text-center fade fade-d2">
+        <div class="stat-num g-text">AZ</div>
+        <div class="s-label mt-2">Valley-Wide Service</div>
+      </div>
+      <div class="text-center md:pl-8 fade fade-d3">
+        <div class="stat-num g-text">24h</div>
+        <div class="s-label mt-2">Response Time</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THREE-PANEL GALLERY PREVIEW (reference-image inspired) ═══ -->
+<section class="py-24 bg-[#111111]">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="flex items-end justify-between mb-10 fade">
+      <div>
+        <div class="s-label mb-3">Recent Work</div>
+        <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em]">The Work</h2>
+      </div>
+      <a href="gallery.html" class="ghost cond text-sm font-600 tracking-[0.15em] uppercase text-white/60 hover:text-white px-6 py-3 rounded-sm transition-colors hidden md:inline-block">Full Gallery →</a>
+    </div>
+
+    <div class="three-panel fade">
+      <div>
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/603882274_3911414932492552_7133293299687518284_n_Logo_o0gfu8.jpg" alt="Football action">
+        <span class="panel-label">Football</span>
+      </div>
+      <div>
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735232/IMG_3694_f2cl77.jpg" alt="Soccer">
+        <span class="panel-label">Soccer</span>
+      </div>
+      <div>
+        <img src="https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735357/IMG_8350_hbqgkz.jpg" alt="Softball">
+        <span class="panel-label">Softball</span>
+      </div>
+    </div>
+
+    <div class="mt-8 flex justify-between items-center fade">
+      <p class="text-white/30 text-sm font-300">300+ posts across football, baseball, basketball, soccer, volleyball, softball, cheerleading &amp; more</p>
+      <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/40 hover:text-[#00C9A7] transition-colors md:hidden">View All →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services" class="py-24 bg-[#0a0a0a]">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="mb-14 fade">
+      <div class="s-label mb-3">What We Do</div>
+      <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em]">Services</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+
+      <!-- Photography -->
+      <div class="svc-card rounded-sm p-6 fade">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+            <path stroke-linecap="round" d="M3 9l3-3h2l2-2h4l2 2h2l3 3v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            <circle cx="12" cy="13" r="3"/>
+          </svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Game-Day Photography</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed mb-4">Pro action shots. Every sport, every moment.</p>
+        <a href="services.html" class="cond text-xs tracking-[0.18em] uppercase text-white/30 hover:text-[#00C9A7] transition-colors">Learn More →</a>
+      </div>
+
+      <!-- Videography -->
+      <div class="svc-card rounded-sm p-6 fade fade-d1">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+            <rect x="2" y="6" width="14" height="12" rx="1.5"/>
+            <path d="M16 10l6-4v12l-6-4"/>
+          </svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Sports Videography</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed mb-4">Full game and event coverage done right.</p>
+        <a href="services.html" class="cond text-xs tracking-[0.18em] uppercase text-white/30 hover:text-[#00C9A7] transition-colors">Learn More →</a>
+      </div>
+
+      <!-- Highlight Reels -->
+      <div class="svc-card rounded-sm p-6 fade fade-d2">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+            <rect x="2" y="4" width="20" height="16" rx="1.5"/>
+            <path d="M10 9l5 3-5 3V9z" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Highlight Reels</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed mb-4">Recruiting reels that get athletes noticed by coaches.</p>
+        <a href="services.html" class="cond text-xs tracking-[0.18em] uppercase text-white/30 hover:text-[#00C9A7] transition-colors">Learn More →</a>
+      </div>
+
+      <!-- Event Coverage -->
+      <div class="svc-card rounded-sm p-6 fade fade-d3">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+            <path d="M8 21h8m-4-4v4M5 3h14a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z"/>
+            <path d="M9 8h6M9 11h4"/>
+          </svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Event Coverage</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed mb-4">Cheer comps, youth leagues, tournaments. We're there.</p>
+        <a href="services.html" class="cond text-xs tracking-[0.18em] uppercase text-white/30 hover:text-[#00C9A7] transition-colors">Learn More →</a>
+      </div>
+
+      <!-- Scouting -->
+      <div class="svc-card rounded-sm p-6 fade fade-d4">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <path d="M11 8v3m0 0v3m0-3h3m-3 0H8"/>
+          </svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Scouting Exposure</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed mb-4">We put your athlete in front of the right eyes.</p>
+        <a href="services.html" class="cond text-xs tracking-[0.18em] uppercase text-white/30 hover:text-[#00C9A7] transition-colors">Learn More →</a>
+      </div>
+
+    </div>
+    <div class="mt-10 text-center fade">
+      <a href="services.html" class="ghost cond text-sm font-700 tracking-[0.15em] uppercase text-white px-10 py-4 rounded-sm inline-block">All Services</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SPORT GALLERY ═══ -->
+<section class="py-24 bg-[#111111]">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="flex items-end justify-between mb-10 fade">
+      <div>
+        <div class="s-label mb-3">Arizona's Athletes</div>
+        <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em]">Browse by Sport</h2>
+      </div>
+      <a href="gallery.html" class="ghost cond text-sm font-600 tracking-[0.15em] uppercase text-white/60 hover:text-white px-6 py-3 rounded-sm transition-colors hidden md:inline-block">Full Gallery →</a>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-8 fade" id="sport-tabs" role="tablist" aria-label="Browse by sport">
+      <button class="sport-tab active" data-sport="football" role="tab" aria-selected="true" id="tab-football" aria-controls="sport-grid">Football</button>
+      <button class="sport-tab" data-sport="baseball" role="tab" aria-selected="false" id="tab-baseball" aria-controls="sport-grid">Baseball</button>
+      <button class="sport-tab" data-sport="soccer" role="tab" aria-selected="false" id="tab-soccer" aria-controls="sport-grid">Soccer</button>
+      <button class="sport-tab" data-sport="basketball" role="tab" aria-selected="false" id="tab-basketball" aria-controls="sport-grid">Basketball</button>
+      <button class="sport-tab" data-sport="volleyball" role="tab" aria-selected="false" id="tab-volleyball" aria-controls="sport-grid">Volleyball</button>
+      <button class="sport-tab" data-sport="softball" role="tab" aria-selected="false" id="tab-softball" aria-controls="sport-grid">Softball</button>
+    </div>
+    <div class="sport-grid" id="sport-grid" role="tabpanel" aria-live="polite" aria-label="Sport gallery"></div>
+    <div class="mt-8 text-center fade">
+      <a href="gallery.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-10 py-4 rounded-sm inline-block">See Full Gallery</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SPORTS COVERED ═══ -->
+<section class="py-20 bg-[#111111]">
+  <div class="max-w-7xl mx-auto px-6 md:px-12 text-center">
+    <div class="s-label mb-8 fade">Sports We Cover</div>
+    <div class="flex flex-wrap justify-center gap-3 fade">
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Football</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Baseball</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Basketball</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Soccer</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Volleyball</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Softball</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Cheerleading</span>
+      <span class="sport-pill px-5 py-2.5 rounded-sm">Tennis</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA BANNER ═══ -->
+<section class="cta-banner py-28">
+  <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-12 text-center">
+    <div class="s-label mb-5 fade">Ready?</div>
+    <h2 class="cond text-[clamp(48px,8vw,100px)] font-black uppercase tracking-[0.04em] leading-none mb-5 fade fade-d1">
+      Ready to Get Your<br><span class="g-text">Athlete Seen?</span>
+    </h2>
+    <p class="text-white/40 text-lg font-300 max-w-lg mx-auto mb-10 fade fade-d2">Book your session today. Fast turnaround. Real results. We respond within 24 hours.</p>
+    <div class="flex flex-wrap justify-center gap-4 fade fade-d3">
+      <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-10 py-4 rounded-sm inline-block">Book Now</a>
+      <a href="https://instagram.com/eyescoutsports" target="_blank" rel="noopener noreferrer" class="ghost ripple-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-10 py-4 rounded-sm inline-block">@eyescoutsports</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="bg-[#060606] border-t border-white/[0.05] py-16">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="grid md:grid-cols-3 gap-10 mb-12">
+      <!-- Brand -->
+      <div>
+        <div class="flex items-center gap-3 mb-4"><img src="logo.png" alt="Eyescout Sports" class="h-12 w-12 object-contain flex-shrink-0"></div>
+        <p class="text-white/30 text-xs font-300 leading-relaxed mb-3">A Phoenix-based sports media company launched in 2025 to give talented athletes the professional coverage they deserve — regardless of budget.</p>
+        <p class="text-white/20 text-xs font-300 leading-relaxed">Serving Phoenix, Gilbert, Scottsdale &amp; all of Greater Arizona.</p>
+      </div>
+      <!-- Links -->
+      <div>
+        <div class="s-label mb-4">Navigation</div>
+        <div class="flex flex-col gap-2.5">
+          <a href="index.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Home</a>
+          <a href="gallery.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Gallery</a>
+          <a href="services.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Services</a>
+          <a href="booking.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Book a Session</a>
+        </div>
+      </div>
+      <!-- Social -->
+      <div>
+        <div class="s-label mb-4">Follow the Journey</div>
+        <div class="flex gap-4 mb-4">
+          <a href="https://instagram.com/eyescoutsports" target="_blank" rel="noopener noreferrer" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+          <a href="https://facebook.com/p/Eyescout-Sports-61576586320358/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-9 h-9 border border-white/10 rounded-sm flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-colors">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+        </div>
+        <div class="cond text-sm tracking-[0.1em] uppercase text-white/30">@eyescoutsports</div>
+      </div>
+    </div>
+    <div class="g-line mb-6"></div>
+    <div class="flex flex-col md:flex-row justify-between items-center gap-3">
+      <p class="cond text-xs tracking-[0.15em] uppercase text-white/20">© 2025 Eyescout Sports. All Rights Reserved.</p>
+      <p class="cond text-xs tracking-[0.12em] uppercase text-white/15">Phoenix, AZ — Serving Greater Phoenix Valley</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── NAV SCROLL ──
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // ── MOBILE NAV ──
+  const mobileNav = document.getElementById('mobile-nav');
+  const mobOpen = document.getElementById('mob-open');
+  const mobClose = document.getElementById('mob-close');
+  const FOCUSABLE_SEL = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function openMobileNav() {
+    mobileNav.classList.add('open');
+    mobOpen.setAttribute('aria-expanded', 'true');
+    const first = mobileNav.querySelectorAll(FOCUSABLE_SEL)[0];
+    if (first) first.focus();
+    document.addEventListener('keydown', trapMobileNav);
+  }
+  function closeMobileNav() {
+    mobileNav.classList.remove('open');
+    mobOpen.setAttribute('aria-expanded', 'false');
+    mobOpen.focus();
+    document.removeEventListener('keydown', trapMobileNav);
+  }
+  function trapMobileNav(e) {
+    const items = [...mobileNav.querySelectorAll(FOCUSABLE_SEL)];
+    if (e.key === 'Escape') { closeMobileNav(); return; }
+    if (e.key !== 'Tab' || !items.length) return;
+    if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === items[items.length - 1]) { e.preventDefault(); items[0].focus(); }
+  }
+  mobOpen.addEventListener('click', openMobileNav);
+  mobClose.addEventListener('click', closeMobileNav);
+
+  // ── SCROLL PROGRESS BAR ──
+  const bar = document.getElementById('scroll-bar');
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    bar.style.width = pct + '%';
+  }, { passive: true });
+
+  // ── HERO CURSOR SPOTLIGHT ──
+  const hero = document.querySelector('.hero');
+  const spotlight = document.getElementById('cursor-spotlight');
+  if (hero && spotlight) {
+    hero.addEventListener('mousemove', e => {
+      const rect = hero.getBoundingClientRect();
+      spotlight.style.left = (e.clientX - rect.left) + 'px';
+      spotlight.style.top  = (e.clientY - rect.top)  + 'px';
+    });
+    hero.addEventListener('mouseleave', () => spotlight.style.opacity = '0');
+    hero.addEventListener('mouseenter', () => spotlight.style.opacity = '1');
+  }
+
+  // hero word spans already pre-built in HTML
+
+  // ── ANIMATED STATS COUNTER ──
+  function animateCount(el, target, suffix, duration) {
+    const start = performance.now();
+    const isNum = !isNaN(parseInt(target));
+    const end = isNum ? parseInt(target) : 0;
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      if (isNum) {
+        el.textContent = Math.floor(ease * end) + suffix;
+      }
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  const statEls = document.querySelectorAll('.stat-num');
+  const statData = [
+    { target: '300', suffix: '+' },
+    { target: '8',  suffix: ''  },
+    { target: 'AZ', suffix: ''  },
+    { target: '24', suffix: 'h' },
+  ];
+  const statIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = [...statEls].indexOf(e.target);
+        if (statData[i]) animateCount(e.target, statData[i].target, statData[i].suffix, 1400);
+        statIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  statEls.forEach(el => { el.textContent = '—'; statIO.observe(el); });
+
+  // ── BUTTON RIPPLE ──
+  document.querySelectorAll('.ripple-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const r = document.createElement('span');
+      r.classList.add('ripple-wave');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+      this.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    });
+  });
+
+  // ── MAGNETIC BUTTONS ──
+  document.querySelectorAll('.mag-btn').forEach(btn => {
+    btn.addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width  / 2) * 0.25;
+      const y = (e.clientY - rect.top  - rect.height / 2) * 0.25;
+      this.style.transform = `translate(${x}px, ${y}px) translateY(-2px)`;
+    });
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+
+  // ── 3D CARD TILT ──
+  document.querySelectorAll('.svc-card').forEach(card => {
+    card.addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = (e.clientY - rect.top  - rect.height / 2) / rect.height * -12;
+      const y = (e.clientX - rect.left - rect.width  / 2) / rect.width  *  12;
+      this.style.transform = `perspective(600px) rotateX(${x}deg) rotateY(${y}deg) translateY(-5px)`;
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+
+  // ── 3-PANEL PARALLAX ──
+  const panels = document.querySelectorAll('.three-panel img');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    panels.forEach((img, i) => {
+      const speed = [0.04, 0.06, 0.08][i] || 0.05;
+      img.style.transform = `scale(1.1) translateY(${scrollY * speed}px)`;
+    });
+  }, { passive: true });
+
+  // ── GALLERY IMAGE STAGGER ──
+  const gridImgs = document.querySelectorAll('.nine-grid > div');
+  const gridIO = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.style.opacity = '1', i * 60);
+        gridIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  gridImgs.forEach(el => { el.style.opacity = '0'; el.style.transition = 'opacity 0.5s ease'; gridIO.observe(el); });
+
+  // ── FADE-IN ON SCROLL ──
+  const faders = document.querySelectorAll('.fade');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  faders.forEach(f => io.observe(f));
+
+  // ── SPORT GALLERY ──
+  const CLOUDINARY_MAP = {
+    '27Jas2.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735342/27Jas2_mqrcyj.jpg',
+    '27Jas3.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735343/27Jas3_qwhhec.jpg',
+    '518259809_3753109248323122_6097285160122520934_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/518259809_3753109248323122_6097285160122520934_n_pz3bsp.jpg',
+    '531845790_3781135042187209_3645621867856368789_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735155/531845790_3781135042187209_3645621867856368789_n_u7cgl8.jpg',
+    '548196032_3815919595375420_1274746523035374581_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735155/548196032_3815919595375420_1274746523035374581_n_xkmpwt.jpg',
+    '577015860_3864476353853077_2400986784217703739_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/577015860_3864476353853077_2400986784217703739_n_mxhmsv.jpg',
+    '599949119_3898956843738361_1070158023975895140_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735210/599949119_3898956843738361_1070158023975895140_n_bkptoy.jpg',
+    '603882274_3911414932492552_7133293299687518284_n_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/603882274_3911414932492552_7133293299687518284_n_Logo_o0gfu8.jpg',
+    '605516816_3911414609159251_5661107446656363947_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735269/605516816_3911414609159251_5661107446656363947_n_xdqjvl.jpg',
+    'FB_IMG_1757562219357.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735137/FB_IMG_1757562219357_ejgn5p.jpg',
+    'IMG_2090_2.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735158/IMG_2090_2_cvgydx.jpg',
+    'IMG_3694.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735232/IMG_3694_f2cl77.jpg',
+    'IMG_4123.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735162/IMG_4123_juwkgs.jpg',
+    'IMG_4328_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735155/548196032_3815919595375420_1274746523035374581_n_xkmpwt.jpg',
+    'IMG_4728_#23_1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735359/IMG_4728__23_1_bph56l.jpg',
+    'IMG_6023_#4_2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781736498/IMG_6023__4_2_srsxj0.jpg',
+    'IMG_6540_#13_2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781736494/IMG_6540__13_2_cmelmp.jpg',
+    'IMG_6597_LogoRN.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735142/IMG_6597_LogoRN_jkijol.jpg',
+    'IMG_6929_MarteLogo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735142/IMG_6929_MarteLogo_vynf5k.jpg',
+    'IMG_7354_Out.JPG': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735144/IMG_7354_Out_rv5gmi.jpg',
+    'IMG_7768.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735257/IMG_7768_yxv33b.jpg',
+    'IMG_7029.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735235/IMG_7029_hstcft.jpg',
+    'IMG_7053_Logo.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735243/IMG_7053_Logo_xp66ib.jpg',
+    'IMG_7110.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735247/IMG_7110_vxtqac.jpg',
+    'IMG_8350.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735357/IMG_8350_hbqgkz.jpg',
+    'IMG_09922e.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735363/IMG_09922e_lxi3gj.jpg',
+    'IMG_4073_TeamA_1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735359/IMG_4073_TeamA_1_hrqklz.jpg',
+    'IMG_7065_4_1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735364/IMG_7065_4_1_gfjzre.jpg',
+    'PerezChamp1.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735146/PerezChamp1_lajop2.jpg',
+    'ZPerezChamp2.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735151/ZPerezChamp2_fuhlbx.jpg',
+    '651105720_3981649332135778_8589362175518966011_n.jpg': 'https://res.cloudinary.com/dboxgrnbu/image/upload/v1781735344/651105720_3981649332135778_8589362175518966011_n_lwgzoq.jpg',
+  };
+  function cdnUrl(fn) { return CLOUDINARY_MAP[fn] || ''; }
+  const SPORT_PHOTOS = {
+    football: [
+      ['football', '603882274_3911414932492552_7133293299687518284_n_Logo.jpg'],
+      ['football', '518259809_3753109248323122_6097285160122520934_n.jpg'],
+      ['football', '577015860_3864476353853077_2400986784217703739_n.jpg'],
+      ['football', '605516816_3911414609159251_5661107446656363947_n.jpg'],
+    ],
+    baseball: [
+      ['baseball', 'FB_IMG_1757562219357.jpg'],
+      ['baseball', 'IMG_6597_LogoRN.jpg'],
+      ['baseball', 'IMG_6929_MarteLogo.jpg'],
+      ['baseball', 'IMG_7354_Out.JPG'],
+      ['baseball', 'PerezChamp1.jpg'],
+      ['baseball', 'ZPerezChamp2.jpg'],
+    ],
+    soccer: [
+      ['soccer', '599949119_3898956843738361_1070158023975895140_n.jpg'],
+      ['soccer', 'IMG_3694.jpg'],
+      ['soccer', 'IMG_7768.jpg'],
+      ['soccer', 'IMG_7029.jpg'],
+      ['soccer', 'IMG_7053_Logo.jpg'],
+      ['soccer', 'IMG_7110.jpg'],
+    ],
+    basketball: [
+      ['basketball', '548196032_3815919595375420_1274746523035374581_n.jpg'],
+      ['basketball', 'IMG_4328_Logo.jpg'],
+      ['basketball', '531845790_3781135042187209_3645621867856368789_n.jpg'],
+      ['basketball', 'IMG_2090_2.JPG'],
+      ['basketball', 'IMG_4123.jpg'],
+    ],
+    volleyball: [
+      ['volleyball', 'IMG_4073_TeamA_1.jpg'],
+      ['volleyball', 'IMG_4728_#23_1.jpg'],
+      ['volleyball', 'IMG_6023_#4_2.jpg'],
+      ['volleyball', 'IMG_09922e.jpg'],
+      ['volleyball', 'IMG_6540_#13_2.jpg'],
+      ['volleyball', 'IMG_7065_4_1.jpg'],
+    ],
+    softball: [
+      ['softball', '27Jas3.JPG'],
+      ['softball', '651105720_3981649332135778_8589362175518966011_n.jpg'],
+      ['softball', 'IMG_8350.jpg'],
+      ['softball', '27Jas2.JPG'],
+    ],
+    cheer: [],
+  };
+
+  function renderSportGrid(sport) {
+    const grid = document.getElementById('sport-grid');
+    const photos = SPORT_PHOTOS[sport] || [];
+    grid.innerHTML = '';
+    const sportLabel = sport.charAt(0).toUpperCase() + sport.slice(1);
+    photos.forEach(([folder, file]) => {
+      const div = document.createElement('div');
+      div.className = 'sport-grid-item';
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('role', 'link');
+      div.setAttribute('aria-label', `View ${sportLabel} gallery`);
+      const img = document.createElement('img');
+      img.src = cdnUrl(file);
+      img.alt = '';
+      img.setAttribute('aria-hidden', 'true');
+      img.loading = 'lazy';
+      div.appendChild(img);
+      function goToGallery() { window.location.href = 'gallery.html?sport=' + sport; }
+      div.addEventListener('click', goToGallery);
+      div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToGallery(); } });
+      grid.appendChild(div);
+    });
+  }
+
+  document.getElementById('sport-tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.sport-tab');
+    if (!btn) return;
+    document.querySelectorAll('.sport-tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    renderSportGrid(btn.dataset.sport);
+  });
+
+  renderSportGrid('football');
+
+  // Force video autoplay across all browsers
+  const heroVideo = document.getElementById('hero-video');
+  if (heroVideo) {
+    heroVideo.play().catch(() => {});
+    heroVideo.addEventListener('canplay', () => { heroVideo.play().catch(() => {}); });
+    heroVideo.addEventListener('loadedmetadata', () => { heroVideo.play().catch(() => {}); });
+  }
+</script>
+
+<!-- ═══ ROLE MODAL ═══ -->
+<div id="role-modal-overlay" onclick="closeRoleModal(event)" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; padding:20px;
+">
+  <div id="role-modal" style="
+    background:#141414; border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:40px 36px; max-width:480px; width:100%;
+    transform:translateY(20px); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  ">
+    <div style="text-align:center; margin-bottom:32px;">
+      <img src="logo-transparent.png" alt="EyeScout" style="height:56px;width:56px;object-fit:contain;border-radius:50%;margin:0 auto 16px;">
+      <h2 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:24px;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Join EyeScout</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,0.35);line-height:1.6;">Are you signing up as a player or a coach?</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <!-- Player card -->
+      <a href="../eyescout-portal/login.html" style="
+        display:flex; align-items:center; gap:18px; padding:20px 22px;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:14px;
+        text-decoration:none; transition:border-color 0.2s, background 0.2s; cursor:pointer;
+      " onmouseover="this.style.borderColor='rgba(123,47,190,0.5)';this.style.background='rgba(123,47,190,0.07)'"
+         onmouseout="this.style.borderColor='rgba(255,255,255,0.09)';this.style.background='rgba(255,255,255,0.03)'">
+        <div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(123,47,190,0.25),rgba(30,144,255,0.15));border:1px solid rgba(123,47,190,0.3);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(123,47,190,1)" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:3px;">I'm a Player</p>
+          <p style="font-size:12px;color:rgba(255,255,255,0.35);">Create your athlete profile and access your photos</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+
+      <!-- Coach card -->
+      <a href="../eyescout-portal/coach-login.html" style="
+        display:flex; align-items:center; gap:18px; padding:20px 22px;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:14px;
+        text-decoration:none; transition:border-color 0.2s, background 0.2s; cursor:pointer;
+      " onmouseover="this.style.borderColor='rgba(30,144,255,0.5)';this.style.background='rgba(30,144,255,0.07)'"
+         onmouseout="this.style.borderColor='rgba(255,255,255,0.09)';this.style.background='rgba(255,255,255,0.03)'">
+        <div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(30,144,255,0.2),rgba(0,201,167,0.12));border:1px solid rgba(30,144,255,0.3);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:3px;">I'm a Coach</p>
+          <p style="font-size:12px;color:rgba(255,255,255,0.35);">Scout talented players and connect with athletes</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <button onclick="closeRoleModal()" style="
+      display:block; width:100%; margin-top:20px; padding:11px;
+      background:none; border:none; font-size:13px; color:rgba(255,255,255,0.25);
+      cursor:pointer; transition:color 0.15s;
+    " onmouseover="this.style.color='rgba(255,255,255,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<script>
+  function openRoleModal() {
+    const overlay = document.getElementById('role-modal-overlay');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => {
+      document.getElementById('role-modal').style.transform = 'translateY(0)';
+    });
+    document.body.style.overflow = 'hidden';
+  }
+  function closeRoleModal(e) {
+    if (e && e.target !== document.getElementById('role-modal-overlay')) return;
+    document.getElementById('role-modal').style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      document.getElementById('role-modal-overlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }, 250);
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRoleModal(); });
+</script>
+</body>
+</html>
