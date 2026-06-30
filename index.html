@@ -371,7 +371,7 @@
   <a href="index.html" class="cond text-3xl font-bold tracking-widest uppercase text-white hover:text-[#00C9A7] transition-colors">Home</a>
   <a href="gallery.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Gallery</a>
   <a href="services.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Services</a>
-  <a href="booking.html" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Book Now</a>
+  <button onclick="openRoleModal()" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm" style="border:none;cursor:pointer;">Create an Account</button>
 </div>
 
 <!-- ═══ NAV ═══ -->
@@ -390,7 +390,7 @@
       <a href="index.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/90 hover:text-white transition-colors">Home</a>
       <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Gallery</a>
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Services</a>
-      <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
+      <button onclick="openRoleModal()" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm" style="border:none;cursor:pointer;">Create an Account</button>
     </div>
     <!-- Hamburger -->
     <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
@@ -428,7 +428,6 @@
       </p>
       <div class="flex flex-wrap gap-4 fade fade-d3">
         <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Book a Session</a>
-        <a href="booking.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Receive Your Photos</a>
         <a href="gallery.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Browse the Gallery</a>
       </div>
     </div>
@@ -445,7 +444,7 @@
   <div class="max-w-7xl mx-auto px-6 md:px-12">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-white/[0.07]">
       <div class="text-center fade">
-        <div class="stat-num g-text">92+</div>
+        <div class="stat-num g-text">300+</div>
         <div class="s-label mt-2">Sessions Captured</div>
       </div>
       <div class="text-center md:pl-8 fade fade-d1">
@@ -491,7 +490,7 @@
     </div>
 
     <div class="mt-8 flex justify-between items-center fade">
-      <p class="text-white/30 text-sm font-300">92+ posts across football, baseball, basketball, soccer, volleyball, softball, cheerleading &amp; more</p>
+      <p class="text-white/30 text-sm font-300">300+ posts across football, baseball, basketball, soccer, volleyball, softball, cheerleading &amp; more</p>
       <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/40 hover:text-[#00C9A7] transition-colors md:hidden">View All →</a>
     </div>
   </div>
@@ -759,7 +758,7 @@
 
   const statEls = document.querySelectorAll('.stat-num');
   const statData = [
-    { target: '92', suffix: '+' },
+    { target: '300', suffix: '+' },
     { target: '8',  suffix: ''  },
     { target: 'AZ', suffix: ''  },
     { target: '24', suffix: 'h' },
@@ -967,6 +966,89 @@
     heroVideo.addEventListener('canplay', () => { heroVideo.play().catch(() => {}); });
     heroVideo.addEventListener('loadedmetadata', () => { heroVideo.play().catch(() => {}); });
   }
+</script>
+
+<!-- ═══ ROLE MODAL ═══ -->
+<div id="role-modal-overlay" onclick="closeRoleModal(event)" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; padding:20px;
+">
+  <div id="role-modal" style="
+    background:#141414; border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:40px 36px; max-width:480px; width:100%;
+    transform:translateY(20px); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  ">
+    <div style="text-align:center; margin-bottom:32px;">
+      <img src="logo-transparent.png" alt="EyeScout" style="height:56px;width:56px;object-fit:contain;border-radius:50%;margin:0 auto 16px;">
+      <h2 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:24px;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Join EyeScout</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,0.35);line-height:1.6;">Are you signing up as a player or a coach?</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <!-- Player card -->
+      <a href="../eyescout-portal/login.html" style="
+        display:flex; align-items:center; gap:18px; padding:20px 22px;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:14px;
+        text-decoration:none; transition:border-color 0.2s, background 0.2s; cursor:pointer;
+      " onmouseover="this.style.borderColor='rgba(123,47,190,0.5)';this.style.background='rgba(123,47,190,0.07)'"
+         onmouseout="this.style.borderColor='rgba(255,255,255,0.09)';this.style.background='rgba(255,255,255,0.03)'">
+        <div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(123,47,190,0.25),rgba(30,144,255,0.15));border:1px solid rgba(123,47,190,0.3);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(123,47,190,1)" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:3px;">I'm a Player</p>
+          <p style="font-size:12px;color:rgba(255,255,255,0.35);">Create your athlete profile and access your photos</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+
+      <!-- Coach card -->
+      <a href="../eyescout-portal/coach-login.html" style="
+        display:flex; align-items:center; gap:18px; padding:20px 22px;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:14px;
+        text-decoration:none; transition:border-color 0.2s, background 0.2s; cursor:pointer;
+      " onmouseover="this.style.borderColor='rgba(30,144,255,0.5)';this.style.background='rgba(30,144,255,0.07)'"
+         onmouseout="this.style.borderColor='rgba(255,255,255,0.09)';this.style.background='rgba(255,255,255,0.03)'">
+        <div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(30,144,255,0.2),rgba(0,201,167,0.12));border:1px solid rgba(30,144,255,0.3);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:3px;">I'm a Coach</p>
+          <p style="font-size:12px;color:rgba(255,255,255,0.35);">Scout talented players and connect with athletes</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <button onclick="closeRoleModal()" style="
+      display:block; width:100%; margin-top:20px; padding:11px;
+      background:none; border:none; font-size:13px; color:rgba(255,255,255,0.25);
+      cursor:pointer; transition:color 0.15s;
+    " onmouseover="this.style.color='rgba(255,255,255,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<script>
+  function openRoleModal() {
+    const overlay = document.getElementById('role-modal-overlay');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => {
+      document.getElementById('role-modal').style.transform = 'translateY(0)';
+    });
+    document.body.style.overflow = 'hidden';
+  }
+  function closeRoleModal(e) {
+    if (e && e.target !== document.getElementById('role-modal-overlay')) return;
+    document.getElementById('role-modal').style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      document.getElementById('role-modal-overlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }, 250);
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRoleModal(); });
 </script>
 </body>
 </html>
