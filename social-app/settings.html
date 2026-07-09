@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Settings</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<script src="crop-modal.js"></script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --surface2: #1a1a1a;
+    --border: rgba(255,255,255,0.07);
+    --sidebar-w: 244px;
+    --accent: #1E90FF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: 0; left: 0;
+    height: 100vh; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 28px 16px 24px;
+    z-index: 40; background: var(--bg);
+  }
+  .nav-links { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .nav-link {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
+    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s;
+    text-decoration: none; letter-spacing: 0.01em;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-link.active { color: #fff; font-weight: 700; background: rgba(30,144,255,0.08); }
+  .nav-link-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .new-post-btn {
+    display: flex; align-items: center; gap: 14px; padding: 13px 14px;
+    border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 700;
+    color: #fff; border: none; margin-top: 8px;
+    background: var(--grad); background-size: 200%; transition: opacity 0.2s;
+  }
+  .new-post-btn:hover { opacity: 0.85; }
+  .sidebar-bottom {
+    display: flex; align-items: center; gap: 12px; padding: 16px 14px 12px;
+    border-top: 1px solid var(--border); margin-top: 12px; text-decoration: none;
+  }
+  .sb-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg,#1a0828,#0e1528);
+    border: 2px solid var(--border); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sb-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .sb-handle { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w); flex: 1; display: flex; justify-content: center;
+    padding: 0 24px 80px; animation: pageIn 0.18s ease-out both;
+  }
+  .settings-col { width: 620px; max-width: 100%; padding: 40px 0 80px; }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 36px;
+    padding-bottom: 28px; border-bottom: 1px solid var(--border);
+  }
+  .page-header-avatar {
+    width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #1a0828, #0e1528);
+    border: 2px solid rgba(30,144,255,0.3); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; cursor: pointer;
+  }
+  .page-header-avatar:hover .avatar-change-overlay { opacity: 1; }
+  .avatar-change-overlay {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s;
+  }
+
+  /* ── Section cards ── */
+  .settings-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; margin-bottom: 16px; overflow: hidden;
+  }
+  .section-header {
+    padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-icon {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .section-title { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+  .section-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+  .section-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── Fields ── */
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(255,255,255,0.35);
+  }
+  .field-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 14px; color: #fff; font-size: 14px;
+    outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+    width: 100%; font-family: inherit;
+  }
+  .field-input:focus {
+    border-color: rgba(30,144,255,0.5);
+    box-shadow: 0 0 0 3px rgba(30,144,255,0.08);
+  }
+  .field-input::placeholder { color: rgba(255,255,255,0.2); }
+  .field-input[readonly] { color: rgba(255,255,255,0.3); cursor: default; }
+  select.field-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px;
+    background-color: var(--surface2);
+  }
+  textarea.field-input { resize: vertical; min-height: 88px; line-height: 1.6; }
+
+  /* ── Toggle ── */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-info { flex: 1; padding-right: 16px; }
+  .toggle-label { font-size: 14px; font-weight: 600; color: #fff; }
+  .toggle-desc { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; line-height: 1.5; }
+  .toggle {
+    width: 44px; height: 26px; border-radius: 13px; flex-shrink: 0;
+    background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+    position: relative; transition: background 0.22s cubic-bezier(0.22,1,0.36,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle.on { background: #1E90FF; }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%; background: #fff;
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* ── Save button ── */
+  .save-btn {
+    width: 100%; padding: 14px; border-radius: 12px; border: none; cursor: pointer;
+    background: var(--grad); background-size: 200%; color: #fff;
+    font-size: 14px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: opacity 0.2s, transform 0.15s; font-family: inherit;
+  }
+  .save-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .save-btn:active { transform: translateY(0); opacity: 1; }
+  .save-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  /* ── Danger zone ── */
+  .danger-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 14px 20px; background: none; border: none;
+    border-bottom: 1px solid var(--border); cursor: pointer;
+    text-align: left; transition: background 0.15s; color: inherit;
+  }
+  .danger-btn:last-child { border-bottom: none; }
+  .danger-btn:hover { background: rgba(255,255,255,0.03); }
+  .danger-btn.red { color: #f87171; }
+  .danger-btn.red:hover { background: rgba(248,113,113,0.06); }
+  .danger-label { font-size: 14px; font-weight: 600; }
+  .danger-desc { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+  /* ── Custom stats ── */
+  .stat-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .stat-row .field-input { flex: 1; }
+  .stat-remove-btn {
+    width: 34px; height: 34px; flex-shrink: 0; border-radius: 8px;
+    background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.15);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s; color: #f87171;
+  }
+  .stat-remove-btn:hover { background: rgba(248,113,113,0.16); }
+  .add-stat-btn {
+    display: flex; align-items: center; gap: 8px; background: none;
+    border: 1.5px dashed rgba(255,255,255,0.12); border-radius: 10px;
+    padding: 11px 16px; cursor: pointer; color: rgba(255,255,255,0.35);
+    font-size: 13px; font-weight: 600; transition: all 0.15s; width: 100%;
+    font-family: inherit;
+  }
+  .add-stat-btn:hover { border-color: rgba(30,144,255,0.4); color: #1E90FF; background: rgba(30,144,255,0.04); }
+
+  /* ── Photo upload zone ── */
+  .photo-zone {
+    display: flex; align-items: center; gap: 18px;
+  }
+  .photo-preview {
+    width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #1a0828, #0e1528);
+    border: 2px solid rgba(30,144,255,0.2); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-actions { display: flex; flex-direction: column; gap: 8px; }
+  .photo-upload-btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    border: 1px solid rgba(30,144,255,0.35); background: rgba(30,144,255,0.08);
+    color: #1E90FF; transition: all 0.15s; font-family: inherit;
+  }
+  .photo-upload-btn:hover { background: rgba(30,144,255,0.16); border-color: rgba(30,144,255,0.6); }
+  .photo-remove-btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08); background: none;
+    color: rgba(255,255,255,0.3); transition: all 0.15s; font-family: inherit;
+  }
+  .photo-remove-btn:hover { color: #f87171; border-color: rgba(248,113,113,0.3); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+    padding: 12px 20px; font-size: 13px; font-weight: 600; color: #fff;
+    display: flex; align-items: center; gap: 10px; z-index: 9999;
+    opacity: 0; transition: opacity 0.22s, transform 0.22s; pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Mobile header (hidden on desktop) ── */
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 40;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .mobile-logo { height: 38px; width: 38px; object-fit: contain; border-radius: 50%; }
+  .mobile-header-title {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .mobile-new-post {
+    background: var(--grad); border: none; border-radius: 8px;
+    padding: 8px 14px; color: #fff; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em; cursor: pointer;
+  }
+  /* ── Mobile bottom nav ── */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    z-index: 40;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mob-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    text-decoration: none; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; transition: color 0.15s;
+    position: relative;
+  }
+  .mob-nav-btn.active { color: #fff; }
+  .mob-nav-btn svg { display: block; }
+  .mob-notif-dot {
+    position: absolute; top: 4px; right: 8px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #ff4d6d; display: none;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .mobile-header { display: flex; }
+    .mobile-nav { display: flex; }
+    .main { margin-left: 0 !important; padding: 0 16px 100px !important; padding-top: 68px !important; }
+    .settings-col { width: 100%; padding: 24px 0 80px; }
+    .field-row { grid-template-columns: 1fr; }
+    .page-header { margin-bottom: 24px; padding-bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="mobile-header">
+  <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout" class="mobile-logo">
+  <span class="mobile-header-title">EyeScout</span>
+  <button class="mobile-new-post" onclick="window.location.href='create-post.html'">+ Post</button>
+</div>
+<nav class="mobile-nav">
+  <a class="mob-nav-btn" href="feed.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+  <a class="mob-nav-btn" href="explore.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</a>
+  <a class="mob-nav-btn" href="activity.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Activity<span class="mob-notif-dot" id="mob-activity-dot"></span></a>
+  <a class="mob-nav-btn" href="messages.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages</a>
+  <a class="mob-nav-btn active" href="profile.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+</nav>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <a href="feed.html" style="display:flex;justify-content:center;align-items:center;padding:4px 0;margin-bottom:20px;">
+    <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout Sports" style="height:64px;width:64px;object-fit:contain;border-radius:50%;">
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      Home
+    </a>
+    <a class="nav-link" href="explore.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      Search
+    </a>
+    <a class="nav-link" href="activity.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      Activity
+    </a>
+    <a class="nav-link" href="messages.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Messages
+    </a>
+    <a class="nav-link" href="profile.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      My Profile
+    </a>
+    <a class="nav-link active" href="settings.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      Settings
+    </a>
+    <a class="nav-link" href="#" onclick="logout();return false;">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      Sign Out
+    </a>
+    <button class="new-post-btn" onclick="window.location.href='create-post.html'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Post
+    </button>
+  </nav>
+  <a href="profile.html" class="sidebar-bottom">
+    <div class="sb-avatar" id="sb-avatar-wrap"><div id="sb-avatar-inner"></div></div>
+    <div>
+      <p class="sb-name" id="sb-name">My Profile</p>
+      <p class="sb-handle" id="sb-handle">@eyescout</p>
+    </div>
+  </a>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main" id="main-content" tabindex="-1">
+<div class="settings-col">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.01em;color:#fff;">Settings</h1>
+      <p style="font-size:13px;color:rgba(255,255,255,0.35);margin-top:3px;">Manage your profile, athlete info, and account</p>
+    </div>
+    <a href="profile.html" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.3);text-decoration:none;padding:8px 14px;border-radius:8px;border:1px solid var(--border);transition:all 0.15s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.color='rgba(255,255,255,0.3)';this.style.borderColor='var(--border)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      View Profile
+    </a>
+  </div>
+
+  <!-- ── Subscription ── -->
+  <div class="settings-section" id="sub-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Subscription</p>
+        <p class="section-sub" id="sub-section-desc">Manage your EyeScout plan</p>
+      </div>
+    </div>
+    <div class="section-body" id="sub-section-body">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- ── Profile Photo ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(30,144,255,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Profile Photo</p>
+        <p class="section-sub">Your photo appears on your profile and posts</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="photo-zone">
+        <div class="photo-preview" id="photo-preview">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="photo-actions">
+          <input type="file" id="photo-file-input" aria-label="Upload profile photo" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+          <button class="photo-upload-btn" onclick="document.getElementById('photo-file-input').click()">Change Photo</button>
+          <button class="photo-remove-btn" onclick="removePhoto()">Remove Photo</button>
+          <p id="photo-status" style="font-size:11px;color:rgba(255,255,255,0.25);"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Personal Info ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(123,47,190,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7B2FBE" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Personal Info</p>
+        <p class="section-sub">Your name and contact details</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="s-first">First Name</label>
+          <input class="field-input" type="text" id="s-first" placeholder="First name">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="s-last">Last Name</label>
+          <input class="field-input" type="text" id="s-last" placeholder="Last name">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="s-email">Email</label>
+          <input class="field-input" type="email" id="s-email" placeholder="your@email.com">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="s-phone">Phone</label>
+          <input class="field-input" type="tel" id="s-phone" placeholder="(555) 000-0000">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Athlete Info ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,201,167,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00C9A7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Athlete Info</p>
+        <p class="section-sub">Sport, school, and jersey details</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="s-sport">Sport</label>
+          <select class="field-input" id="s-sport">
+            <option value="">Select sport</option>
+            <option>Football</option><option>Basketball</option><option>Baseball</option>
+            <option>Softball</option><option>Soccer</option><option>Track & Field</option>
+            <option>Volleyball</option><option>Wrestling</option><option>Lacrosse</option>
+            <option>Tennis</option><option>Swimming</option><option>Cross Country</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="s-position">Position</label>
+          <input class="field-input" type="text" id="s-position" placeholder="e.g. Quarterback">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="s-jersey">Jersey #</label>
+          <input class="field-input" type="text" id="s-jersey" placeholder="e.g. 12">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="s-gradyear">Grad Year</label>
+          <input class="field-input" type="text" id="s-gradyear" placeholder="e.g. 2026">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="s-school">School / Program</label>
+        <input class="field-input" type="text" id="s-school" placeholder="e.g. Desert Ridge High School">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="s-height">Height</label>
+        <input class="field-input" type="text" id="s-height" placeholder="e.g. 6'2&quot;">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="s-weight">Weight</label>
+        <input class="field-input" type="text" id="s-weight" placeholder="e.g. 185 lbs">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Bio ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(57,211,83,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2" stroke-linecap="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="13" y1="18" x2="3" y2="18"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Bio</p>
+        <p class="section-sub">Tell coaches and scouts about yourself</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="field-group">
+        <textarea class="field-input" id="s-bio" aria-label="Bio" placeholder="Write a short bio — highlights, goals, what makes you stand out as an athlete…" style="min-height:110px;"></textarea>
+        <p style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:6px;text-align:right;"><span id="bio-count">0</span> / 300 characters</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Custom Stats ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(30,144,255,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Custom Stats</p>
+        <p class="section-sub">Add sport-specific stats to your profile card</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div id="stat-rows" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <button class="add-stat-btn" onclick="addStatRow()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Stat
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Notifications ── -->
+  <div class="settings-section">
+    <div class="section-header" style="border-bottom:none;">
+      <div class="section-icon" style="background:rgba(255,200,50,0.08);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f0b429" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Notifications</p>
+        <p class="section-sub">Control what updates you receive</p>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <p class="toggle-label">Photos Ready</p>
+        <p class="toggle-desc">When your tournament photos are delivered</p>
+      </div>
+      <button class="toggle on" id="notif-photos" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Photos Ready"></button>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <p class="toggle-label">Messages</p>
+        <p class="toggle-desc">When you receive a new direct message</p>
+      </div>
+      <button class="toggle on" id="notif-messages" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Messages"></button>
+    </div>
+  </div>
+
+  <!-- ── Privacy ── -->
+  <div class="settings-section">
+    <div class="section-header" style="border-bottom:none;">
+      <div class="section-icon" style="background:rgba(123,47,190,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7B2FBE" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Privacy</p>
+        <p class="section-sub">Control who can see your profile and posts</p>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <p class="toggle-label">Show Stats on Profile</p>
+        <p class="toggle-desc">Display your stats card to profile visitors</p>
+      </div>
+      <button class="toggle on" id="priv-stats" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Show Stats on Profile"></button>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <p class="toggle-label">Show Contact Info</p>
+        <p class="toggle-desc">Allow verified coaches to see your email and phone</p>
+      </div>
+      <button class="toggle" id="priv-contact" onclick="togglePref(this)" role="switch" aria-checked="false" aria-label="Show Contact Info"></button>
+    </div>
+  </div>
+
+  <!-- ── Save ── -->
+  <button class="save-btn" id="save-btn" onclick="saveSettings()">Save Changes</button>
+
+  <!-- ── Account / Danger Zone ── -->
+  <div class="settings-section" style="margin-top:32px;">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(248,113,113,0.08);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Account</p>
+      </div>
+    </div>
+    <button class="danger-btn" onclick="window.location.href='login.html'">
+      <div>
+        <p class="danger-label">Sign Out</p>
+        <p class="danger-desc">You'll need to log back in</p>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button class="danger-btn" onclick="logout()">
+      <div>
+        <p class="danger-label">Sign Out All Devices</p>
+        <p class="danger-desc">Clears your session everywhere</p>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button class="danger-btn red" onclick="confirmDelete()">
+      <div>
+        <p class="danger-label">Delete Account</p>
+        <p class="danger-desc" style="color:rgba(248,113,113,0.5);">Permanently removes your profile and all posts</p>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(248,113,113,0.5)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <p style="font-size:11px;color:rgba(255,255,255,0.12);text-align:center;margin-top:24px;line-height:1.7;">
+    © 2026 EyeScout Sports · Film Em. Scout Em. Stardom.<br>
+    <a href="#" onclick="openLegal('pp');return false;" style="color:rgba(255,255,255,0.2);text-decoration:none;">Privacy Policy</a> · <a href="#" onclick="openLegal('tos');return false;" style="color:rgba(255,255,255,0.2);text-decoration:none;">Terms</a>
+  </p>
+
+</div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+  const session = JSON.parse(localStorage.getItem('es_session') || 'null');
+  if (!session) window.location.href = 'login.html';
+
+  // Pro plan = active subscription. Gates stat editing (Pro-only feature).
+  function isPro() {
+    const sub = JSON.parse(localStorage.getItem('es_sub_' + session.id) || 'null');
+    return typeof _subHasAccess === 'function' ? _subHasAccess(sub) : (!!sub && sub.status === 'active');
+  }
+
+  // ── Subscription section ────────────────────────────────────────────────────
+  function renderSubSection() {
+    const sub = JSON.parse(localStorage.getItem('es_sub_' + session.id) || 'null');
+    const body = document.getElementById('sub-section-body');
+    const desc = document.getElementById('sub-section-desc');
+    if (typeof _subHasAccess === 'function' ? _subHasAccess(sub) : (sub && sub.status === 'active')) {
+      const isCancelled = sub.status === 'cancelled';
+      const next = new Date(sub.accessUntil || sub.nextBillingDate || (function () {
+        const s = new Date(sub.startDate || sub.started_at || Date.now());
+        return new Date(s.getFullYear(), s.getMonth() + 1, s.getDate());
+      })());
+      const nextStr = isNaN(next) ? '—' : next.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      desc.textContent = isCancelled ? 'Pro plan · Cancelled' : 'Pro plan · Active';
+      body.innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:20px;">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(57,211,83,0.1);border:1px solid rgba(57,211,83,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <p style="font-size:14px;font-weight:700;color:#fff;">EyeScout Pro · $15/month</p>
+            <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;">${isCancelled ? 'Pro access until ' + nextStr : 'Next billing: ' + nextStr}</p>
+          </div>
+        </div>
+        ${isCancelled
+          ? `<p style="font-size:12px;color:rgba(255,255,255,0.4);">Your Pro access ends ${nextStr}. You won't be charged again.</p>`
+          : `<button onclick="showCancelModal()" style="background:rgba(255,77,109,0.07);border:1px solid rgba(255,77,109,0.18);border-radius:8px;padding:10px 18px;color:rgba(255,77,109,0.6);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,77,109,0.14)';this.style.color='#ff4d6d'" onmouseout="this.style.background='rgba(255,77,109,0.07)';this.style.color='rgba(255,77,109,0.6)'">Cancel Subscription</button>`}`;
+    } else {
+      desc.textContent = 'You\'re on the free plan';
+      body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+          <div>
+            <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;">Unlock the full EyeScout experience — post, search, message, and get discovered.</p>
+          </div>
+          <a href="subscription.html" style="flex-shrink:0;margin-left:20px;display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);color:#fff;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Upgrade — $15/mo
+          </a>
+        </div>`;
+    }
+
+    // Update "New Post" btn for non-subscribers (cancelled-but-still-active keeps full access)
+    if (!(typeof _subHasAccess === 'function' ? _subHasAccess(sub) : (sub && sub.status === 'active'))) {
+      const btn = document.querySelector('.new-post-btn');
+      if (btn) {
+        btn.style.background = 'rgba(245,158,11,0.1)';
+        btn.style.border = '1px solid rgba(245,158,11,0.22)';
+        btn.style.color = '#F59E0B';
+        btn.style.boxShadow = 'none';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Upgrade to Pro`;
+        btn.onclick = () => window.location.href = 'subscription.html';
+      }
+    }
+  }
+  renderSubSection();
+
+  function getPlayer() {
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    return all.find(p => p.id === session.id) || session;
+  }
+  function savePatch(patch) {
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    const idx = all.findIndex(p => p.id === session.id);
+    if (idx > -1) {
+      Object.assign(all[idx], patch);
+      localStorage.setItem('es_players', JSON.stringify(all));
+      localStorage.setItem('es_session', JSON.stringify(all[idx]));
+      if (typeof _sbSavePlayer === 'function') _sbSavePlayer(all[idx]);
+    }
+  }
+
+  // ── Load current values ───────────────────────────────────────────────────
+  const p = getPlayer();
+
+  document.getElementById('s-first').value    = p.athleteFirst  || '';
+  document.getElementById('s-last').value     = p.athleteLast   || '';
+  document.getElementById('s-email').value    = p.email         || '';
+  document.getElementById('s-phone').value    = p.phone         || '';
+  document.getElementById('s-sport').value    = p.sport         || '';
+  document.getElementById('s-position').value = p.position      || '';
+  document.getElementById('s-jersey').value   = p.jersey        || '';
+  document.getElementById('s-gradyear').value = p.gradYear      || '';
+  document.getElementById('s-school').value   = p.school        || '';
+  document.getElementById('s-height').value   = p.height        || '';
+  document.getElementById('s-weight').value   = p.weight        || '';
+  document.getElementById('s-bio').value      = p.bio           || '';
+  document.getElementById('bio-count').textContent = (p.bio || '').length;
+
+  // Profile photo
+  const preview = document.getElementById('photo-preview');
+  if (p.profilePhoto) {
+    preview.innerHTML = `<img src="${p.profilePhoto}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+
+  // Sidebar
+  document.getElementById('sb-name').textContent   = `${p.athleteFirst || ''} ${p.athleteLast || ''}`.trim() || 'My Profile';
+  document.getElementById('sb-handle').textContent = p.jersey ? `#${p.jersey} · ${p.sport || ''}`.replace(/ · $/, '') : '@eyescout';
+  const sbAv = document.getElementById('sb-avatar-inner');
+  if (p.profilePhoto) sbAv.innerHTML = `<img alt="" src="${p.profilePhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+
+  // Bio counter
+  document.getElementById('s-bio').addEventListener('input', function() {
+    document.getElementById('bio-count').textContent = this.value.length;
+  });
+
+  // Preferences / toggles — prefer the synced profile.prefs (cross-device), fall back to local
+  const _plPrefs = getPlayer();
+  const prefs = (_plPrefs && _plPrefs.prefs && Object.keys(_plPrefs.prefs).length)
+    ? _plPrefs.prefs
+    : JSON.parse(localStorage.getItem('es_prefs_' + session.id) || '{}');
+  const prefDefaults = { 'notif-photos': true, 'notif-messages': true, 'priv-stats': true, 'priv-contact': false };
+  Object.entries(prefDefaults).forEach(([id, def]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = prefs[id] !== undefined ? prefs[id] : def;
+    el.classList.toggle('on', val);
+  });
+
+  function togglePref(btn) {
+    btn.classList.toggle('on');
+    btn.setAttribute('aria-checked', btn.classList.contains('on') ? 'true' : 'false');
+  }
+
+  // ── Custom Stats ─────────────────────────────────────────────────────────
+  let statRows = Array.isArray(p.sportStats) ? [...p.sportStats] : [];
+
+  function renderStatRows() {
+    const container = document.getElementById('stat-rows');
+    const addBtn = document.querySelector('.add-stat-btn');
+    const pro = isPro();
+    if (addBtn) addBtn.style.display = pro ? '' : 'none';
+
+    // Free plan: show any existing stats read-only + an upgrade prompt. No editing.
+    if (!pro) {
+      const esc = (v) => String(v || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      const readOnly = statRows.filter(s => s.label).map(s => `
+        <div class="stat-row" style="opacity:0.5;pointer-events:none;">
+          <input class="field-input" type="text" value="${esc(s.label)}" disabled aria-label="Stat label" style="flex:1.4;">
+          <input class="field-input" type="text" value="${esc(s.value)}" disabled aria-label="Stat value" style="flex:1;">
+        </div>`).join('');
+      container.innerHTML = readOnly + `
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;border-radius:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.18);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div style="flex:1;">
+            <p style="font-size:13px;font-weight:700;color:#F59E0B;">Adding &amp; editing stats is a Pro feature</p>
+            <p style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">Upgrade to add sport-specific stats to your profile card.</p>
+          </div>
+          <a href="subscription.html" style="flex-shrink:0;padding:9px 16px;border-radius:8px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">Upgrade — $15/mo</a>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = statRows.map((s, i) => `
+      <div class="stat-row">
+        <input class="field-input" type="text" placeholder="Label (e.g. 40-Yard Dash)" aria-label="Stat label" value="${s.label || ''}"
+          oninput="statRows[${i}].label = this.value" style="flex:1.4;">
+        <input class="field-input" type="text" placeholder="Value (e.g. 4.45s)" aria-label="Stat value" value="${s.value || ''}"
+          oninput="statRows[${i}].value = this.value" style="flex:1;">
+        <button class="stat-remove-btn" onclick="removeStatRow(${i})" aria-label="Remove stat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`).join('');
+  }
+
+  function addStatRow() {
+    if (!isPro()) { window.location.href = 'subscription.html'; return; }
+    statRows.push({ label: '', value: '' });
+    renderStatRows();
+  }
+  function removeStatRow(i) {
+    if (!isPro()) return;
+    statRows.splice(i, 1);
+    renderStatRows();
+  }
+
+  renderStatRows();
+
+  // ── Photo upload ──────────────────────────────────────────────────────────
+  let pendingPhoto = null;
+  let removePhotoFlag = false;
+
+  async function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    const status = document.getElementById('photo-status');
+
+    // Let the player center their face inside the circle before uploading
+    const cropped = await EyeScoutCropper.open(file, { shape: 'circle', outWidth: 600, title: 'Position your photo' });
+    if (!cropped) { status.textContent = ''; return; }
+
+    status.textContent = 'Uploading…';
+    status.style.color = '#1E90FF';
+    preview.innerHTML = `<span style="font-size:11px;color:rgba(255,255,255,0.3);">Uploading…</span>`;
+    try {
+      const url = await _sbUploadImage('avatars', session.id, cropped.file);
+      pendingPhoto = url;
+      removePhotoFlag = false;
+      preview.innerHTML = `<img src="${url}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+      status.textContent = '✓ Ready to save';
+      status.style.color = '#39D353';
+    } catch (err) {
+      preview.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      status.textContent = 'Upload failed: ' + (err.message || 'try again');
+      status.style.color = '#f87171';
+      console.error('[avatar upload]', err);
+    }
+  }
+
+  async function uploadToDropbox(file, folder) {
+    const res = await fetch('/api/dropbox-upload', {
+      method: 'POST',
+      headers: { 'X-Filename': encodeURIComponent(file.name || 'photo.jpg'), 'X-Folder': folder, 'Content-Type': 'application/octet-stream' },
+      body: file,
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || res.status); }
+    const { url } = await res.json();
+    return url;
+  }
+
+  function removePhoto() {
+    pendingPhoto = null;
+    removePhotoFlag = true;
+    preview.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    document.getElementById('photo-status').textContent = '';
+  }
+
+  // ── Save ─────────────────────────────────────────────────────────────────
+  function saveSettings() {
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const patch = {
+      athleteFirst: document.getElementById('s-first').value.trim(),
+      athleteLast:  document.getElementById('s-last').value.trim(),
+      email:        document.getElementById('s-email').value.trim(),
+      phone:        document.getElementById('s-phone').value.trim(),
+      sport:        document.getElementById('s-sport').value,
+      position:     document.getElementById('s-position').value.trim(),
+      jersey:       document.getElementById('s-jersey').value.trim(),
+      gradYear:     document.getElementById('s-gradyear').value.trim(),
+      school:       document.getElementById('s-school').value.trim(),
+      height:       document.getElementById('s-height').value.trim(),
+      weight:       document.getElementById('s-weight').value.trim(),
+      bio:          document.getElementById('s-bio').value.trim(),
+    };
+    // Stats are a Pro-only feature — only persist changes for active subscribers.
+    if (isPro()) patch.sportStats = statRows.filter(s => s.label);
+    if (pendingPhoto)   patch.profilePhoto = pendingPhoto;
+    if (removePhotoFlag) patch.profilePhoto = null;
+
+    // Save prefs
+    const prefIds = ['notif-photos','notif-messages','priv-stats','priv-contact'];
+    const newPrefs = {};
+    prefIds.forEach(id => { const el = document.getElementById(id); if (el) newPrefs[id] = el.classList.contains('on'); });
+    localStorage.setItem('es_prefs_' + session.id, JSON.stringify(newPrefs));
+    patch.prefs = newPrefs;
+
+    savePatch(patch);
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+      showToast('✓ Settings saved');
+    }, 320);
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = isError ? 'rgba(248,113,113,0.3)' : 'rgba(57,211,83,0.3)';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Delete account ───────────────────────────────────────────────────────
+  function confirmDelete() {
+    document.getElementById('delete-overlay').classList.add('open');
+  }
+  function closeDeleteModal() {
+    document.getElementById('delete-overlay').classList.remove('open');
+  }
+  // Ask the local server to delete the Supabase Auth user (service-role only).
+  async function deleteAuthUser(userId) {
+    try {
+      const r = await fetch('/api/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!data.ok) console.warn('[delete auth user]', data.error || 'failed');
+      return data;
+    } catch (e) {
+      console.warn('[delete auth user] server unreachable', e);
+      return { ok: false, error: e.message };
+    }
+  }
+
+  async function performDelete() {
+    const delBtn = document.querySelector('#delete-overlay .confirm-delete');
+    if (delBtn) { delBtn.disabled = true; delBtn.textContent = 'Deleting…'; }
+
+    // Remove the Supabase Auth login (requires the server's service-role key —
+    // best effort; if the server isn't running / key not set, we still delete the
+    // profile row below).
+    await deleteAuthUser(session.id);
+
+    // Delete from Supabase FIRST and wait for it — CASCADE removes posts, follows,
+    // messages, hypes, notifications, subscription. Awaiting matters: redirecting
+    // before the request lands cancels it, which is why deletes weren't sticking.
+    if (typeof _sbDeletePlayer === 'function') {
+      const { error } = await _sbDeletePlayer(session.id);
+      if (error) {
+        if (delBtn) { delBtn.disabled = false; delBtn.textContent = 'Delete Account'; }
+        alert('Could not delete your account from the server. Please try again.\n\n' + (error.message || ''));
+        return; // leave local data intact so nothing is lost / out of sync
+      }
+    }
+    // Sign out of Supabase Auth
+    if (typeof sb !== 'undefined') { try { await sb.auth.signOut(); } catch (e) {} }
+
+    closeDeleteModal();
+    // Clear localStorage
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    localStorage.setItem('es_players', JSON.stringify(all.filter(pl => pl.id !== session.id)));
+    const posts = JSON.parse(localStorage.getItem('es_posts') || '[]').filter(p => p.authorId !== session.id);
+    localStorage.setItem('es_posts', JSON.stringify(posts));
+    localStorage.removeItem('es_player_hyped_' + session.id);
+    localStorage.removeItem('es_prefs_' + session.id);
+    const msgs = JSON.parse(localStorage.getItem('es_messages') || '[]').filter(m => m.playerId !== session.id);
+    localStorage.setItem('es_messages', JSON.stringify(msgs));
+    const notifs = JSON.parse(localStorage.getItem('es_notifications') || '[]').filter(n => n.targetId !== session.id);
+    localStorage.setItem('es_notifications', JSON.stringify(notifs));
+    localStorage.removeItem('es_session');
+    window.location.href = 'login.html';
+  }
+
+  function logout() {
+    localStorage.removeItem('es_session');
+    window.location.href = 'login.html';
+  }
+
+  // ── Supabase background sync ─────────────────────────────────────────────
+  (async () => {
+    try {
+      if (typeof _sbSync !== 'function') return;
+      await _sbSync({ players: true, subscription: true });
+      // Refresh form with fresher data
+      const fresh = getPlayer();
+      document.getElementById('s-first').value    = fresh.athleteFirst  || '';
+      document.getElementById('s-last').value     = fresh.athleteLast   || '';
+      document.getElementById('s-email').value    = fresh.email         || '';
+      document.getElementById('s-phone').value    = fresh.phone         || '';
+      document.getElementById('s-sport').value    = fresh.sport         || '';
+      document.getElementById('s-position').value = fresh.position      || '';
+      document.getElementById('s-jersey').value   = fresh.jersey        || '';
+      document.getElementById('s-gradyear').value = fresh.gradYear      || '';
+      document.getElementById('s-school').value   = fresh.school        || '';
+      document.getElementById('s-height').value   = fresh.height        || '';
+      document.getElementById('s-weight').value   = fresh.weight        || '';
+      document.getElementById('s-bio').value      = fresh.bio           || '';
+      document.getElementById('bio-count').textContent = (fresh.bio || '').length;
+      if (fresh.profilePhoto) {
+        document.getElementById('photo-preview').innerHTML = `<img src="${fresh.profilePhoto}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+      }
+      // Reflect freshly-synced subscription + stats (Pro gate)
+      statRows = Array.isArray(fresh.sportStats) ? [...fresh.sportStats] : statRows;
+      renderStatRows();
+      if (typeof renderSubSection === 'function') renderSubSection();
+    } catch(e) { console.warn('[settings] Supabase sync error:', e.message); }
+  })();
+</script>
+
+<!-- Legal modals -->
+<style>
+  .legal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  .legal-overlay.open { display:flex; }
+  .legal-modal { background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:16px; max-width:560px; width:100%; max-height:80vh; display:flex; flex-direction:column; }
+  .legal-modal-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
+  .legal-modal-head h3 { font-family:Impact,'Arial Narrow',Arial,sans-serif; font-size:18px; letter-spacing:0.05em; text-transform:uppercase; color:#fff; }
+  .legal-modal-close { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.35); padding:4px; transition:color 0.15s; }
+  .legal-modal-close:hover { color:#fff; }
+  .legal-modal-body { overflow-y:auto; padding:20px 24px 24px; font-size:13px; line-height:1.7; color:rgba(255,255,255,0.55); }
+  .legal-modal-body h4 { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin:20px 0 8px; }
+  .legal-modal-body h4:first-child { margin-top:0; }
+  .legal-modal-body p { margin-bottom:8px; }
+  .legal-modal-body a { color:rgba(30,144,255,0.8); }
+
+  /* Delete Account confirmation modal */
+  .confirm-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); backdrop-filter:blur(6px); z-index:220; align-items:center; justify-content:center; padding:20px; }
+  .confirm-overlay.open { display:flex; }
+  .confirm-modal { background:#181818; border:1px solid rgba(255,255,255,0.1); border-radius:18px; max-width:400px; width:100%; padding:30px 28px 24px; text-align:center; box-shadow:0 24px 60px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(248,113,113,0.06); animation:confirmPop 0.24s cubic-bezier(0.22,1,0.36,1); }
+  @keyframes confirmPop { from { opacity:0; transform:scale(0.94) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .confirm-icon { width:56px; height:56px; border-radius:16px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
+  .confirm-modal h3 { font-family:Impact,'Arial Narrow',Arial,sans-serif; font-size:21px; letter-spacing:0.03em; text-transform:uppercase; color:#fff; margin-bottom:10px; }
+  .confirm-modal p { font-size:13.5px; line-height:1.6; color:rgba(255,255,255,0.5); margin-bottom:24px; }
+  .confirm-actions { display:flex; gap:10px; }
+  .confirm-actions button { flex:1; padding:12px 16px; border-radius:11px; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.15s, opacity 0.15s, transform 0.1s; }
+  .confirm-actions button:active { transform:scale(0.97); }
+  .confirm-cancel { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#fff; }
+  .confirm-cancel:hover { background:rgba(255,255,255,0.12); }
+  .confirm-cancel:focus-visible { outline:2px solid rgba(255,255,255,0.4); outline-offset:2px; }
+  .confirm-delete { background:#f0453a; border:1px solid #f0453a; color:#fff; }
+  .confirm-delete:hover { background:#d83a30; }
+  .confirm-delete:focus-visible { outline:2px solid rgba(248,113,113,0.6); outline-offset:2px; }
+</style>
+<div class="legal-overlay" id="legal-overlay" onclick="if(event.target===this)closeLegal()">
+  <div class="legal-modal">
+    <div class="legal-modal-head">
+      <h3 id="legal-title">Privacy Policy</h3>
+      <button class="legal-modal-close" onclick="closeLegal()" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="legal-modal-body" id="legal-body"></div>
+  </div>
+</div>
+
+<!-- ── Delete Account confirmation ── -->
+<div class="confirm-overlay" id="delete-overlay" onclick="if(event.target===this)closeDeleteModal()">
+  <div class="confirm-modal" role="alertdialog" aria-labelledby="delete-title">
+    <div class="confirm-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+    </div>
+    <h3 id="delete-title">Delete your account?</h3>
+    <p>This permanently removes your profile, posts, messages, and all your data. This can't be undone.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="confirm-delete" onclick="performDelete()">Delete Account</button>
+    </div>
+  </div>
+</div>
+<script>
+  const PP_HTML = `
+    <p><em>Last updated: [DATE]. This Privacy Policy explains how [LEGAL ENTITY NAME] ("EyeScout Sports," "we," "us") collects, uses, and protects information on the EyeScout Sports platform.</em></p>
+    <h4>Who We Are</h4>
+    <p>EyeScout Sports is operated by [LEGAL ENTITY NAME], [MAILING ADDRESS]. For any privacy question or request, contact <a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a> or 602.858.0798.</p>
+    <h4>Information We Collect</h4>
+    <p>Athlete name, email, phone, school, sport, jersey number, graduation year, height/weight and stats you enter, parent/guardian contact information, profile and tournament photos and videos, messages you send on the platform, and the basic account information needed to operate the service. Coaches also provide their name, email, organization, and title.</p>
+    <h4>How We Use Your Information</h4>
+    <p>To create and display athlete profiles, connect athletes with verified coaches for recruiting, process purchases, deliver tournament photos and videos, operate messaging, provide support, and keep the platform secure. We do not sell your personal information.</p>
+    <h4>Who Can See Your Information</h4>
+    <p>EyeScout Sports staff, and verified coaches with accounts on the platform, can view athlete profiles and photos for recruiting purposes. By creating a profile, you acknowledge and consent to this visibility. You can control certain visibility options in Settings &rarr; Privacy.</p>
+    <h4>Service Providers</h4>
+    <p>We share information only with trusted service providers that help us operate the platform, under confidentiality obligations and only as needed to provide the service: Supabase (secure cloud database and file storage), PayPal (payment processing), Dropbox (photo delivery workflow), and our customer-management tools. These providers are not permitted to use your information for their own purposes.</p>
+    <h4>Payments</h4>
+    <p>Payments are processed by PayPal. We do not receive or store your full credit or debit card numbers. PayPal's handling of your payment information is governed by PayPal's own privacy policy.</p>
+    <h4>Photos, Video &amp; Likeness</h4>
+    <p>By selecting, uploading, or posting photos or videos, you (and, for a minor, the parent or guardian on the athlete's behalf) grant EyeScout Sports permission to store and display that media on the athlete's profile within the platform for recruiting purposes. [PHOTO COPYRIGHT / USAGE TERMS &mdash; TO BE CONFIRMED.]</p>
+    <h4>Children &amp; Parental Consent</h4>
+    <p>EyeScout Sports is intended for athletes 13 years of age or older and is not directed to children under 13. For any athlete under 18, a parent or legal guardian must review this Policy and provide consent on the athlete's behalf at signup. Parents and guardians may at any time review the athlete's information, request corrections, revoke consent, and request deletion by contacting <a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a> or using Settings &rarr; Account &rarr; Delete Account. If we learn we have collected information from a child under 13 without proper consent, we will delete it.</p>
+    <h4>Text Messages &amp; Calls</h4>
+    <p>With your consent (given at signup), we may contact you by call or text, including via autodialer, AI, or prerecorded voice, at the number(s) you provide. Message frequency varies. Message and data rates may apply. Reply STOP to opt out of texts, or contact us to revoke consent. Consent is not a condition of any purchase.</p>
+    <h4>Cookies &amp; Local Storage</h4>
+    <p>The platform stores information in your browser's local storage to keep you signed in and remember preferences. We do not use advertising cookies, analytics pixels, or cross-site trackers.</p>
+    <h4>Data Storage &amp; Security</h4>
+    <p>Your information is stored in our cloud database and file storage (hosted in the United States) and protected with access controls and encryption in transit. No system is perfectly secure and we cannot guarantee absolute security, but we take reasonable measures to protect your information and will notify affected users of a material data breach as required by law.</p>
+    <h4>Data Retention</h4>
+    <p>We keep your information for as long as your account is active or as needed to provide the service and meet legal obligations. When you delete your account, we remove your profile and associated data from our active systems; residual copies may remain in backups for a limited time before being overwritten.</p>
+    <h4>Your Privacy Rights</h4>
+    <p>Depending on where you live (including California under the CCPA/CPRA, and states such as Virginia, Colorado, and Connecticut), you may have the right to access, correct, delete, or obtain a copy of your personal information, and to opt out of any "sale" or "sharing" of it. We do not sell or share personal information for cross-context behavioral advertising. To exercise a right, contact <a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a>. We will not discriminate against you for exercising these rights.</p>
+    <h4>Account Deletion</h4>
+    <p>You can permanently delete your account and associated data at any time in Settings &rarr; Account &rarr; Delete Account, or by contacting us.</p>
+    <h4>Changes to This Policy</h4>
+    <p>We may update this Policy from time to time. We will revise the "last updated" date above, and material changes will be reflected on this page. Continued use after an update means you accept the revised Policy.</p>
+    <h4>Contact</h4>
+    <p><a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a> &middot; 602.858.0798</p>
+  `;
+  const TOS_HTML = `
+    <p><em>Last updated: [DATE]. These Terms of Use ("Terms") are a binding agreement between you and [LEGAL ENTITY NAME] ("EyeScout Sports," "we," "us") governing your use of the EyeScout Sports platform. By creating an account or using the platform, you agree to these Terms and to our Privacy Policy.</em></p>
+    <h4>Eligibility &amp; Parental Consent</h4>
+    <p>The platform is for athletes 13 years of age or older. If the athlete is under 18, a parent or legal guardian must agree to these Terms on the athlete's behalf and is responsible for the athlete's use of the platform. By registering a minor, you confirm you are the parent or legal guardian with authority to consent.</p>
+    <h4>Accounts</h4>
+    <p>Each athlete may have one account. Provide accurate information, keep your password secure, and do not share your login. You are responsible for all activity under your account and must notify us promptly of any unauthorized use.</p>
+    <h4>Payments &amp; Refunds</h4>
+    <p>Prices for photo packages and other purchases are shown at checkout and processed through PayPal. [REFUND POLICY &mdash; TO BE CONFIRMED.] You are responsible for any taxes that apply to your purchase.</p>
+    <h4>Coach Subscriptions &amp; Automatic Renewal</h4>
+    <p>Coach accounts may require a paid subscription, billed on a recurring monthly basis at the price shown at signup (currently $15/month). <strong>Your subscription automatically renews each month and your payment method is charged automatically until you cancel.</strong> You can cancel at any time in Settings; cancellation stops future renewals, and your access continues through the end of the current paid billing period. Except where required by law, payments already made are non-refundable.</p>
+    <h4>Photos, Video &amp; Content</h4>
+    <p>Only upload or post photos and videos of the registered athlete, and do not upload media of other people without their permission. You retain ownership of content you post and grant EyeScout Sports a non-exclusive license to store and display that content on the platform to provide the service. [OWNERSHIP AND LICENSING OF PURCHASED TOURNAMENT PHOTOS &mdash; TO BE CONFIRMED.] You are responsible for the content you upload and confirm you have the rights to it.</p>
+    <h4>Acceptable Use</h4>
+    <p>Do not impersonate others, harass, bully, threaten, or spam; post false, unlawful, or infringing content; scrape or misuse the platform or other users' data; or use the platform for any commercial purpose other than its intended recruiting use. We may remove content or restrict accounts that violate these Terms.</p>
+    <h4>Coach Obligations</h4>
+    <p>Coaches may use athlete information solely for legitimate recruiting and may not re-share, sell, redistribute, or use it for any other purpose. Coaches must interact with athletes and families professionally and lawfully. Violations may result in immediate termination and, where appropriate, referral to authorities.</p>
+    <h4>Verification &amp; User Conduct</h4>
+    <p>We take reasonable steps to verify coach accounts but cannot guarantee any user's identity, statements, or conduct. EyeScout Sports does not control and is not responsible for messages or interactions between users. Interactions are at your own risk, and parents and guardians are responsible for supervising a minor's communications.</p>
+    <h4>Safety &amp; Reporting</h4>
+    <p>You can report or block a user, or report inappropriate content or conduct, by contacting <a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a>. We may, but are not obligated to, monitor activity, and we may remove content or suspend accounts we believe are unsafe or violate these Terms. If you believe a minor is in danger, contact local law enforcement immediately.</p>
+    <h4>No Guarantee of Results</h4>
+    <p>EyeScout Sports showcases athletes to coaches. We do <strong>not</strong> guarantee any athletic scholarship, recruitment, roster spot, exposure, coach interest, or other outcome. Any results depend on factors outside our control.</p>
+    <h4>Disclaimer of Warranties</h4>
+    <p>The platform is provided "AS IS" and "AS AVAILABLE," without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the platform will be uninterrupted, error-free, or secure.</p>
+    <h4>Limitation of Liability</h4>
+    <p>To the fullest extent permitted by law, EyeScout Sports and its owners, employees, and providers will not be liable for any indirect, incidental, special, consequential, or punitive damages, or for lost profits, data, or goodwill, arising from your use of the platform. Our total liability for any claim will not exceed the greater of the amount you paid us in the twelve months before the claim or $100.</p>
+    <h4>Indemnification</h4>
+    <p>You agree to indemnify and hold harmless EyeScout Sports and its owners, employees, and providers from any claims, damages, losses, and expenses (including reasonable attorneys' fees) arising from your content, your use of the platform, or your violation of these Terms or the rights of others.</p>
+    <h4>Intellectual Property</h4>
+    <p>The EyeScout Sports name, logo, software, and platform are owned by EyeScout Sports and protected by law. You may not copy, modify, distribute, or create derivative works from the platform without our permission.</p>
+    <h4>Copyright / DMCA</h4>
+    <p>We respect intellectual property rights. If you believe content on the platform infringes your copyright, send a notice with the information required by the DMCA to <a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a>. We will respond to valid notices, may remove infringing content, and may terminate repeat infringers.</p>
+    <h4>Termination</h4>
+    <p>You may stop using the platform and delete your account at any time. We may suspend or terminate accounts that violate these Terms or that we believe pose a risk, with or without notice. Provisions that by their nature should survive termination will survive.</p>
+    <h4>Governing Law &amp; Dispute Resolution</h4>
+    <p>These Terms are governed by the laws of the State of [STATE], without regard to its conflict-of-laws rules. Before filing any claim, you agree to first contact us and try to resolve the dispute informally for 30 days. Any unresolved dispute will be handled in the state or federal courts located in [COUNTY, STATE], and you consent to that jurisdiction. [OPTIONAL, CONFIRM WITH COUNSEL: disputes will instead be resolved by binding individual arbitration, and you and EyeScout Sports waive any right to a jury trial or to participate in a class action.]</p>
+    <h4>Changes to These Terms</h4>
+    <p>We may update these Terms from time to time. We will revise the "last updated" date, and continued use of the platform after changes constitutes acceptance of the updated Terms.</p>
+    <h4>General</h4>
+    <p>These Terms and the Privacy Policy are the entire agreement between you and EyeScout Sports. If any provision is found unenforceable, the rest remains in effect. Our failure to enforce a provision is not a waiver. You may not assign these Terms; we may. We are not liable for delays or failures caused by events beyond our reasonable control. You consent to receive notices and communications electronically.</p>
+    <h4>Contact</h4>
+    <p><a href="mailto:info@eyescoutsport.com">info@eyescoutsport.com</a> &middot; 602.858.0798</p>
+  `;
+  function openLegal(type) {
+    document.getElementById('legal-title').textContent = type === 'pp' ? 'Privacy Policy' : 'Terms of Use';
+    document.getElementById('legal-body').innerHTML = type === 'pp' ? PP_HTML : TOS_HTML;
+    document.getElementById('legal-overlay').classList.add('open');
+  }
+  function closeLegal() {
+    document.getElementById('legal-overlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLegal(); closeCancelModal(); } });
+</script>
+
+<!-- ── Cancel Subscription Modal ── -->
+<style>
+  .cancel-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.72); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .cancel-overlay.open { display: flex; }
+  .cancel-modal {
+    background: #161616; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 32px; width: 100%; max-width: 400px;
+    transform: translateY(16px); transition: transform 0.25s;
+  }
+  .cancel-overlay.open .cancel-modal { transform: translateY(0); }
+  .cancel-icon-wrap {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.25);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+  }
+  .cancel-heading {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 22px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: #fff; text-align: center; margin-bottom: 10px;
+  }
+  .cancel-body {
+    font-size: 13px; color: rgba(255,255,255,0.4); text-align: center;
+    line-height: 1.65; margin-bottom: 28px;
+  }
+  .cancel-actions { display: flex; flex-direction: column; gap: 10px; }
+  .cancel-confirm-btn {
+    width: 100%; padding: 13px; border-radius: 10px;
+    background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3);
+    color: #ff4d6d; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: background 0.15s, border-color 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .cancel-confirm-btn:hover { background: rgba(255,77,109,0.18); border-color: rgba(255,77,109,0.5); }
+  .cancel-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cancel-keep-btn {
+    width: 100%; padding: 13px; border-radius: 10px;
+    background: var(--grad); border: none;
+    color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: opacity 0.15s;
+    box-shadow: 0 4px 20px rgba(123,47,190,0.22);
+  }
+  .cancel-keep-btn:hover { opacity: 0.88; }
+  @keyframes cspin { to { transform: rotate(360deg); } }
+  .cancel-spinner {
+    width: 15px; height: 15px; border: 2px solid rgba(255,77,109,0.3);
+    border-top-color: #ff4d6d; border-radius: 50%;
+    animation: cspin 0.7s linear infinite; flex-shrink: 0;
+  }
+</style>
+
+<div class="cancel-overlay" id="cancel-overlay" onclick="if(event.target===this)closeCancelModal()">
+  <div class="cancel-modal">
+    <div class="cancel-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <p class="cancel-heading">Cancel Pro?</p>
+    <p class="cancel-body">You'll lose access to stories, posting, search, and coach visibility at the end of your current billing period.</p>
+    <div class="cancel-actions">
+      <button class="cancel-keep-btn" onclick="closeCancelModal()">Keep My Pro Plan</button>
+      <button class="cancel-confirm-btn" id="cancel-confirm-btn" onclick="confirmCancellation()">
+        <span id="cancel-btn-label">Yes, Cancel Subscription</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showCancelModal() {
+    const btn = document.getElementById('cancel-confirm-btn');
+    btn.disabled = false;
+    document.getElementById('cancel-btn-label').textContent = 'Yes, Cancel Subscription';
+    document.getElementById('cancel-overlay').classList.add('open');
+  }
+  function closeCancelModal() {
+    document.getElementById('cancel-overlay').classList.remove('open');
+  }
+  async function confirmCancellation() {
+    const session = JSON.parse(localStorage.getItem('es_session') || 'null');
+    if (!session) return;
+    const btn = document.getElementById('cancel-confirm-btn');
+    btn.disabled = true;
+    document.getElementById('cancel-btn-label').innerHTML = '<span class="cancel-spinner"></span> Cancelling…';
+
+    const subKey = 'es_sub_' + session.id;
+    const existing = JSON.parse(localStorage.getItem(subKey) || '{}');
+
+    // Cancel the real PayPal subscription first. On a genuine failure, keep the
+    // plan active locally so we never hide a subscription PayPal is still billing.
+    if (existing.paypalSubscriptionId && typeof _cancelPayPalSubscription === 'function') {
+      const result = await _cancelPayPalSubscription(existing.paypalSubscriptionId);
+      if (!result.ok && !result.notConfigured) {
+        btn.disabled = false;
+        document.getElementById('cancel-btn-label').textContent = 'Yes, Cancel My Subscription';
+        alert('We couldn\'t cancel your PayPal subscription automatically: ' + (result.error || 'unknown error') + '\n\nPlease try again, or cancel it from your PayPal account.');
+        return;
+      }
+    }
+
+    // Mark as cancelled rather than deleting, so the UI can show cancelled state
+    existing.status = 'cancelled';
+    existing.cancelledAt = new Date().toISOString();
+    // Keep Pro access until the end of the period already paid for.
+    existing.accessUntil = existing.nextBillingDate || existing.accessUntil || null;
+    localStorage.setItem(subKey, JSON.stringify(existing));
+
+    // Write to Supabase (persist the access-until date so it survives across devices)
+    if (typeof _sbSaveSubscription === 'function') {
+      _sbSaveSubscription(session.id, 'cancelled', existing.paypalSubscriptionId, existing.accessUntil);
+    }
+
+    closeCancelModal();
+    renderSubSection();
+    showToast('✓ Subscription cancelled');
+  }
+</script>
+
+</body>
+</html>

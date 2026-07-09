@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Activity</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<script>
+  function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  var escAttr = escHtml;
+</script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: rgba(255,255,255,0.07);
+    --sidebar-w: 244px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: #fff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; display: flex; }
+
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0; position: fixed;
+    top: 0; left: 0; height: 100vh; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 28px 16px 24px; z-index: 40; background: var(--bg);
+  }
+  .nav-links { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .nav-link {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border-radius: 12px; font-size: 15px; font-weight: 500;
+    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s; text-decoration: none;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-link.active { color: #fff; font-weight: 700; }
+  .nav-link-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .new-post-btn {
+    display: flex; align-items: center; gap: 14px; padding: 13px 14px;
+    border-radius: 12px; font-size: 15px; font-weight: 700;
+    color: #fff; background: var(--grad); border: none; width: 100%; margin-top: 8px;
+    transition: opacity 0.15s, transform 0.15s; cursor: pointer;
+  }
+  .new-post-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .sidebar-profile {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    border-radius: 12px; transition: background 0.15s;
+    border-top: 1px solid var(--border); padding-top: 20px; margin-top: 12px; text-decoration: none;
+  }
+  .sidebar-profile:hover { background: rgba(255,255,255,0.04); }
+  .sidebar-avatar { width: 38px; height: 38px; border-radius: 50%; padding: 2px; background: var(--grad); flex-shrink: 0; }
+  .sidebar-avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1e1e1e; border: 2px solid var(--bg); }
+
+  .main { margin-left: var(--sidebar-w); flex: 1; max-width: 640px; padding: 0 0 60px; }
+
+  .page-header {
+    padding: 32px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .page-title {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 26px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .page-title::before {
+    content: ''; width: 5px; height: 24px; border-radius: 3px; background: var(--grad);
+  }
+  .mark-all-btn {
+    font-size: 12px; color: rgba(30,144,255,0.7); background: none; border: none;
+    cursor: pointer; transition: color 0.15s;
+  }
+  .mark-all-btn:hover { color: #1E90FF; }
+
+  /* ── Filter tabs ── */
+  .filter-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .ftab {
+    padding: 14px 0; margin-right: 28px; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    color: rgba(255,255,255,0.3); border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s; background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .ftab.active { color: #fff; border-bottom-color: #1E90FF; }
+  .ftab:hover:not(.active) { color: rgba(255,255,255,0.6); }
+
+  /* ── Notification list (cards) ── */
+  .notif-list { padding: 18px 24px 40px; display: flex; flex-direction: column; gap: 10px; }
+
+  .notif-item {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    position: relative; overflow: hidden;
+    transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    text-decoration: none; cursor: pointer;
+  }
+  .notif-item:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.14);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+  }
+  .notif-item.unread {
+    background: linear-gradient(90deg, rgba(30,144,255,0.08), rgba(30,144,255,0.02));
+    border-color: rgba(30,144,255,0.22);
+  }
+  .notif-item.unread::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--grad);
+  }
+
+  .notif-avatar {
+    width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 15px;
+    overflow: hidden; position: relative;
+  }
+  .notif-type-icon {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--surface); font-size: 9px;
+  }
+
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.5; margin-bottom: 3px; }
+  .notif-text strong { color: #fff; }
+  .notif-time { font-size: 11.5px; color: rgba(255,255,255,0.3); }
+
+  .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #1E90FF; flex-shrink: 0; box-shadow: 0 0 8px rgba(30,144,255,0.6); }
+
+  /* ── Empty ── */
+  .empty-state { text-align: center; padding: 80px 32px; }
+  .empty-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+  .empty-title { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin-bottom: 8px; }
+  .empty-body { font-size: 13px; color: rgba(255,255,255,0.3); line-height: 1.7; }
+
+  /* ── Follow-back button ── */
+  .follow-back-btn {
+    flex-shrink: 0; padding: 8px 16px; border-radius: 9px;
+    font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    background: rgba(30,144,255,0.12); border: 1px solid rgba(30,144,255,0.28);
+    color: #4aa8ff; transition: all 0.15s;
+  }
+  .follow-back-btn:hover { background: rgba(30,144,255,0.2); color: #fff; }
+  .follow-back-btn.following { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.14); color: rgba(255,255,255,0.5); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  .fade-in { animation: fadeUp 0.2s ease both; }
+
+  .date-group-label {
+    padding: 10px 32px 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+  }
+
+  /* ── Mobile header (hidden on desktop) ── */
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 40;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .mobile-logo { height: 38px; width: 38px; object-fit: contain; border-radius: 50%; }
+  .mobile-header-title {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .mobile-new-post {
+    background: var(--grad); border: none; border-radius: 8px;
+    padding: 8px 14px; color: #fff; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em; cursor: pointer;
+  }
+  /* ── Mobile bottom nav ── */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    z-index: 40;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mob-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    text-decoration: none; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; transition: color 0.15s;
+    position: relative;
+  }
+  .mob-nav-btn.active { color: #fff; }
+  .mob-nav-btn svg { display: block; }
+  .mob-notif-dot {
+    position: absolute; top: 4px; right: 8px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #ff4d6d; display: none;
+  }
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .right-col { display: none; }
+  }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-nav { display: flex; }
+    /* Pro gate: cover the content area only, between mobile header (56px) and bottom nav (60px) */
+    #sub-gate { left: 0 !important; right: 0 !important; top: 56px !important; bottom: 60px !important; padding: 0 20px; }
+    .main { margin-left: 0 !important; padding-left: 12px !important; padding-right: 12px !important; padding-top: 68px !important; padding-bottom: 72px !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="mobile-header">
+  <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout" class="mobile-logo">
+  <span class="mobile-header-title">EyeScout</span>
+  <button class="mobile-new-post" onclick="window.location.href='create-post.html'">+ Post</button>
+</div>
+<nav class="mobile-nav">
+  <a class="mob-nav-btn" href="feed.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+  <a class="mob-nav-btn" href="explore.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</a>
+  <a class="mob-nav-btn active" href="activity.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Activity<span class="mob-notif-dot" id="mob-activity-dot"></span></a>
+  <a class="mob-nav-btn" href="messages.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages</a>
+  <a class="mob-nav-btn" href="profile.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+</nav>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <a href="feed.html" style="display:flex;justify-content:center;align-items:center;padding:4px 0;margin-bottom:20px;">
+    <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout" style="height:64px;width:64px;object-fit:contain;border-radius:50%;">
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      Home
+    </a>
+    <a class="nav-link" href="explore.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      Search
+    </a>
+    <a class="nav-link active" href="activity.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      Activity
+      <span class="notif-dot" id="activity-dot" style="display:none;"></span>
+    </a>
+    <a class="nav-link" href="messages.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Messages
+    </a>
+    <a class="nav-link" href="profile.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      My Profile
+    </a>
+    <a class="nav-link" href="settings.html">
+      <span class="nav-link-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </span>
+      Settings
+    </a>
+    <a class="nav-link" href="#" onclick="logout();return false;">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      Sign Out
+    </a>
+    <button class="new-post-btn" onclick="window.location.href='create-post.html'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Post
+    </button>
+  </nav>
+  <a href="profile.html" class="sidebar-profile">
+    <div class="sidebar-avatar"><div class="sidebar-avatar-inner"></div></div>
+    <div>
+      <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">My Profile</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-handle">@eyescout</p>
+    </div>
+  </a>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main" id="main-content" tabindex="-1">
+  <div class="page-header">
+    <h1 class="page-title">Activity</h1>
+    <button class="mark-all-btn" onclick="markAllRead()">Mark all as read</button>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="setTab('all',this)">All</button>
+    <button class="ftab" onclick="setTab('follows',this)">Follows</button>
+    <button class="ftab" onclick="setTab('messages',this)">Messages</button>
+  </div>
+
+  <div class="notif-list" id="notif-list"></div>
+
+  <!-- Subscription gate -->
+  <div id="sub-gate" style="display:none;position:fixed;top:0;left:var(--sidebar-w);right:0;bottom:0;z-index:30;background:rgba(13,13,13,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);align-items:center;justify-content:center;flex-direction:column;">
+    <div style="text-align:center;max-width:400px;padding:40px 32px;">
+      <div style="width:64px;height:64px;border-radius:18px;background:rgba(123,47,190,0.12);border:1px solid rgba(123,47,190,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;">Pro Feature</p>
+      <p style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Activity &amp; Notifications</p>
+      <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:30px;">See when coaches view your profile, when players follow you, and get notified about new photo drops. Pro only.</p>
+      <button onclick="window.location.href='subscription.html'" style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Upgrade to Pro — $15/mo
+      </button>
+      <p style="font-size:12px;color:rgba(255,255,255,0.18);margin-top:14px;">Cancel anytime · Instant access</p>
+    </div>
+  </div>
+</main>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('es_session') || 'null');
+  if (!session) window.location.href = 'login.html';
+  function logout() { localStorage.removeItem('es_session'); window.location.href = 'login.html'; }
+
+  if (session) {
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    const me = all.find(p => p.id === session.id) || session;
+    document.getElementById('sb-name').textContent = `${me.athleteFirst} ${me.athleteLast}`;
+    document.getElementById('sb-handle').textContent = `#${me.jersey} · ${me.sport}`;
+  }
+
+  // Subscription gate
+  function isSubscribed() {
+    const sub = JSON.parse(localStorage.getItem('es_sub_' + (session?.id || '')) || 'null');
+    return typeof _subHasAccess === 'function' ? _subHasAccess(sub) : sub?.status === 'active';
+  }
+  if (!isSubscribed()) {
+    document.getElementById('sub-gate').style.display = 'flex';
+    const btn = document.querySelector('.new-post-btn');
+    if (btn) {
+      btn.style.background = 'rgba(245,158,11,0.1)';
+      btn.style.border = '1px solid rgba(245,158,11,0.22)';
+      btn.style.color = '#F59E0B';
+      btn.style.boxShadow = 'none';
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Upgrade to Pro`;
+      btn.onclick = () => window.location.href = 'subscription.html';
+    }
+  }
+
+  let activeTab = 'all';
+
+  function getNotifs() {
+    return JSON.parse(localStorage.getItem('es_notifications') || '[]')
+      .filter(n => n.targetId === session.id);
+  }
+
+  function getMsgNotifs() {
+    const allMessages = JSON.parse(localStorage.getItem('es_messages') || '[]');
+    return allMessages
+      .filter(t => t.playerId === session.id)
+      .flatMap(t => t.messages.filter(m => m.from === 'coach' && !m.read)
+        .map(m => ({
+          id: `msg_${t.id}_${m.timestamp}`,
+          type: 'message',
+          actorId: t.coachId || null,
+          actorName: t.coachName,
+          actorTitle: t.coachTitle || 'Coach',
+          actorSchool: t.coachSchool || '',
+          threadId: t.id,
+          text: m.text,
+          timestamp: m.timestamp,
+          read: m.read,
+        })));
+  }
+
+  function setTab(tab, btn) {
+    activeTab = tab;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function getFollows() { return JSON.parse(localStorage.getItem('es_follows') || '[]'); }
+  function saveFollows(f) { localStorage.setItem('es_follows', JSON.stringify(f)); }
+
+  function isFollowingBack(actorId) {
+    return getFollows().some(f => f.followerId === session.id && f.followeeId === actorId);
+  }
+
+  function followBack(actorId, btn) {
+    const follows = getFollows();
+    const existing = follows.findIndex(f => f.followerId === session.id && f.followeeId === actorId);
+    const nowFollowing = existing < 0;
+    if (existing >= 0) {
+      follows.splice(existing, 1);
+      btn.textContent = 'Follow Back';
+      btn.classList.remove('following');
+    } else {
+      follows.push({ followerId: session.id, followeeId: actorId, createdAt: new Date().toISOString() });
+      btn.textContent = 'Following';
+      btn.classList.add('following');
+    }
+    saveFollows(follows);
+    if (typeof _sbToggleFollow === 'function') _sbToggleFollow(session.id, actorId, nowFollowing);
+    if (nowFollowing && typeof _notifyNewFollow === 'function') {
+      _notifyNewFollow(session.id, `${session.athleteFirst || ''} ${session.athleteLast || ''}`.trim() || 'Someone', actorId);
+    }
+  }
+
+  function formatTime(ts) {
+    const diff = (Date.now() - new Date(ts)) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff/86400)}d ago`;
+    return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  }
+
+  function getPlayerById(id) {
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    return all.find(p => p.id === id);
+  }
+
+  // Look up an actor by id — could be a player OR a coach.
+  function getActorById(id) {
+    const players = JSON.parse(localStorage.getItem('es_players') || '[]');
+    const p = players.find(x => x.id === id);
+    if (p) return p;
+    const coaches = JSON.parse(localStorage.getItem('es_coaches') || '[]');
+    return coaches.find(x => x.id === id) || null;
+  }
+
+  // Players can't follow coaches — used to hide "Follow Back" on coach follows
+  function isCoachActor(id) {
+    return JSON.parse(localStorage.getItem('es_coaches') || '[]').some(c => c.id === id);
+  }
+
+  function avatarContent(p) {
+    if (!p) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    if (p.profilePhoto) return `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    if (p.jersey) return `<span style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:14px;color:#fff;">#${p.jersey}</span>`;
+    // Coach or no jersey → initials
+    const name = p.firstName ? `${p.firstName} ${p.lastName || ''}` : `${p.athleteFirst || ''} ${p.athleteLast || ''}`;
+    const initials = name.trim().split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2) || '?';
+    return `<span style="font-size:14px;font-weight:700;color:#fff;">${escHtml(initials)}</span>`;
+  }
+
+  function render() {
+    const list = document.getElementById('notif-list');
+    const followNotifs   = getNotifs().filter(n => n.type === 'follow');
+    const removedNotifs   = getNotifs().filter(n => n.type === 'post_removed');
+    const hypeNotifs      = getNotifs().filter(n => n.type === 'hype_milestone');
+    const msgNotifs       = getMsgNotifs();
+
+    let items = [];
+    if (activeTab === 'all' || activeTab === 'follows') items = items.concat(followNotifs);
+    if (activeTab === 'all' || activeTab === 'messages') items = items.concat(msgNotifs);
+    if (activeTab === 'all') items = items.concat(removedNotifs, hypeNotifs);
+    items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    if (!items.length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <p class="empty-title">No Activity Yet</p>
+          <p class="empty-body">When players follow you or coaches send you a message, it'll show up here.</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = items.map((n, i) => {
+      if (n.type === 'follow') {
+        const actor = getActorById(n.actorId);
+        const alreadyFollowing = isFollowingBack(n.actorId);
+        return `
+          <div class="notif-item ${n.read ? '' : 'unread'} fade-in" style="animation-delay:${i*0.03}s">
+            <a href="profile.html?id=${n.actorId}" style="text-decoration:none;flex-shrink:0;">
+              <div class="notif-avatar" style="background:linear-gradient(135deg,rgba(123,47,190,0.15),rgba(30,144,255,0.1));border-color:rgba(123,47,190,0.25);">
+                ${avatarContent(actor)}
+                <div class="notif-type-icon" style="background:#7B2FBE;">
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+              </div>
+            </a>
+            <div class="notif-body">
+              <p class="notif-text"><strong>${escHtml(n.actorName)}</strong> started following you</p>
+              <p class="notif-time">${formatTime(n.timestamp)}</p>
+            </div>
+            ${isCoachActor(n.actorId) ? '' : `<button class="follow-back-btn ${alreadyFollowing ? 'following' : ''}" onclick="followBack('${n.actorId}', this)">
+              ${alreadyFollowing ? 'Following' : 'Follow Back'}
+            </button>`}
+            ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}
+          </div>`;
+      }
+
+      if (n.type === 'message') {
+        const coach = n.actorId ? getActorById(n.actorId) : null;
+        const coachAv = coach && coach.profilePhoto
+          ? `<img alt="" src="${escAttr(coach.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.8)" stroke-width="1.5" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
+        return `
+          <a class="notif-item ${n.read ? '' : 'unread'} fade-in" href="messages.html" style="animation-delay:${i*0.03}s">
+            <div class="notif-avatar" style="background:rgba(30,144,255,0.1);border-color:rgba(30,144,255,0.25);overflow:hidden;">
+              ${coachAv}
+              <div class="notif-type-icon" style="background:#1E90FF;">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+            </div>
+            <div class="notif-body">
+              <p class="notif-text"><strong>${escHtml(n.actorName)}</strong> ${n.actorTitle ? `(${n.actorTitle}${n.actorSchool ? `, ${n.actorSchool}` : ''})` : ''} sent you a message</p>
+              <p class="notif-time" style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">"${escHtml(n.text)}"</p>
+              <p class="notif-time" style="margin-top:4px;">${formatTime(n.timestamp)}</p>
+            </div>
+            ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}
+          </a>`;
+      }
+
+      if (n.type === 'hype_milestone') {
+        const milestone = n.actorName || n.milestone || '';
+        return `
+          <div class="notif-item ${n.read ? '' : 'unread'} fade-in" style="animation-delay:${i*0.03}s;cursor:default;">
+            <div class="notif-avatar" style="background:rgba(168,85,247,0.14);border-color:rgba(168,85,247,0.3);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#a855f7" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <div class="notif-type-icon" style="background:#a855f7;">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="#fff" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <div class="notif-body">
+              <p class="notif-text"><strong>🔥 ${milestone} hype!</strong> Your post just reached ${milestone} hype — keep it going.</p>
+              <p class="notif-time">${formatTime(n.timestamp)}</p>
+            </div>
+            ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}
+          </div>`;
+      }
+
+      if (n.type === 'post_removed') {
+        return `
+          <div class="notif-item ${n.read ? '' : 'unread'} fade-in" style="animation-delay:${i*0.03}s;cursor:default;">
+            <div class="notif-avatar" style="background:rgba(255,77,109,0.1);border-color:rgba(255,77,109,0.28);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="notif-type-icon" style="background:#ff4d6d;">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </div>
+            </div>
+            <div class="notif-body">
+              <p class="notif-text"><strong>A post was removed</strong> for violating our community guidelines</p>
+              <p class="notif-time">${formatTime(n.timestamp)}</p>
+            </div>
+            ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}
+          </div>`;
+      }
+      return '';
+    }).join('');
+
+    updateActivityDot();
+  }
+
+  // Mark every notification + coach message for this user as read, and persist to
+  // Supabase so a background sync doesn't bring the unread state back.
+  function _applyReadAll() {
+    // Notifications
+    const notifs = JSON.parse(localStorage.getItem('es_notifications') || '[]');
+    let nChanged = false;
+    notifs.forEach(n => { if (n.targetId === session.id && !n.read) { n.read = true; nChanged = true; } });
+    if (nChanged) {
+      localStorage.setItem('es_notifications', JSON.stringify(notifs));
+      if (typeof _sbMarkNotifsRead === 'function') _sbMarkNotifsRead(session.id);
+    }
+
+    // Coach messages (they drive the message activity items + the unread dot)
+    const threads = JSON.parse(localStorage.getItem('es_messages') || '[]');
+    const changed = [];
+    threads.forEach(t => {
+      if (t.playerId !== session.id) return;
+      let tc = false;
+      t.messages.forEach(m => { if (m.from === 'coach' && !m.read) { m.read = true; tc = true; } });
+      if (tc) changed.push(t);
+    });
+    if (changed.length) {
+      localStorage.setItem('es_messages', JSON.stringify(threads));
+      // Persist changed threads so the read state survives the next sync — one
+      // batched upsert for all of them instead of a request per thread.
+      if (typeof _sbSaveThreads === 'function') _sbSaveThreads(changed);
+    }
+  }
+
+  function markAllRead() {
+    _applyReadAll();
+    render();
+    updateActivityDot();
+  }
+
+  // Opening the Activity page counts as seeing everything here, so clear the badge.
+  // Don't re-render — the current view keeps its "new" highlights; next visit is clean.
+  function markSeenOnView() {
+    _applyReadAll();
+    updateActivityDot();
+  }
+
+  // Sidebar / mobile unread indicator
+  function updateActivityDot() {
+    const notifs = JSON.parse(localStorage.getItem('es_notifications') || '[]')
+      .filter(n => n.targetId === session.id && !n.read).length;
+    const threads = JSON.parse(localStorage.getItem('es_messages') || '[]');
+    const unreadMsgs = threads.filter(t => t.playerId === session.id)
+      .reduce((s, t) => s + t.messages.filter(m => m.from === 'coach' && !m.read).length, 0);
+    const total = notifs + unreadMsgs;
+    ['activity-dot', 'mob-activity-dot'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = total ? '' : 'none';
+    });
+  }
+
+  render();
+  markSeenOnView();
+
+  // ── Supabase background sync ─────────────────────────────────────────────
+  (async () => {
+    try {
+      if (typeof _sbSync !== 'function') return;
+      await _sbSync({
+        players: true, coaches: true, notifications: true,
+        follows: true, messages: true,
+        subscription: true,
+      });
+      render();
+      markSeenOnView();
+    } catch(e) { console.warn('[activity] Supabase sync error:', e.message); }
+  })();
+</script>
+
+</body>
+</html>

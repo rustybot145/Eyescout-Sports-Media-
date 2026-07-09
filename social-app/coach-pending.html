@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Account Pending</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<style>
+  :root { --grad: linear-gradient(90deg, #1E90FF 0%, #00C9A7 60%, #39D353 100%); }
+  body { background: #0D0D0D; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  h1, h2, h3 { font-family: Impact, 'Arial Narrow', Arial, sans-serif; }
+  .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .g-btn { background: var(--grad); background-size: 200%; border: none; cursor: pointer; transition: background-position 0.4s ease, transform 0.18s, opacity 0.18s; }
+  .g-btn:hover:not(:disabled) { background-position: right; transform: translateY(-2px); }
+  .g-btn:active:not(:disabled) { transform: translateY(0); opacity: 0.85; }
+  .g-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+  .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); }
+  .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(30,144,255,0.13) 0%, transparent 70%); top: -150px; right: -150px; }
+  .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(0,201,167,0.1) 0%, transparent 70%); bottom: -100px; left: -100px; }
+  .card { background: #161616; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 48px 40px; max-width: 460px; width: 100%; position: relative; z-index: 1; box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(30,144,255,0.06); }
+  .status-ring { width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid rgba(30,144,255,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; background: rgba(30,144,255,0.06); position: relative; }
+  .status-ring::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(30,144,255,0.08); }
+  .step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .step:last-child { border-bottom: none; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .dot-done { background: #39D353; }
+  .dot-wait { background: rgba(255,255,255,0.18); }
+  .dot-pending { background: #1E90FF; animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.8); } }
+  #still-pending { display: none; margin-top: 14px; padding: 11px 14px; border-radius: 10px; background: rgba(255,200,50,0.07); border: 1px solid rgba(255,200,50,0.18); font-size: 13px; color: rgba(255,200,50,0.85); text-align: center; }
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card">
+  <div class="status-ring">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+      <path d="M20 14l2 2 4-4" stroke="#39D353" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <h2 class="g-text" style="font-size:26px;letter-spacing:-0.01em;text-align:center;margin-bottom:8px;">Account Pending</h2>
+  <p style="text-align:center;color:rgba(255,255,255,0.45);font-size:14px;line-height:1.6;margin-bottom:32px;">
+    Your coach profile has been submitted. An EyeScout admin will review and approve your account — usually within 24 hours.
+  </p>
+
+  <div style="background:#111;border-radius:12px;padding:16px 18px;margin-bottom:28px;">
+    <div class="step">
+      <div class="step-dot dot-done"></div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff;">Profile created</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.38);margin-top:1px;" id="coach-info">Coach account registered</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-pending"></div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#1E90FF;">Awaiting admin approval</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.38);margin-top:1px;">An EyeScout admin is reviewing your account</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-wait"></div>
+      <div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.38);">Full app access granted</div>
+      </div>
+    </div>
+  </div>
+
+  <button id="check-btn" onclick="checkStatus()" class="g-btn" style="width:100%;padding:14px;border-radius:10px;font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:16px;letter-spacing:0.08em;color:#fff;">
+    CHECK STATUS
+  </button>
+
+  <div id="still-pending">Still pending — check back soon. Reach out to support if it's been more than 24 hours.</div>
+
+  <p style="text-align:center;margin-top:20px;font-size:12px;color:rgba(255,255,255,0.22);">
+    Wrong account? <a href="coach-login.html" style="color:#1E90FF;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Sign in with a different account</a>
+  </p>
+</div>
+
+<script>
+  const coach = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
+
+  if (!coach) {
+    window.location.href = 'coach-login.html';
+  } else if (coach.verified) {
+    window.location.href = 'coach-news-feed.html';
+  } else {
+    const info = document.getElementById('coach-info');
+    info.textContent = `${coach.firstName} ${coach.lastName} · ${coach.sport} · ${coach.university}`;
+  }
+
+  async function checkStatus() {
+    const btn = document.getElementById('check-btn');
+    const stillEl = document.getElementById('still-pending');
+    btn.disabled = true;
+    btn.textContent = 'CHECKING…';
+    stillEl.style.display = 'none';
+
+    try {
+      await _sbSync({});
+    } catch (e) { /* offline — read local cache */ }
+
+    const updated = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
+    if (updated && updated.verified) {
+      window.location.href = 'coach-news-feed.html';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'CHECK STATUS';
+      stillEl.style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>

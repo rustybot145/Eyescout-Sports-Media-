@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout Sports — Select Your Photos</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<style>
+  :root { --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%); }
+  body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; min-height: 100vh; overflow-x: hidden; }
+  h1,h2,h3 { font-family: Impact, 'Arial Narrow', Arial, sans-serif; }
+  .cond { font-family: 'Arial Narrow', Arial, sans-serif; }
+  .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .g-btn { background: var(--grad); background-size: 200%; transition: background-position 0.4s ease, transform 0.2s, opacity 0.2s; cursor: pointer; }
+  .g-btn:hover { background-position: right; transform: translateY(-2px); }
+  .g-btn:active { transform: translateY(0); opacity: 0.9; }
+  .g-btn:disabled { opacity: 0.35; transform: none; cursor: not-allowed; }
+  .g-border { background: linear-gradient(#1c1c1c, #1c1c1c) padding-box, var(--grad) border-box; border: 1px solid transparent; }
+  .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(1px); }
+  .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(123,47,190,0.12) 0%, transparent 70%); top: -150px; right: -150px; }
+  .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(30,144,255,0.10) 0%, transparent 70%); bottom: -100px; left: -100px; }
+
+  /* Step indicator */
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: 'Arial Narrow', Arial, sans-serif; letter-spacing: 0.05em; transition: all 0.3s; flex-shrink: 0; }
+  .step-dot.done { background: var(--grad); color: #fff; }
+  .step-dot.active { background: rgba(30,144,255,0.2); color: #1E90FF; border: 1.5px solid #1E90FF; }
+  .step-dot.inactive { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.25); }
+  .step-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); margin: 0 8px; }
+  .step-line.done { background: linear-gradient(90deg, #7B2FBE, #1E90FF); }
+
+  /* Tournament cards */
+  .tournament-card {
+    background: #171717;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .tournament-card:hover { border-color: rgba(30,144,255,0.35); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(30,144,255,0.08); }
+  .tournament-card.selected { background: linear-gradient(#161616, #161616) padding-box, var(--grad) border-box; border: 1.5px solid transparent; box-shadow: 0 0 0 4px rgba(30,144,255,0.06); }
+
+  /* Player cards */
+  .player-card {
+    background: #171717;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    text-align: center;
+  }
+  .player-card:hover { border-color: rgba(30,144,255,0.35); transform: translateY(-2px); }
+  .player-card.selected { background: linear-gradient(#161616, #161616) padding-box, var(--grad) border-box; border: 1.5px solid transparent; }
+
+  .jersey-num {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  /* Search field */
+  .search-field {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 13px 16px 13px 44px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-field:focus { border-color: rgba(30,144,255,0.5); box-shadow: 0 0 0 3px rgba(30,144,255,0.08); }
+  .search-field::placeholder { color: rgba(255,255,255,0.22); }
+
+  /* Photo grid */
+  .photo-item { position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; aspect-ratio: 3/4; background: #1a1a1a; }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+  .photo-item:hover img { transform: scale(1.03); }
+  .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%); transition: opacity 0.2s; }
+  .photo-check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .photo-item.selected .photo-check { background: var(--grad); border-color: transparent; }
+  .photo-item.selected .photo-check svg { opacity: 1; }
+  .photo-check svg { opacity: 0; transition: opacity 0.2s; }
+  .photo-item.selected::after { content: ''; position: absolute; inset: 0; border-radius: 8px; border: 2.5px solid #1E90FF; pointer-events: none; }
+  .photo-item.at-limit:not(.selected) { opacity: 0.4; cursor: not-allowed; }
+  .photo-item.at-limit:not(.selected):hover img { transform: none; }
+
+  /* Video section */
+  .video-card { background: #171717; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+  .video-thumb { aspect-ratio: 16/9; background: #1a1a1a; position: relative; display: flex; align-items: center; justify-content: center; }
+  .play-btn { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.15); }
+
+  /* Bottom bar */
+  .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(17,17,17,0.96); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.07); padding: 16px 24px; z-index: 100; transition: transform 0.3s; }
+  .bottom-bar.hidden-bar { transform: translateY(100%); }
+
+  /* Pill counter */
+  .pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(30,144,255,0.12); border: 1px solid rgba(30,144,255,0.25); border-radius: 100px; padding: 5px 14px; }
+
+  /* Animations */
+  .fade-in { animation: fadeIn 0.35s ease; }
+  .slide-up { animation: slideUp 0.35s cubic-bezier(0.22,1,0.36,1); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+  /* Submit overlay */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes successPop { from { opacity: 0; transform: scale(0.92) translateY(18px); } to { opacity: 1; transform: none; } }
+  #submit-overlay { animation: overlayIn 0.3s ease; }
+  #ol-success { animation: successPop 0.45s cubic-bezier(0.22,1,0.36,1); }
+  .check-path { stroke-dasharray: 55; stroke-dashoffset: 55; animation: drawCheck 0.55s 0.25s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .info-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 18px; }
+
+  .section-label {
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- Nav -->
+<nav class="fixed top-0 w-full z-50 py-5 px-6 md:px-12 flex items-center justify-between" style="background: rgba(17,17,17,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05);">
+  <a href="feed.html" class="flex items-center no-underline">
+    <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout Sports" style="height:40px;width:40px;object-fit:contain;border-radius:50%;">
+  </a>
+  <div class="flex items-center gap-6">
+    <span class="cond text-xs tracking-[0.15em] uppercase text-white/30" id="nav-player-name"></span>
+    <a href="login.html" class="cond text-xs tracking-[0.15em] uppercase text-white/30 hover:text-white transition-colors">Sign Out</a>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="min-h-screen pt-24 pb-32 px-4 md:px-8 max-w-5xl mx-auto" id="main-content" role="main" tabindex="-1">
+
+  <!-- Page header -->
+  <div class="mb-10">
+    <h1 class="text-3xl md:text-4xl tracking-widest uppercase g-text mb-1">Select Your Photos</h1>
+    <p class="cond text-xs tracking-[0.2em] uppercase text-white/30">EyeScout Sports</p>
+  </div>
+
+  <!-- Step Indicator -->
+  <div class="flex items-center mb-10" id="step-indicator">
+    <div class="step-dot active" id="dot-1">1</div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot inactive" id="dot-2">2</div>
+    <div class="ml-4 flex flex-col gap-0.5">
+      <span class="cond text-xs font-bold tracking-[0.15em] uppercase text-white/60" id="step-label">Tournament</span>
+      <span class="cond text-[10px] tracking-[0.1em] uppercase text-white/25" id="step-sub">Step 1 of 2</span>
+    </div>
+  </div>
+
+  <!-- ────────── STEP 1: TOURNAMENT ────────── -->
+  <div id="step-1" class="fade-in">
+    <p class="section-label">Choose Your Tournament</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="tournament-grid">
+      <!-- populated by JS from localStorage es_tournaments -->
+    </div>
+
+    <div class="mt-8 flex justify-end">
+      <button id="next-1" onclick="goToStep(2)" disabled class="g-btn px-10 py-3.5 rounded-lg cond text-sm font-black tracking-[0.15em] uppercase text-white" style="min-width: 160px;">
+        Next →
+      </button>
+    </div>
+  </div>
+
+  <!-- ────────── STEP 2: GALLERY + SELECTION ────────── -->
+  <div id="step-2" class="hidden fade-in">
+
+    <div class="flex items-center gap-3 mb-6">
+      <button onclick="goToStep(1)" class="flex items-center gap-2 text-white/30 hover:text-white transition-colors cond text-xs tracking-widest uppercase">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+      <span class="text-white/15">·</span>
+      <span class="cond text-xs tracking-[0.15em] uppercase text-white/40" id="gallery-context-label"></span>
+    </div>
+
+    <!-- Package info bar -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8 p-4 rounded-xl" style="background: rgba(30,144,255,0.06); border: 1px solid rgba(30,144,255,0.15);">
+      <div>
+        <p class="cond text-xs tracking-[0.18em] uppercase text-white/40 mb-0.5">Your Package</p>
+        <p class="cond font-black text-lg tracking-wide uppercase text-white">All Tournament Photos · Pick Your Shots</p>
+      </div>
+      <div class="pill">
+        <span class="cond text-xs font-black tracking-widest uppercase g-text" id="selection-count">0</span>
+        <span class="cond text-xs font-black tracking-widest uppercase text-white/50">&nbsp;selected · min. 5</span>
+      </div>
+    </div>
+
+    <!-- No photos message (shown when tournament has no pulled photos yet) -->
+    <div id="no-photos-msg" style="display:none;margin-bottom:28px;padding:20px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);text-align:center;">
+      <p class="cond font-black text-sm tracking-[0.12em] uppercase" style="color:rgba(255,255,255,0.35);margin-bottom:4px;">Photos Coming Soon</p>
+      <p class="text-xs" style="color:rgba(255,255,255,0.2);line-height:1.5;">Your coach hasn't uploaded photos for this tournament yet. Check back soon.</p>
+    </div>
+
+    <!-- Photos section -->
+    <p class="section-label">Photos</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-12" id="photo-grid">
+      <!-- populated by JS -->
+    </div>
+
+
+  </div>
+
+</div>
+
+<!-- Bottom submit bar (step 3) -->
+<div class="bottom-bar hidden-bar" id="bottom-bar">
+  <div class="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <p class="cond text-xs tracking-[0.15em] uppercase text-white/30 mb-0.5">Ready to submit?</p>
+      <p class="text-sm text-white/60"><span id="bar-count">0</span> photo<span id="bar-plural">s</span> selected · select at least 5</p>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;">
+        <input type="checkbox" id="photo-consent" style="width:14px;height:14px;accent-color:#1E90FF;flex-shrink:0;">
+        <span style="font-size:11px;color:rgba(255,255,255,0.35);line-height:1.4;">I grant EyeScout Sports the right to display these photos on my profile.</span>
+      </label>
+    </div>
+    <button onclick="handleSubmit()" class="g-btn px-10 py-3.5 rounded-lg cond text-sm font-black tracking-[0.15em] uppercase text-white flex-shrink-0" id="submit-btn" disabled>
+      Submit Selection →
+    </button>
+  </div>
+</div>
+
+<!-- ────────── SUBMIT OVERLAY ────────── -->
+<div id="submit-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#111111;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- Loading state -->
+  <div id="ol-loading" style="display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;">
+    <div style="position:relative;width:64px;height:64px;border-radius:50%;background:conic-gradient(from 0deg,#7B2FBE,#1E90FF,#00C9A7,#39D353,rgba(0,0,0,0));animation:spin 1s linear infinite;">
+      <div style="position:absolute;inset:5px;border-radius:50%;background:#111;"></div>
+    </div>
+    <div>
+      <h2 class="cond text-xl tracking-[0.2em] uppercase text-white mb-2">Sending your selection…</h2>
+      <p class="cond text-xs tracking-[0.15em] uppercase text-white/30">Locking in your photo selection</p>
+    </div>
+  </div>
+
+  <!-- Success state -->
+  <div id="ol-success" style="display:none;flex-direction:column;align-items:center;gap:32px;text-align:center;max-width:500px;width:100%;">
+
+    <!-- Checkmark -->
+    <div style="position:relative;width:100px;height:100px;">
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cgStroke" x1="0" y1="0" x2="100" y2="0"><stop stop-color="#7B2FBE"/><stop offset="0.38" stop-color="#1E90FF"/><stop offset="0.7" stop-color="#00C9A7"/><stop offset="1" stop-color="#39D353"/></linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="44" stroke="url(#cgStroke)" stroke-width="2.5" opacity="0.2"/>
+        <circle cx="50" cy="50" r="44" stroke="url(#cgStroke)" stroke-width="2.5" opacity="0.6" stroke-dasharray="276" stroke-dashoffset="276" style="animation:drawCheck 0.7s 0.1s ease forwards;"/>
+        <path class="check-path" d="M30 51 L44 65 L70 36" stroke="url(#cgStroke)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Heading + message -->
+    <div>
+      <h1 id="ol-heading" class="g-text mb-3" style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:clamp(28px,6vw,42px);letter-spacing:0.08em;text-transform:uppercase;line-height:1;">Photos Submitted!</h1>
+      <p id="ol-message" style="font-size:15px;line-height:1.7;color:rgba(255,255,255,0.55);max-width:380px;margin:0 auto;">Your selections are in. Once they've been edited by the team, they'll appear on your player profile — no watermarks, ready to download.</p>
+    </div>
+
+    <!-- Info chips -->
+    <div class="grid grid-cols-2 gap-3 w-full" style="max-width:400px;" id="ol-chips">
+      <!-- populated by JS -->
+    </div>
+
+    <!-- CTA -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
+      <button onclick="goToProfile()" class="g-btn w-full max-w-xs py-4 rounded-xl cond text-sm font-black tracking-[0.2em] uppercase text-white">
+        View My Profile →
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── Data ──────────────────────────────────────────────────────────────────
+  const PACKAGE_LIMIT = 5;
+  let selectedTournament = null;
+  let selectedPhotos = new Set();
+
+  const photoSizes = [
+    '400x530', '400x500', '400x550', '400x520',
+    '400x510', '400x540', '400x560', '400x515',
+    '400x525', '400x535', '400x545', '400x505',
+  ];
+
+  // ── Session ───────────────────────────────────────────────────────────────
+  const session = JSON.parse(localStorage.getItem('es_session') || 'null');
+  if (!session) window.location.href = 'login.html';
+
+  function getLatestPlayer() {
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    return all.find(p => p.id === session.id) || session;
+  }
+
+  // ── Tournament grid ───────────────────────────────────────────────────────
+  function renderTournaments() {
+    let tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
+    // Only show tournaments for the player's sport.
+    const mySport = getLatestPlayer()?.sport || null;
+    if (mySport) {
+      tournaments = tournaments.filter(t => (t.sport || '').toLowerCase() === mySport.toLowerCase());
+    }
+    const grid = document.getElementById('tournament-grid');
+    if (!tournaments.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px 24px;">
+        <p class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.2);">No tournaments available yet</p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.18);margin-top:6px;">Check back after EyeScout publishes your event.</p>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = tournaments.map((t, i) => {
+      const photoCount = (t.photos || []).length;
+      const dateStr = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+      return `
+      <div class="tournament-card" data-id="${t.id}" onclick="selectTournament(this)">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <p class="cond font-black text-lg tracking-wide uppercase text-white">${t.name}</p>
+            <p class="cond text-xs tracking-[0.12em] uppercase text-white/40 mt-0.5">${t.sport || ''}</p>
+          </div>
+          <div class="check-icon opacity-0 w-5 h-5 flex-shrink-0 mt-0.5">
+            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="url(#tg${i})"/><path d="M6 10l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="tg${i}" x1="0" y1="0" x2="20" y2="0"><stop stop-color="#7B2FBE"/><stop offset="0.38" stop-color="#1E90FF"/><stop offset="0.7" stop-color="#00C9A7"/><stop offset="1" stop-color="#39D353"/></linearGradient></defs></svg>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-4">
+          ${dateStr ? `<div><p class="text-[10px] text-white/30 uppercase tracking-widest mb-0.5">Date</p><p class="text-sm text-white/70">${dateStr}</p></div>` : ''}
+          ${t.location ? `<div><p class="text-[10px] text-white/30 uppercase tracking-widest mb-0.5">Location</p><p class="text-sm text-white/70">${t.location}</p></div>` : ''}
+          <div><p class="text-[10px] text-white/30 uppercase tracking-widest mb-0.5">Photos</p><p class="text-sm text-white/70">${photoCount ? photoCount + ' shots' : 'Coming soon'}</p></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Tournament selection ─────────────────────────────────────────────────
+  function selectTournament(card) {
+    document.querySelectorAll('.tournament-card').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelector('.check-icon').style.opacity = '0';
+    });
+    card.classList.add('selected');
+    card.querySelector('.check-icon').style.opacity = '1';
+    selectedTournament = card.dataset.id;
+    document.getElementById('next-1').disabled = false;
+  }
+
+  // ── Step navigation ──────────────────────────────────────────────────────
+  function goToStep(n) {
+    [1,2].forEach(i => document.getElementById('step-'+i).classList.add('hidden'));
+    document.getElementById('step-'+n).classList.remove('hidden');
+    document.getElementById('step-'+n).classList.add('fade-in');
+
+    const labels = ['Tournament', 'Photos'];
+    document.getElementById('step-label').textContent = labels[n-1];
+    document.getElementById('step-sub').textContent = 'Step '+n+' of 2';
+
+    [1,2].forEach(i => {
+      const dot = document.getElementById('dot-'+i);
+      dot.className = 'step-dot ' + (i < n ? 'done' : i === n ? 'active' : 'inactive');
+    });
+    document.getElementById('line-1').className = 'step-line ' + (n > 1 ? 'done' : '');
+
+    if (n === 2) {
+      const sp = getLatestPlayer();
+      const tCard = document.querySelector('.tournament-card.selected');
+      const tName = tCard ? tCard.querySelector('p').textContent : '';
+      document.getElementById('gallery-context-label').textContent = tName;
+      document.getElementById('nav-player-name').textContent = `#${sp.jersey} ${sp.athleteFirst} ${sp.athleteLast}`;
+      renderPhotos();
+      document.getElementById('bottom-bar').classList.remove('hidden-bar');
+    } else {
+      document.getElementById('bottom-bar').classList.add('hidden-bar');
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Photo rendering ───────────────────────────────────────────────────────
+  function renderPhotos() {
+    const tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
+    const t = tournaments.find(x => x.id === selectedTournament);
+    const realPhotos = t && t.photos && t.photos.length ? t.photos : null;
+    const grid = document.getElementById('photo-grid');
+    const noPhotosMsg = document.getElementById('no-photos-msg');
+
+    selectedPhotos.clear();
+
+    if (realPhotos) {
+      noPhotosMsg.style.display = 'none';
+      // Use the actual URL as the photo ID so selections save real URLs
+      grid.innerHTML = realPhotos.map((src, i) => `
+        <div class="photo-item" data-photo-url="${src}" onclick="togglePhoto(this, '${src}')">
+          <img src="${src}" alt="Photo ${i+1}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+          <div class="photo-overlay"></div>
+          <div class="photo-check">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 p-2.5">
+            <span class="cond text-[10px] tracking-widest uppercase text-white/40">Shot ${i+1}</span>
+          </div>
+        </div>`).join('');
+    } else {
+      noPhotosMsg.style.display = 'block';
+      grid.innerHTML = '';
+    }
+    updateCounter();
+  }
+
+  function togglePhoto(item, id) {
+    if (item.classList.contains('selected')) {
+      item.classList.remove('selected');
+      selectedPhotos.delete(id);
+    } else {
+      item.classList.add('selected');
+      selectedPhotos.add(id);
+    }
+    updateCounter();
+  }
+
+  function updateCounter() {
+    const n = selectedPhotos.size;
+    document.getElementById('selection-count').textContent = n;
+    document.getElementById('bar-count').textContent = n;
+    document.getElementById('bar-plural').textContent = n === 1 ? '' : 's';
+    document.getElementById('submit-btn').disabled = n < PACKAGE_LIMIT;
+  }
+
+  // ── Save + Submit ─────────────────────────────────────────────────────────
+  function saveSelectionToStorage(tName, playerName, photos) {
+    const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+    const idx = all.findIndex(p => p.id === session.id);
+    const selectionData = {
+      selectionSubmitted: true,
+      selectedPhotos:     Array.from(photos),
+      tournament:         tName,
+      playerName:         playerName,
+    };
+    if (idx > -1) {
+      Object.assign(all[idx], selectionData);
+      localStorage.setItem('es_players', JSON.stringify(all));
+      localStorage.setItem('es_session', JSON.stringify(all[idx]));
+      if (typeof _sbSavePlayer === 'function') _sbSavePlayer(all[idx]);
+    } else {
+      // Self-registered user not in es_players — persist directly to session
+      const merged = Object.assign({}, session, selectionData);
+      localStorage.setItem('es_session', JSON.stringify(merged));
+      if (typeof _sbSavePlayer === 'function') _sbSavePlayer(merged);
+    }
+  }
+
+  function handleSubmit() {
+    if (!document.getElementById('photo-consent').checked) {
+      alert('Please confirm photo usage rights before submitting.');
+      return;
+    }
+    const overlay = document.getElementById('submit-overlay');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(() => {
+      const sp = getLatestPlayer();
+      const tCard = document.querySelector('.tournament-card.selected');
+      const tName = tCard ? tCard.querySelector('p').textContent : '';
+      const playerLabel = `#${sp.jersey} ${sp.athleteFirst} ${sp.athleteLast}`;
+
+      saveSelectionToStorage(tName, playerLabel, selectedPhotos);
+
+      // Photo pipeline: if they already paid, this selection completes the
+      // purchase — copy it into the editors' Dropbox and push the Monday card.
+      if (sp.purchased && typeof _esSendToEditors === 'function') {
+        _esSendToEditors(session.id).catch(e => console.warn('[photo-select] send-to-editors failed:', e.message));
+      }
+
+      document.getElementById('ol-loading').style.display = 'none';
+      document.getElementById('ol-success').style.display = 'flex';
+
+      const heading = sp.purchased ? 'We Received Your Selection!' : 'Photos Saved to Your Profile!';
+      const message = sp.purchased
+        ? 'Your selections have been sent in. Our team will get to work — your finished photos will appear on your profile when ready.'
+        : 'Your selections are saved. Purchase to have them professionally edited and watermarks removed.';
+
+      document.getElementById('ol-heading').textContent = heading;
+      document.getElementById('ol-message').textContent = message;
+
+      document.getElementById('ol-chips').innerHTML = `
+        <div class="info-chip text-left">
+          <p class="cond text-[10px] tracking-[0.18em] uppercase text-white/30 mb-1">Tournament</p>
+          <p class="cond text-sm font-bold tracking-wide uppercase text-white">${tName}</p>
+        </div>
+        <div class="info-chip text-left">
+          <p class="cond text-[10px] tracking-[0.18em] uppercase text-white/30 mb-1">Player</p>
+          <p class="cond text-sm font-bold tracking-wide uppercase text-white">${playerLabel}</p>
+        </div>
+        <div class="info-chip text-left" style="grid-column:1/-1;">
+          <p class="cond text-[10px] tracking-[0.18em] uppercase text-white/30 mb-1">Photos Selected</p>
+          <p class="cond text-sm font-bold tracking-wide uppercase g-text">${selectedPhotos.size} photos</p>
+        </div>
+      `;
+    }, 1800);
+  }
+
+  function goToProfile() {
+    window.location.href = 'profile.html';
+  }
+
+  // ── Init — sync tournaments from Supabase first so photos are fresh ────────
+  (async () => {
+    try {
+      if (typeof _sbSync === 'function') {
+        await _sbSync({ players: true, tournaments: true });
+      }
+    } catch(e) { console.warn('[photo-select] sync error:', e.message); }
+    const p = getLatestPlayer();
+    if (p && p.purchased) { window.location.href = 'profile.html'; return; }
+    renderTournaments();
+  })();
+</script>
+
+</body>
+</html>

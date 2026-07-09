@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Coach Profile</title>
+<script>if (window.top !== window.self) { try { window.top.location.replace(window.location.href); } catch (e) { document.documentElement.style.display = 'none'; } }</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<script src="crop-modal.js"></script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1b1b1b;
+    --border: rgba(255,255,255,0.07);
+    --blue: #1E90FF;
+    --sidebar-w: 244px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+  .page-content { flex: 1; display: flex; min-width: 0; animation: pageIn 0.18s ease-out both; }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    border-right: 1px solid var(--border);
+    border-top: 3px solid var(--blue);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 16px 24px;
+    z-index: 40;
+    background: var(--bg);
+  }
+
+  .coach-portal-label {
+    text-align: center;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--blue);
+    opacity: 0.7;
+    margin-top: -6px;
+    margin-bottom: 18px;
+  }
+
+  .nav-links { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: 12px; cursor: pointer;
+    font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.55);
+    transition: background 0.15s, color 0.15s; text-decoration: none;
+    border-left: 3px solid transparent;
+  }
+  .nav-link:hover { background: rgba(30,144,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-link.active { color: #fff; font-weight: 700; background: rgba(30,144,255,0.08); border-left-color: var(--blue); padding-left: 11px; }
+  .nav-link-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .sidebar-bottom {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 14px 12px; border-top: 1px solid var(--border); margin-top: 12px;
+  }
+  .coach-avatar-sm {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(30,144,255,0.1); border: 1px solid rgba(30,144,255,0.25);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    max-width: 760px;
+    padding: 40px 32px 80px;
+  }
+
+  /* ── Hero band ── */
+  .profile-banner {
+    width: 100%; height: 148px; border-radius: 18px;
+    background: linear-gradient(135deg, #0a0e1a 0%, #0d1525 50%, #091020 100%);
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden; margin-bottom: 0;
+  }
+  .profile-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 20% 60%, rgba(30,144,255,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, rgba(123,47,190,0.12) 0%, transparent 55%);
+  }
+  .banner-accent {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #1E90FF 0%, #7B2FBE 50%, #00C9A7 100%);
+  }
+  .banner-label {
+    position: absolute; top: 20px; right: 20px;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--blue); opacity: 0.5;
+  }
+
+  /* ── Avatar ── */
+  .avatar-wrap {
+    position: relative; width: 96px; height: 96px;
+    margin: -48px 0 0 28px; z-index: 10;
+    flex-shrink: 0;
+  }
+  .avatar-ring {
+    width: 96px; height: 96px; border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #1E90FF, #7B2FBE);
+    cursor: pointer;
+  }
+  .avatar-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: #1a1a2a; border: 3px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .avatar-overlay {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s; cursor: pointer;
+  }
+  .avatar-ring:hover .avatar-overlay { opacity: 1; }
+
+  /* ── Name row ── */
+  .name-row {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 12px 24px 0 136px; /* left pushes past avatar */
+  }
+
+  /* ── Verified badge ── */
+  .verified-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    background: rgba(30,144,255,0.1); border: 1px solid rgba(30,144,255,0.25);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--blue);
+  }
+  .pending-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.25);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #FF8C00;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-top: 20px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); margin-bottom: 20px;
+  }
+
+  /* ── Form fields ── */
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field-grid.full { grid-template-columns: 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+  .field-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px; color: #fff; font-family: inherit;
+    outline: none; transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+  }
+  .field-input::placeholder { color: rgba(255,255,255,0.2); }
+  .field-input:focus {
+    border-color: rgba(30,144,255,0.4);
+    background: rgba(30,144,255,0.04);
+  }
+  select.field-input { cursor: pointer; }
+  select.field-input option { background: #1b1b1b; color: #fff; }
+  textarea.field-input { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+  /* ── Stats row ── */
+  .stat-row { display: flex; gap: 10px; margin-top: 4px; }
+  .stat-pill {
+    flex: 1; padding: 16px 12px; border-radius: 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-num {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 26px; letter-spacing: 0.03em;
+    color: #fff;
+  }
+  .stat-label { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── Banner upload ── */
+  .profile-banner {
+    cursor: pointer;
+  }
+  .banner-upload-hint {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; transition: opacity 0.2s;
+    font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85);
+    letter-spacing: 0.06em;
+  }
+  .profile-banner:hover .banner-upload-hint { opacity: 1; }
+
+  /* ── View / Edit mode ── */
+  #view-section { display: block; }
+  #edit-section { display: none; }
+  body.editing #view-section { display: none; }
+  body.editing #edit-section { display: block; }
+
+  .info-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-top: 20px;
+  }
+  .info-block-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); margin-bottom: 16px;
+  }
+  .bio-text {
+    font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.75;
+    white-space: pre-wrap;
+  }
+  .bio-empty {
+    font-size: 14px; color: rgba(255,255,255,0.2); font-style: italic;
+  }
+  .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .info-item { display: flex; flex-direction: column; gap: 4px; }
+  .info-item-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+  }
+  .info-item-value { font-size: 14px; color: rgba(255,255,255,0.8); }
+  .info-link {
+    font-size: 14px; color: var(--blue); text-decoration: none; word-break: break-all;
+  }
+  .info-link:hover { text-decoration: underline; }
+
+  /* ── Edit profile btn ── */
+  .edit-profile-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 10px;
+    background: rgba(30,144,255,0.1); border: 1px solid rgba(30,144,255,0.25);
+    cursor: pointer; font-size: 13px; font-weight: 700; color: var(--blue);
+    font-family: inherit; letter-spacing: 0.04em;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .edit-profile-btn:hover { background: rgba(30,144,255,0.18); border-color: rgba(30,144,255,0.4); }
+
+  /* ── Save button ── */
+  .save-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 13px 28px; border-radius: 12px;
+    background: linear-gradient(135deg, #1E90FF, #0066CC);
+    border: none; cursor: pointer;
+    font-size: 14px; font-weight: 700; color: #fff; font-family: inherit;
+    letter-spacing: 0.06em;
+    box-shadow: 0 4px 20px rgba(30,144,255,0.25);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .save-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .save-btn:active { transform: translateY(0); }
+
+  .save-msg {
+    font-size: 13px; color: #00C9A7; font-weight: 600;
+    opacity: 0; transition: opacity 0.3s; margin-left: 12px;
+  }
+
+  .bottom-nav { display: none; }
+  @media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .main { margin-left: 0 !important; padding: 16px 16px 108px !important; max-width: 100% !important; }
+    .profile-banner { height: 120px; border-radius: 12px; }
+    .avatar-wrap { margin-left: 16px; }
+    .name-row { padding-left: 16px !important; flex-wrap: wrap; gap: 8px; }
+    .name-row > div:last-child { flex-direction: column; align-items: flex-start; gap: 6px; }
+    #edit-btn { width: 100%; justify-content: center; }
+    .bottom-nav {
+      display: flex; position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 48px; right: 48px; height: 40px;
+      background: rgba(8,8,12,0.52); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+      backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+      z-index: 100; align-items: center; justify-content: center; gap: 0;
+    }
+    .bn-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+      flex: 1; height: 100%; text-decoration: none; font-size: 0; position: relative;
+      color: rgba(255,255,255,0.25); border-radius: 20px;
+      transition: color 0.22s cubic-bezier(0.22,1,0.36,1), background 0.22s cubic-bezier(0.22,1,0.36,1), transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bn-item:active { transform: scale(0.82); }
+    .bn-item.active { color: #1E90FF; background: rgba(30,144,255,0.12); }
+    .bn-item svg { width: 17px; height: 17px; transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1); }
+    .bn-item.active svg { transform: scale(1.18); }
+    .bn-item.active::after { content: ''; position: absolute; bottom: 5px; width: 3px; height: 3px; border-radius: 50%; background: #1E90FF; box-shadow: 0 0 5px #1E90FF; }
+  }
+
+</style>
+  <link rel="prefetch" href="coach-news-feed.html">
+  <link rel="prefetch" href="coach-feed.html">
+  <link rel="prefetch" href="coach-messages.html">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="page-content">
+<!-- Sidebar -->
+<aside class="sidebar">
+  <a href="coach-news-feed.html" style="display:flex;justify-content:center;align-items:center;padding:4px 0;margin-bottom:8px;">
+    <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout" style="height:64px;width:64px;object-fit:contain;border-radius:50%;">
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="coach-feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      Scout Players
+    </a>
+    <a class="nav-link" href="coach-news-feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      Feed
+    </a>
+    <a class="nav-link" href="coach-messages.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Messages
+    </a>
+    <a class="nav-link active" href="coach-profile.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      My Profile
+    </a>
+    <a class="nav-link" href="coach-settings.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      Settings
+    </a>
+    <a class="nav-link" href="#" onclick="logout();return false;">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      Sign Out
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="coach-avatar-sm" id="sb-avatar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.7)" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">Coach</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-sub">Coach Profile</p>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main" id="main-content" tabindex="-1">
+
+  <!-- Pending Notice -->
+  <div id="pending-notice" style="display:none;padding:13px 16px;border-radius:12px;background:rgba(30,144,255,0.07);border:1px solid rgba(30,144,255,0.18);align-items:center;gap:12px;margin-bottom:20px;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;"><strong style="color:#1E90FF;">Account pending verification</strong> — we'll notify you once an admin approves it. You can fill out your profile while you wait.</p>
+  </div>
+
+  <!-- Banner -->
+  <div class="profile-banner" id="banner-div" onclick="document.getElementById('banner-input').click();">
+    <div class="banner-accent"></div>
+    <div class="banner-upload-hint">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Change Banner Photo
+    </div>
+  </div>
+  <input type="file" id="banner-input" aria-label="Upload banner image" accept="image/*" style="display:none;" onchange="handleBannerUpload(event)">
+
+  <!-- Avatar + name row -->
+  <div style="display:flex;align-items:flex-start;gap:0;">
+    <div class="avatar-wrap">
+      <div class="avatar-ring" onclick="document.getElementById('avatar-input').click();">
+        <div class="avatar-inner" id="avatar-display">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.35)" stroke-width="1.4" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div class="avatar-overlay">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="avatar-input" aria-label="Upload profile photo" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+    </div>
+
+    <div class="name-row" style="flex:1;padding-left:20px;padding-top:56px;">
+      <div>
+        <h1 id="display-name" style="font-size:24px;font-weight:800;color:#fff;line-height:1.1;">Coach</h1>
+        <p id="display-title" style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;"></p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="status-badge"></div>
+        <button class="edit-profile-btn" id="edit-btn" onclick="enterEditMode()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stat-row" style="margin-top:24px;">
+    <div class="stat-pill">
+      <div class="stat-num" id="stat-saved">0</div>
+      <div class="stat-label">Saved Players</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-num" id="stat-sport">—</div>
+      <div class="stat-label">Sport</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-num" id="stat-years">—</div>
+      <div class="stat-label">Yrs Coaching</div>
+    </div>
+  </div>
+
+  <!-- VIEW MODE -->
+  <div id="view-section">
+    <!-- Bio block -->
+    <div class="info-block">
+      <p class="info-block-title">About</p>
+      <p class="bio-text" id="view-bio"></p>
+    </div>
+
+    <!-- Info block -->
+    <div class="info-block">
+      <p class="info-block-title">Coach Info</p>
+      <div class="info-row" id="view-info-rows"></div>
+    </div>
+  </div>
+
+  <!-- EDIT MODE -->
+  <div id="edit-section">
+
+    <!-- Profile Photo -->
+    <div class="card">
+      <p class="card-title">Profile Photo</p>
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div id="edit-photo-preview" onclick="document.getElementById('avatar-input').click();" style="width:76px;height:76px;border-radius:50%;overflow:hidden;background:rgba(30,144,255,0.08);border:1px solid rgba(255,255,255,0.1);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.35)" stroke-width="1.4" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:10px;">Upload a profile picture — you can drag to reposition and zoom before saving. JPG or PNG.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" onclick="document.getElementById('avatar-input').click()" style="background:rgba(30,144,255,0.12);border:1px solid rgba(30,144,255,0.3);border-radius:8px;padding:8px 16px;color:#1E90FF;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(30,144,255,0.2)'" onmouseout="this.style.background='rgba(30,144,255,0.12)'">Change Photo</button>
+            <button type="button" id="coach-remove-photo-btn" onclick="removeCoachPhoto()" style="display:none;background:none;border:1px solid rgba(255,77,109,0.3);border-radius:8px;padding:8px 16px;color:rgba(255,77,109,0.7);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(255,77,109,0.6)';this.style.color='#ff4d6d'" onmouseout="this.style.borderColor='rgba(255,77,109,0.3)';this.style.color='rgba(255,77,109,0.7)'">Remove Photo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner Photo -->
+    <div class="card">
+      <p class="card-title">Banner Photo</p>
+      <div id="edit-banner-preview" onclick="document.getElementById('banner-input').click();" style="width:100%;height:96px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#0a0e1a 0%,#0d1525 50%,#091020 100%);border:1px solid rgba(255,255,255,0.1);cursor:pointer;background-size:cover;background-position:center;margin-bottom:12px;"></div>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:10px;">Upload a banner image — you can drag to reposition and zoom before saving. JPG or PNG.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" onclick="document.getElementById('banner-input').click()" style="background:rgba(30,144,255,0.12);border:1px solid rgba(30,144,255,0.3);border-radius:8px;padding:8px 16px;color:#1E90FF;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(30,144,255,0.2)'" onmouseout="this.style.background='rgba(30,144,255,0.12)'">Change Banner</button>
+        <button type="button" id="coach-remove-banner-btn" onclick="removeCoachBanner()" style="display:none;background:none;border:1px solid rgba(255,77,109,0.3);border-radius:8px;padding:8px 16px;color:rgba(255,77,109,0.7);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(255,77,109,0.6)';this.style.color='#ff4d6d'" onmouseout="this.style.borderColor='rgba(255,77,109,0.3)';this.style.color='rgba(255,77,109,0.7)'">Remove Banner</button>
+      </div>
+    </div>
+
+    <!-- Edit Info -->
+    <div class="card">
+      <p class="card-title">Coach Info</p>
+      <div class="field-grid" style="margin-bottom:16px;">
+        <div class="field">
+          <label class="field-label" for="f-first">First Name</label>
+          <input class="field-input" id="f-first" type="text" placeholder="First name">
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-last">Last Name</label>
+          <input class="field-input" id="f-last" type="text" placeholder="Last name">
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-title">Title</label>
+          <select class="field-input" id="f-title">
+            <option value="">Select title</option>
+            <option>Head Coach</option>
+            <option>Assistant Coach</option>
+            <option>Recruiting Coordinator</option>
+            <option>Strength &amp; Conditioning</option>
+            <option>Volunteer Coach</option>
+            <option>Scout</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-sport">Sport</label>
+          <select class="field-input" id="f-sport">
+            <option value="">Select sport</option>
+            <option>Football</option>
+            <option>Basketball</option>
+            <option>Baseball</option>
+            <option>Softball</option>
+            <option>Soccer</option>
+            <option>Volleyball</option>
+            <option>Track &amp; Field</option>
+            <option>Wrestling</option>
+            <option>Lacrosse</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-division">Division Level</label>
+          <select class="field-input" id="f-division">
+            <option value="">Select division</option>
+            <option value="D1">Division I (D1)</option>
+            <option value="D2">Division II (D2)</option>
+            <option value="D3">Division III (D3)</option>
+            <option value="NAIA">NAIA</option>
+            <option value="JUCO">JUCO (Junior College)</option>
+            <option value="High School">High School</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-school">School / University</label>
+          <input class="field-input" id="f-school" type="text" placeholder="e.g. Arizona State University">
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-years">Years Coaching</label>
+          <input class="field-input" id="f-years" type="number" min="0" max="60" placeholder="e.g. 8">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label" for="f-bio">Bio</label>
+        <textarea class="field-input" id="f-bio" placeholder="Tell players about yourself — your coaching philosophy, program, what you look for in recruits..."></textarea>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="card">
+      <p class="card-title">Contact Info</p>
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label" for="f-email">Email</label>
+          <input class="field-input" id="f-email" type="email" placeholder="you@school.edu">
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-phone">Phone (optional)</label>
+          <input class="field-input" id="f-phone" type="tel" placeholder="(555) 000-0000">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label class="field-label" for="f-link">Official Recruiting Profile URL (optional)</label>
+          <input class="field-input" id="f-link" type="url" placeholder="https://school.edu/coaches/you">
+        </div>
+      </div>
+    </div>
+
+    <!-- Save / Cancel -->
+    <div style="display:flex;align-items:center;gap:12px;margin-top:24px;">
+      <button class="save-btn" onclick="saveProfile()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Profile
+      </button>
+      <button onclick="exitEditMode()" style="padding:13px 20px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-size:14px;font-weight:600;color:rgba(255,255,255,0.5);font-family:inherit;transition:background 0.15s;">
+        Cancel
+      </button>
+      <span class="save-msg" id="save-msg">✓ Saved</span>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  // Escape user-supplied text before inserting into innerHTML (prevents stored XSS)
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  const escAttr = escHtml;
+  // Allow only http(s) URLs in coach-entered links (blocks javascript:/data: schemes)
+  function safeUrl(u) { u = String(u == null ? '' : u).trim(); return /^https?:\/\//i.test(u) ? u : ''; }
+
+  const coach = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
+  if (!coach) window.location.href = 'coach-login.html';
+  if (coach && !coach.verified) {
+    document.getElementById('pending-notice').style.display = 'flex';
+  }
+
+  function logout() { localStorage.removeItem('es_coach_session'); window.location.href = 'coach-login.html'; }
+
+  // ── Load saved profile data ────────────────────────────────────────────────
+  function getProfileKey() { return 'es_coach_profile_' + (coach ? coach.id : 'x'); }
+
+  function loadProfile() {
+    if (!coach) return;
+    const saved = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+    const data = { ...coach, ...saved };
+
+    document.getElementById('f-first').value  = data.firstName  || '';
+    document.getElementById('f-last').value   = data.lastName   || '';
+    document.getElementById('f-title').value    = data.title      || '';
+    document.getElementById('f-sport').value    = data.sport      || '';
+    document.getElementById('f-division').value = data.division   || '';
+    document.getElementById('f-school').value   = data.university || data.school || '';
+    document.getElementById('f-years').value  = data.years      || '';
+    document.getElementById('f-bio').value    = data.bio        || '';
+    document.getElementById('f-email').value  = data.email      || '';
+    document.getElementById('f-phone').value  = data.phone      || '';
+    document.getElementById('f-link').value   = data.link       || '';
+
+    // Display name
+    const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ');
+    document.getElementById('display-name').textContent = fullName || 'Coach';
+    document.getElementById('sb-name').textContent = fullName || 'Coach';
+    document.getElementById('display-title').textContent = [data.title, data.division, data.university || data.school].filter(Boolean).join(' · ');
+    document.getElementById('sb-sub').textContent = data.sport ? `Coach · ${data.sport}` : 'Coach Profile';
+
+    // Stats
+    const allSaved = JSON.parse(localStorage.getItem('es_coach_saved') || '{}');
+    document.getElementById('stat-saved').textContent = (allSaved[coach.id] || []).length;
+    document.getElementById('stat-sport').textContent = data.sport || '—';
+    document.getElementById('stat-years').textContent = data.years || '—';
+
+    // Avatar — drive big ring, sidebar + edit preview + remove button from one helper
+    updateCoachPhotoUI(data.profilePhoto || null);
+
+    // Status badge
+    const badge = document.getElementById('status-badge');
+    badge.innerHTML = coach.verified
+      ? `<span class="verified-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Verified Coach</span>`
+      : `<span class="pending-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Pending Verification</span>`;
+
+    // Banner photo
+    if (data.bannerPhoto) applyBannerImage(data.bannerPhoto);
+
+    // Render view section
+    renderViewSection();
+  }
+
+  // ── View / Edit mode ──────────────────────────────────────────────────────
+  function enterEditMode() {
+    document.body.classList.add('editing');
+    document.getElementById('edit-btn').style.display = 'none';
+  }
+  function exitEditMode() {
+    document.body.classList.remove('editing');
+    document.getElementById('edit-btn').style.display = 'flex';
+    renderViewSection();
+  }
+
+  function renderViewSection() {
+    const saved = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+    const data  = { ...coach, ...saved };
+
+    // Bio
+    const bioEl = document.getElementById('view-bio');
+    if (data.bio) {
+      bioEl.className = 'bio-text';
+      bioEl.textContent = data.bio;
+    } else {
+      bioEl.className = 'bio-empty';
+      bioEl.textContent = 'No bio added yet. Click "Edit Profile" to tell players about yourself.';
+    }
+
+    // Info rows
+    const rows = [
+      { label: 'Title',        value: data.title      || '' },
+      { label: 'Division',     value: data.division   || '' },
+      { label: 'Sport',        value: data.sport      || '' },
+      { label: 'School',       value: data.university || data.school || '' },
+      { label: 'Years Coaching', value: data.years    || '' },
+      { label: 'Email',        value: data.email      || '', link: data.email ? `mailto:${data.email}` : null },
+      { label: 'Phone',        value: data.phone      || '' },
+    ];
+    if (data.link && safeUrl(data.link)) {
+      rows.push({ label: 'Recruiting Profile', value: 'View Profile', link: safeUrl(data.link) });
+    }
+    const filtered = rows.filter(r => r.value);
+    document.getElementById('view-info-rows').innerHTML = filtered.length
+      ? filtered.map(r => `
+          <div class="info-item">
+            <span class="info-item-label">${escHtml(r.label)}</span>
+            ${r.link
+              ? `<a class="info-link" href="${escAttr(r.link)}" target="_blank" rel="noopener noreferrer">${escHtml(r.value)}</a>`
+              : `<span class="info-item-value">${escHtml(r.value)}</span>`}
+          </div>`).join('')
+      : `<p style="font-size:14px;color:rgba(255,255,255,0.2);font-style:italic;">No info added yet.</p>`;
+  }
+
+  // ── Banner upload ──────────────────────────────────────────────────────────
+  async function handleBannerUpload(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    // Match the crop frame to the actual banner shape so what they frame is what shows
+    const bEl = document.getElementById('banner-div');
+    const aspect = bEl && bEl.offsetHeight ? bEl.offsetWidth / bEl.offsetHeight : 4.5;
+    const cropped = await EyeScoutCropper.open(file, { shape: 'rect', aspect, outWidth: 1400, title: 'Position your banner' });
+    if (!cropped) return;
+    updateCoachBannerUI(cropped.dataUrl); // instant local preview while it uploads
+    try {
+      const url = await _sbUploadImage('banners', coach.id, cropped.file);
+      const p = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+      p.bannerPhoto = url;
+      localStorage.setItem(getProfileKey(), JSON.stringify(p));
+      syncToSession({ bannerPhoto: url });
+      updateCoachBannerUI(url);
+    } catch (err) {
+      console.error('[banner upload]', err);
+      alert('Banner upload failed: ' + (err.message || 'try again'));
+    }
+  }
+
+  // Backwards-compatible alias — keep every banner surface (hero + edit preview)
+  // and the Remove button in sync.
+  function applyBannerImage(src) { updateCoachBannerUI(src); }
+  function updateCoachBannerUI(url) {
+    const b    = document.getElementById('banner-div');
+    const prev = document.getElementById('edit-banner-preview');
+    const rm   = document.getElementById('coach-remove-banner-btn');
+    if (url) {
+      const cssUrl = `url("${String(url).replace(/["\\]/g, '')}")`; // quoted + stripped so a hostile URL can't inject CSS
+      if (b)    { b.style.backgroundImage = cssUrl; b.style.backgroundSize = 'cover'; b.style.backgroundPosition = 'center'; }
+      if (prev) { prev.style.backgroundImage = cssUrl; }
+      if (rm)   rm.style.display = '';
+    } else {
+      if (b)    b.style.backgroundImage = '';   // revert to the default gradient
+      if (prev) prev.style.backgroundImage = '';
+      if (rm)   rm.style.display = 'none';
+    }
+  }
+
+  function removeCoachBanner() {
+    if (!confirm('Remove your banner photo?')) return;
+    const p = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+    delete p.bannerPhoto;
+    localStorage.setItem(getProfileKey(), JSON.stringify(p));
+    syncToSession({ bannerPhoto: null });
+    updateCoachBannerUI(null);
+  }
+
+  // ── Avatar upload ──────────────────────────────────────────────────────────
+  // Keep every avatar surface (big ring, sidebar, edit preview) + remove button in sync.
+  function updateCoachPhotoUI(url) {
+    const overlay = `<div class="avatar-overlay" onclick="document.getElementById('avatar-input').click()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+    const d = document.getElementById('avatar-display');
+    const sb = document.getElementById('sb-avatar');
+    const prev = document.getElementById('edit-photo-preview');
+    const rm = document.getElementById('coach-remove-photo-btn');
+    const img = (u) => `<img alt="" src="${escAttr(u)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    const bigPh = `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.35)" stroke-width="1.4" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    const smPh  = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.35)" stroke-width="1.4" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    if (url) {
+      if (d)   d.innerHTML = img(url) + overlay;
+      if (sb)  sb.innerHTML = img(url);
+      if (prev) prev.innerHTML = img(url);
+      if (rm)  rm.style.display = '';
+    } else {
+      if (d)   d.innerHTML = bigPh + overlay;
+      if (sb)  sb.innerHTML = smPh;
+      if (prev) prev.innerHTML = smPh;
+      if (rm)  rm.style.display = 'none';
+    }
+  }
+
+  async function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    const cropped = await EyeScoutCropper.open(file, { shape: 'circle', outWidth: 500, title: 'Position your photo' });
+    if (!cropped) return;
+    updateCoachPhotoUI(cropped.dataUrl); // instant preview while it uploads
+    try {
+      const url = await _sbUploadImage('avatars', coach.id, cropped.file);
+      const p = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+      p.profilePhoto = url;
+      localStorage.setItem(getProfileKey(), JSON.stringify(p));
+      syncToSession({ profilePhoto: url });
+      updateCoachPhotoUI(url);
+    } catch (err) {
+      console.error('[avatar upload]', err);
+      alert('Photo upload failed: ' + (err.message || 'try again'));
+    }
+  }
+
+  function removeCoachPhoto() {
+    if (!confirm('Remove your profile photo?')) return;
+    const p = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+    delete p.profilePhoto;
+    localStorage.setItem(getProfileKey(), JSON.stringify(p));
+    syncToSession({ profilePhoto: null });
+    updateCoachPhotoUI(null);
+  }
+
+  // ── Save profile ──────────────────────────────────────────────────────────
+  function saveProfile() {
+    const data = {
+      firstName:  document.getElementById('f-first').value.trim(),
+      lastName:   document.getElementById('f-last').value.trim(),
+      title:      document.getElementById('f-title').value,
+      sport:      document.getElementById('f-sport').value,
+      division:   document.getElementById('f-division').value,
+      university: document.getElementById('f-school').value.trim(),
+      years:      document.getElementById('f-years').value,
+      bio:        document.getElementById('f-bio').value.trim(),
+      email:      document.getElementById('f-email').value.trim(),
+      phone:      document.getElementById('f-phone').value.trim(),
+      link:       document.getElementById('f-link').value.trim(),
+    };
+
+    // Merge with existing profile photo
+    const existing = JSON.parse(localStorage.getItem(getProfileKey()) || '{}');
+    const merged = { ...existing, ...data };
+    localStorage.setItem(getProfileKey(), JSON.stringify(merged));
+
+    syncToSession(data);
+
+    // Update display
+    const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ');
+    document.getElementById('display-name').textContent = fullName || 'Coach';
+    document.getElementById('sb-name').textContent = fullName || 'Coach';
+    document.getElementById('display-title').textContent = [data.title, data.division, data.university].filter(Boolean).join(' · ');
+    document.getElementById('sb-sub').textContent = data.sport ? `Coach · ${data.sport}` : 'Coach Profile';
+    document.getElementById('stat-sport').textContent = data.sport || '—';
+    document.getElementById('stat-years').textContent = data.years || '—';
+
+    const msg = document.getElementById('save-msg');
+    msg.style.opacity = '1';
+    setTimeout(() => {
+      msg.style.opacity = '0';
+      exitEditMode();
+    }, 900);
+  }
+
+  function syncToSession(patch) {
+    // Update coach session
+    const session = JSON.parse(localStorage.getItem('es_coach_session') || '{}');
+    const updated = { ...session, ...patch };
+    localStorage.setItem('es_coach_session', JSON.stringify(updated));
+
+    // Update coaches array
+    const coaches = JSON.parse(localStorage.getItem('es_coaches') || '[]');
+    const idx = coaches.findIndex(c => c.id === (session.id || coach.id));
+    if (idx >= 0) {
+      coaches[idx] = { ...coaches[idx], ...patch };
+      localStorage.setItem('es_coaches', JSON.stringify(coaches));
+    }
+
+    if (typeof _sbSaveCoach === 'function') _sbSaveCoach(updated);
+  }
+
+  loadProfile();
+
+  (async () => {
+    try {
+      if (typeof _sbSync !== 'function') return;
+      await _sbSync({ coaches: true, subscription: true });
+      // Refresh coach session from Supabase data
+      const freshCoaches = JSON.parse(localStorage.getItem('es_coaches') || '[]');
+      const me = freshCoaches.find(c => c.id === coach?.id);
+      if (me) {
+        localStorage.setItem('es_coach_session', JSON.stringify({ ...coach, ...me }));
+        loadProfile();
+      }
+    } catch(e) { console.warn('[coach-profile] Supabase sync error:', e.message); }
+  })();
+</script>
+</div><!-- /.page-content -->
+<nav class="bottom-nav">
+  <a class="bn-item" href="coach-feed.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Scout
+  </a>
+  <a class="bn-item" href="coach-news-feed.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Feed
+  </a>
+  <a class="bn-item" href="coach-messages.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Messages
+  </a>
+  <a class="bn-item active" href="coach-profile.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </a>
+  <a class="bn-item" href="coach-settings.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </a>
+</nav>
+<script>
+document.querySelectorAll('.bn-item:not(.active)').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href) {
+      e.preventDefault();
+      const pc = document.querySelector('.page-content');
+      pc.style.transition = 'opacity 0.12s ease';
+      pc.style.opacity = '0';
+      setTimeout(() => { window.location.href = href; }, 110);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

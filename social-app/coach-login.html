@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Coach Login</title>
+<!-- Coach login now lives on the unified login page with a Player/Coach toggle. -->
+<script>
+  const q = new URLSearchParams(window.location.search);
+  const tab = q.get('tab') === 'signup' ? 'signup' : 'login';
+  window.location.replace('login.html?role=coach&tab=' + tab);
+</script>
+<meta http-equiv="refresh" content="0; url=login.html?role=coach&tab=login">
+</head>
+<body style="background:#111;color:#fff;font-family:system-ui,sans-serif;">
+  <p style="padding:24px;">Redirecting to <a href="login.html?role=coach&tab=login" style="color:#1E90FF;">the login page</a>…</p>
+</body>
+</html>

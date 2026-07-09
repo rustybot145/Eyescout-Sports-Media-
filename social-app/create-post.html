@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Post — EyeScout Sports</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --border: rgba(255,255,255,0.07);
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --sidebar-w: 244px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: #fff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; display: flex; }
+
+  /* Sidebar */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: 0; left: 0;
+    height: 100vh; border-right: 1px solid var(--border); display: flex;
+    flex-direction: column; padding: 28px 16px 24px; z-index: 40; background: var(--bg);
+  }
+  .nav-links { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .nav-link {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
+    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s;
+    text-decoration: none; user-select: none;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-link-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .new-post-btn {
+    display: flex; align-items: center; gap: 14px; padding: 13px 14px; border-radius: 12px;
+    cursor: pointer; font-size: 15px; font-weight: 700; color: #fff; background: var(--grad);
+    border: none; width: 100%; margin-top: 8px; letter-spacing: 0.02em;
+    box-shadow: 0 4px 20px rgba(123,47,190,0.25); transition: opacity 0.15s, transform 0.15s;
+  }
+  .new-post-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .sidebar-profile {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px;
+    cursor: pointer; transition: background 0.15s; border-top: 1px solid var(--border);
+    padding-top: 20px; margin-top: 12px; text-decoration: none;
+  }
+  .sidebar-profile:hover { background: rgba(255,255,255,0.04); }
+  .sidebar-avatar { width: 38px; height: 38px; border-radius: 50%; padding: 2px; background: var(--grad); flex-shrink: 0; }
+  .sidebar-avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1a1a1a; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .sidebar-name { font-size: 14px; font-weight: 700; color: #fff; }
+  .sidebar-handle { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+  /* Main */
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 48px 40px; max-width: 900px; }
+
+  /* Photo grid */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .photo-tile {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .photo-tile:hover { transform: scale(1.02); }
+  .photo-tile img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .photo-tile.selected { border-color: #1E90FF; }
+  .photo-tile .check {
+    position: absolute; top: 8px; right: 8px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #1E90FF; display: none; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .photo-tile.selected .check { display: flex; }
+
+  /* Caption */
+  .caption-box {
+    width: 100%; background: #141414; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 14px 16px; color: #fff; font-size: 15px;
+    font-family: system-ui, sans-serif; resize: none; outline: none; line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+  .caption-box:focus { border-color: rgba(255,255,255,0.2); }
+  .caption-box::placeholder { color: rgba(255,255,255,0.22); }
+
+  /* Tournament pill */
+  .tourn-pill {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.08);
+    background: #141414; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    font-size: 14px; color: rgba(255,255,255,0.55);
+  }
+  .tourn-pill:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
+  .tourn-pill.selected {
+    border-color: #1E90FF; background: rgba(30,144,255,0.08); color: #fff;
+  }
+  .tourn-pill .tag-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    color: #1E90FF; background: rgba(30,144,255,0.15);
+    padding: 2px 8px; border-radius: 20px;
+  }
+
+  /* Post button */
+  .post-btn {
+    padding: 14px 32px; border-radius: 12px; background: var(--grad); border: none;
+    font-size: 15px; font-weight: 700; color: #fff; cursor: pointer;
+    box-shadow: 0 6px 24px rgba(123,47,190,0.3); transition: opacity 0.15s, transform 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .post-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .post-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  /* Selected preview */
+  #selected-preview img,
+  #selected-preview video {
+    width: 100%; max-height: 400px; object-fit: contain; border-radius: 12px;
+    background: #111; display: block;
+  }
+  .vid-badge {
+    position: absolute; bottom: 8px; left: 8px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+
+  /* Success */
+  #step-done { text-align: center; padding: 80px 0; }
+  .check-ring {
+    width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px;
+    background: rgba(57,211,83,0.1); border: 1.5px solid rgba(57,211,83,0.35);
+    display: flex; align-items: center; justify-content: center;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ── Mobile header (hidden on desktop) ── */
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 40;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .mobile-logo { height: 38px; width: 38px; object-fit: contain; border-radius: 50%; }
+  .mobile-header-title {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .mobile-new-post {
+    background: var(--grad); border: none; border-radius: 8px;
+    padding: 8px 14px; color: #fff; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em; cursor: pointer;
+  }
+  /* ── Mobile bottom nav ── */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    z-index: 40;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mob-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    text-decoration: none; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; transition: color 0.15s;
+    position: relative;
+  }
+  .mob-nav-btn.active { color: #fff; }
+  .mob-nav-btn svg { display: block; }
+  .mob-notif-dot {
+    position: absolute; top: 4px; right: 8px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #ff4d6d; display: none;
+  }
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .right-col { display: none; }
+  }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-nav { display: flex; }
+    .main { margin-left: 0 !important; padding-left: 12px !important; padding-right: 12px !important; padding-top: 68px !important; padding-bottom: 72px !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="mobile-header">
+  <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout" class="mobile-logo">
+  <span class="mobile-header-title">EyeScout</span>
+  <button class="mobile-new-post" onclick="window.location.href='create-post.html'">+ Post</button>
+</div>
+<nav class="mobile-nav">
+  <a class="mob-nav-btn" href="feed.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+  <a class="mob-nav-btn" href="explore.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</a>
+  <a class="mob-nav-btn" href="activity.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Activity<span class="mob-notif-dot" id="mob-activity-dot"></span></a>
+  <a class="mob-nav-btn" href="messages.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages</a>
+  <a class="mob-nav-btn" href="profile.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+</nav>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <a href="feed.html" style="display:flex;justify-content:center;align-items:center;padding:4px 0;margin-bottom:20px;">
+    <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout Sports" style="height:64px;width:64px;object-fit:contain;border-radius:50%;">
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      Home
+    </a>
+    <a class="nav-link" href="explore.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      Search
+    </a>
+    <a class="nav-link" href="activity.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      Activity
+    </a>
+    <a class="nav-link" href="messages.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Messages
+    </a>
+    <a class="nav-link" href="profile.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      My Profile
+    </a>
+    <a class="nav-link" href="settings.html">
+      <span class="nav-link-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </span>
+      Settings
+    </a>
+    <a class="nav-link" href="#" onclick="logout();return false;">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      Sign Out
+    </a>
+    <button class="new-post-btn" onclick="window.location.href='create-post.html'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Post
+    </button>
+  </nav>
+  <a href="profile.html" class="sidebar-profile">
+    <div class="sidebar-avatar"><div class="sidebar-avatar-inner"></div></div>
+    <div>
+      <p class="sidebar-name" id="sb-name">My Profile</p>
+      <p class="sidebar-handle" id="sb-handle">@eyescout</p>
+    </div>
+  </a>
+</aside>
+
+<!-- Main -->
+<main class="main" id="main-content" tabindex="-1">
+
+  <!-- Step 1: Pick a photo -->
+  <div id="step-pick">
+    <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">New Post</p>
+    <h1 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:34px;letter-spacing:0.04em;text-transform:uppercase;color:#fff;margin-bottom:6px;">Choose a photo</h1>
+    <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-bottom:28px;">Pick one of your profile photos to share.</p>
+
+    <!-- No photos state -->
+    <div id="no-photos" style="display:none;text-align:center;padding:60px 0;">
+      <div style="width:60px;height:60px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.3);margin-bottom:6px;">No photos on your profile yet</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.18);">Add photos on your <a href="profile.html" style="color:rgba(30,144,255,0.75);text-decoration:underline;">profile</a> first, then come back to post them.</p>
+    </div>
+
+    <!-- Photo grid -->
+    <div class="photo-grid" id="photo-grid"></div>
+
+  </div>
+
+  <!-- Step 2: Preview + caption -->
+  <div id="step-caption" style="display:none;">
+    <button onclick="goBack()" style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.35);font-size:13px;cursor:pointer;background:none;border:none;margin-bottom:28px;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
+
+      <!-- Preview -->
+      <div id="selected-preview">
+        <img id="preview-img" src="" alt="Selected photo">
+      </div>
+
+      <!-- Caption + tournament + post -->
+      <div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">Caption</p>
+        <textarea class="caption-box" id="caption-input" aria-label="Post caption" rows="4" maxlength="220" placeholder="Write something about this photo…"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;margin-bottom:20px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.2);" id="char-count">0 / 220</span>
+        </div>
+
+        <!-- Tournament tag -->
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">Tournament <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:rgba(255,255,255,0.2);">— optional</span></p>
+        <div id="tournament-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;"></div>
+        <div id="no-tournaments" style="display:none;font-size:13px;color:rgba(255,255,255,0.2);margin-bottom:20px;">No tournaments added yet — an admin can add them from the admin panel.</div>
+
+        <button class="post-btn" id="post-btn" onclick="submitPost()">Share Post →</button>
+        <p id="post-err" style="display:none;font-size:12px;color:#f87171;margin-top:10px;"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Step 3: Done -->
+  <div id="step-done" style="display:none;">
+    <div class="check-ring">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:32px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:10px;">Posted!</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);">Taking you to your profile…</p>
+  </div>
+
+</main>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('es_session') || 'null');
+  if (!session) window.location.href = 'login.html';
+
+  // Subscription gate — creating posts is a Pro feature
+  (function() {
+    const sub = JSON.parse(localStorage.getItem('es_sub_' + (session?.id || '')) || 'null');
+    if (!(typeof _subHasAccess === 'function' ? _subHasAccess(sub) : sub && sub.status === 'active')) window.location.href = 'subscription.html';
+  })();
+
+  document.getElementById('sb-name').textContent = (session.athleteFirst || '') + ' ' + (session.athleteLast || '');
+  document.getElementById('sb-handle').textContent = '#' + (session.jersey || '—') + ' · ' + (session.sport || 'EyeScout');
+
+  function logout() { localStorage.removeItem('es_session'); window.location.href = 'login.html'; }
+
+  let selectedPhoto = null;
+  let selectedType  = 'photo';
+  window._media = [];
+
+  // Gather ALL media on the player's profile — own photos, delivered photos, and videos —
+  // from every place they can be stored (session, es_players, and legacy localStorage stores).
+  function collectMedia() {
+    const players = JSON.parse(localStorage.getItem('es_players') || '[]');
+    const arrP = players.find(p => p.id === session.id) || {};
+    const out = [];
+    const seen = new Set();
+    const add = (src, type) => { if (src && !seen.has(src)) { seen.add(src); out.push({ src, type }); } };
+
+    [session, arrP].forEach(o => {
+      (o.ownPhotos       || []).forEach(ph => add(ph && (ph.url || ph.dataUrl), 'photo'));
+      (o.deliveredPhotos || []).forEach(s  => add(s, 'photo'));
+      (o.ownClips        || []).forEach(c  => add(c && (c.url || c.dataUrl), 'video'));
+    });
+    // legacy per-user localStorage stores (where profile uploads may live)
+    JSON.parse(localStorage.getItem('es_own_photos_' + session.id) || '[]').forEach(ph => add(ph && (ph.url || ph.dataUrl), 'photo'));
+    JSON.parse(localStorage.getItem('es_own_clips_'  + session.id) || '[]').forEach(c  => add(c  && (c.url  || c.dataUrl),  'video'));
+    return out;
+  }
+
+  function renderMediaGrid(media) {
+    window._media = media;
+    const grid = document.getElementById('photo-grid');
+    const noPhotos = document.getElementById('no-photos');
+    if (!media.length) {
+      grid.innerHTML = '';
+      noPhotos.style.display = 'block';
+      return;
+    }
+    noPhotos.style.display = 'none';
+    grid.innerHTML = media.map((m, i) => {
+      const inner = m.type === 'video'
+        ? `<video src="${m.src}#t=0.1" muted preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
+           <div class="vid-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><polygon points="6 4 20 12 6 20"/></svg></div>`
+        : `<img src="${m.src}" alt="Media ${i+1}" loading="lazy">`;
+      return `<div class="photo-tile" id="tile-${i}" onclick="selectMedia(${i})">${inner}
+        <div class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Initial render from local profile data
+  renderMediaGrid(collectMedia());
+
+  function selectMedia(i) {
+    const m = window._media[i];
+    if (!m) return;
+    selectedPhoto = m.src;
+    selectedType  = m.type;
+
+    document.querySelectorAll('.photo-tile').forEach(t => t.classList.remove('selected'));
+    document.getElementById('tile-' + i).classList.add('selected');
+
+    setTimeout(() => {
+      document.getElementById('step-pick').style.display = 'none';
+      document.getElementById('step-caption').style.display = 'block';
+      document.getElementById('selected-preview').innerHTML = m.type === 'video'
+        ? `<video src="${m.src}" controls playsinline></video>`
+        : `<img src="${m.src}" alt="Selected media">`;
+      selectedTournament = null;
+      renderTournamentPicker();
+      document.getElementById('caption-input').focus();
+    }, 160);
+  }
+
+  function goBack() {
+    document.getElementById('step-caption').style.display = 'none';
+    document.getElementById('step-pick').style.display = 'block';
+  }
+
+  document.getElementById('caption-input').addEventListener('input', function() {
+    document.getElementById('char-count').textContent = this.value.length + ' / 220';
+  });
+
+  // ── Tournament picker ──────────────────────────────────────────────────────
+  let selectedTournament = null;
+
+  function renderTournamentPicker() {
+    const tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
+    const list = document.getElementById('tournament-list');
+    const empty = document.getElementById('no-tournaments');
+
+    if (!tournaments.length) {
+      list.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    list.style.display = 'flex';
+    empty.style.display = 'none';
+    list.innerHTML = tournaments.map(t => `
+      <div class="tourn-pill${selectedTournament === t.name ? ' selected' : ''}"
+           id="tourn-${t.id}" onclick="selectTournament('${t.name}', '${t.id}')">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <span style="font-weight:600;">${t.name}</span>
+          ${t.sport ? `<span style="font-size:12px;color:rgba(255,255,255,0.3);">${t.sport}</span>` : ''}
+        </div>
+        <span class="tag-badge">#${t.name.replace(/\s+/g,'')}</span>
+      </div>`).join('');
+  }
+
+  function selectTournament(name, id) {
+    if (selectedTournament === name) {
+      selectedTournament = null;
+    } else {
+      selectedTournament = name;
+    }
+    renderTournamentPicker();
+  }
+
+  function submitPost() {
+    if (!selectedPhoto) return;
+    const btn = document.getElementById('post-btn');
+    btn.disabled = true;
+    btn.textContent = 'Posting…';
+
+    const posts = JSON.parse(localStorage.getItem('es_posts') || '[]');
+    const newPostId = Date.now().toString();
+    // Flag so the feed floats this brand-new post to the very top next time it opens.
+    try { sessionStorage.setItem('es_just_posted', newPostId); } catch (e) {}
+    posts.unshift({
+      id: newPostId,
+      authorId: session.id,
+      authorName: session.athleteFirst + ' ' + session.athleteLast,
+      authorJersey: session.jersey,
+      sport: session.sport,
+      type: selectedType,
+      mediaData: selectedPhoto,
+      caption: document.getElementById('caption-input').value.trim(),
+      tournament: selectedTournament || null,
+      likes: [],
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem('es_posts', JSON.stringify(posts));
+    if (typeof _sbSavePost === 'function') _sbSavePost(posts[0]);
+
+    document.getElementById('step-caption').style.display = 'none';
+    document.getElementById('step-done').style.display = 'block';
+    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
+  }
+
+  (async () => {
+    try {
+      if (typeof _sbSync !== 'function') return;
+      await _sbSync({ players: true, tournaments: true, subscription: true });
+      // Re-scan for media after sync brings fresh profile data (only while still on the picker)
+      if (document.getElementById('step-pick').style.display !== 'none') {
+        renderMediaGrid(collectMedia());
+      }
+    } catch(e) { console.warn('[create-post] Supabase sync error:', e.message); }
+  })();
+</script>
+</body>
+</html>

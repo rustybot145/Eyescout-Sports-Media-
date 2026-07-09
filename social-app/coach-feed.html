@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Coach Scout</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<script>
+  function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  var escAttr = escHtml;
+</script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: rgba(255,255,255,0.07);
+    --sidebar-w: 244px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+  .page-content { flex: 1; display: flex; min-width: 0; animation: pageIn 0.18s ease-out both; }
+  body { background: var(--bg); color: #fff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; display: flex; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0; position: fixed;
+    top: 0; left: 0; height: 100vh; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 28px 16px 24px; z-index: 40; background: var(--bg);
+    border-top: 3px solid #1E90FF;
+  }
+  .coach-portal-label {
+    text-align: center; font-size: 9px; font-weight: 800; letter-spacing: 0.22em;
+    text-transform: uppercase; color: #1E90FF; opacity: 0.7; margin-top: -6px; margin-bottom: 18px;
+  }
+  .nav-links { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .nav-link {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
+    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s; text-decoration: none;
+    border-left: 3px solid transparent;
+  }
+  .nav-link:hover { background: rgba(30,144,255,0.06); color: rgba(255,255,255,0.9); }
+  .nav-link.active { color: #fff; font-weight: 700; background: rgba(30,144,255,0.08); border-left-color: #1E90FF; padding-left: 11px; }
+  .nav-link-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sidebar-bottom {
+    display: flex; align-items: center; gap: 12px; padding: 16px 14px 12px;
+    border-top: 1px solid var(--border); margin-top: 12px;
+  }
+  .coach-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(30,144,255,0.15); border: 1px solid rgba(30,144,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Main ── */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(13,13,13,0.95); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .topbar-title {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #ffffff;
+    flex-shrink: 0; margin-right: 8px;
+  }
+
+  .filter-select {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 8px 32px 8px 12px; color: rgba(255,255,255,0.7);
+    font-size: 13px; font-family: system-ui, sans-serif; outline: none; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    transition: border-color 0.15s;
+  }
+  .filter-select:focus { border-color: rgba(30,144,255,0.4); }
+  .filter-select option { background: #1a1a1a; color: #fff; }
+  .filter-num {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 8px 10px; color: rgba(255,255,255,0.7);
+    font-size: 13px; font-family: system-ui, sans-serif; outline: none; width: 74px;
+    transition: border-color 0.15s, opacity 0.15s;
+  }
+  .filter-num:focus { border-color: rgba(30,144,255,0.4); }
+  .filter-num::placeholder { color: rgba(255,255,255,0.3); }
+  .filter-num:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .search-input {
+    flex: 1; min-width: 180px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 8px 14px;
+    color: #fff; font-size: 13px; font-family: system-ui, sans-serif; outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: rgba(30,144,255,0.4); }
+  .search-input::placeholder { color: rgba(255,255,255,0.22); }
+
+  .results-count { font-size: 12px; color: rgba(255,255,255,0.3); margin-left: auto; flex-shrink: 0; white-space: nowrap; }
+
+  /* ── Player Grid ── */
+  .player-grid {
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .player-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+  .player-card:hover {
+    border-color: rgba(30,144,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .card-banner {
+    height: 80px;
+    background: #10141c;
+    position: relative;
+  }
+  .card-banner-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #1E90FF; }
+
+  .card-avatar-wrap {
+    width: 68px; height: 68px; border-radius: 50%; padding: 2px;
+    background: #1E90FF; position: absolute;
+    bottom: -34px; left: 50%; transform: translateX(-50%);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  }
+  .card-avatar-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: #1a1a1a; border: 2.5px solid var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, sans-serif;
+    font-size: 18px; font-weight: 700; overflow: hidden;
+  }
+
+  .card-body { padding: 42px 16px 16px; text-align: center; }
+  .card-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .card-meta { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
+  .card-hw { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 10px; letter-spacing: 0.02em; }
+
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; justify-content: center; }
+  .card-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 6px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+  }
+  .card-tag.sport { background: rgba(30,144,255,0.1); border-color: rgba(30,144,255,0.25); color: #1E90FF; }
+  .card-tag.purchased { background: rgba(57,211,83,0.08); border-color: rgba(57,211,83,0.22); color: #39D353; }
+
+  .scout-btn {
+    width: 100%; padding: 9px; border-radius: 8px; border: none; cursor: pointer;
+    background: #1E90FF; color: #fff; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: opacity 0.15s, transform 0.15s, background 0.15s;
+  }
+  .scout-btn:hover { background: #1877d6; transform: translateY(-1px); }
+
+  /* ── Player Drawer ── */
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 480px; background: var(--bg);
+    border-left: 1px solid var(--border);
+    z-index: 51; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .drawer-overlay.open .drawer { transform: translateX(0); }
+
+  .drawer-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .drawer-close {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04); cursor: pointer; color: rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .drawer-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 0 0 24px; }
+  .drawer-body::-webkit-scrollbar { width: 4px; }
+  .drawer-body::-webkit-scrollbar-track { background: transparent; }
+  .drawer-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+  /* Drawer profile */
+  .drawer-cover {
+    height: 110px; background: linear-gradient(135deg,#0d0b14,#0e1520,#0a0d10); position: relative; overflow: hidden;
+  }
+  .drawer-cover-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--grad); }
+  .drawer-avatar-wrap {
+    width: 80px; height: 80px; border-radius: 50%; padding: 2.5px; background: var(--grad);
+    position: absolute; bottom: -40px; left: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .drawer-avatar-inner {
+    width: 100%; height: 100%; border-radius: 50%; background: #1a1a1a;
+    border: 3px solid var(--bg); display: flex; align-items: center; justify-content: center;
+    font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 28px; overflow: hidden;
+  }
+  .drawer-info { padding: 52px 24px 20px; border-bottom: 1px solid var(--border); }
+  .drawer-name { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 26px; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; margin-bottom: 4px; }
+  .drawer-sub { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+  .drawer-bio { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.65; margin-bottom: 14px; }
+  .drawer-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  .drawer-section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .drawer-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 14px; }
+  .info-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: flex-start; }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.25); width: 110px; flex-shrink: 0; padding-top: 1px; }
+  .info-val { font-size: 13px; color: rgba(255,255,255,0.7); }
+
+  .drawer-footer { padding: 20px 24px; flex-shrink: 0; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .msg-draft-btn {
+    flex: 1; padding: 13px; border-radius: 10px; background: var(--grad); border: none;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #fff; cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+  }
+  .msg-draft-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .save-btn {
+    padding: 13px 18px; border-radius: 10px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12); font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.15s;
+  }
+  .save-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
+
+  /* ── Message Modal ── */
+  .msg-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+    z-index: 60; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .msg-modal-overlay.open { opacity: 1; pointer-events: all; }
+  .msg-modal {
+    background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px;
+    padding: 28px; width: 100%; max-width: 460px;
+    transform: translateY(16px); transition: transform 0.25s;
+  }
+  .msg-modal-overlay.open .msg-modal { transform: translateY(0); }
+  .msg-modal-title { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin-bottom: 6px; }
+  .msg-modal-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+  .msg-textarea {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 14px; color: #fff; font-size: 14px; line-height: 1.6;
+    resize: none; outline: none; font-family: system-ui,sans-serif;
+    transition: border-color 0.2s; min-height: 120px; margin-bottom: 16px;
+  }
+  .msg-textarea:focus { border-color: rgba(30,144,255,0.4); }
+  .msg-textarea::placeholder { color: rgba(255,255,255,0.2); }
+  .msg-modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-cancel { padding: 10px 20px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.15s; }
+  .modal-cancel:hover { color: #fff; }
+  .modal-send { padding: 10px 24px; border-radius: 10px; background: var(--grad); border: none; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: opacity 0.15s, transform 0.15s; }
+  .modal-send:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* ── Empty ── */
+  .empty-state { text-align: center; padding: 80px 40px; }
+  .empty-state p { font-size: 14px; color: rgba(255,255,255,0.25); line-height: 1.7; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+  /* "Message Sent" confirmation toast */
+  .sent-toast {
+    position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(20,20,22,0.97); border: 1px solid rgba(57,211,83,0.28);
+    padding: 14px 24px 14px 16px; border-radius: 14px; z-index: 9999;
+    box-shadow: 0 14px 44px rgba(0,0,0,0.5), 0 0 24px rgba(57,211,83,0.12);
+    opacity: 0; animation: sentIn 0.42s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  .sent-toast.leaving { animation: sentOut 0.4s ease forwards; }
+  .sent-toast-label { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.01em; white-space: nowrap; }
+  .sent-check { width: 30px; height: 30px; flex-shrink: 0; }
+  .sent-check svg { width: 100%; height: 100%; overflow: visible; }
+  .sent-check-circle { stroke: #39D353; stroke-width: 3; stroke-dasharray: 145; stroke-dashoffset: 145; animation: sentCircle 0.5s ease-out 0.08s forwards; }
+  .sent-check-mark { stroke: #39D353; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: sentMark 0.32s ease-out 0.42s forwards; }
+  @keyframes sentIn  { from { opacity:0; transform:translateX(-50%) translateY(14px) scale(0.94); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
+  @keyframes sentOut { to { opacity:0; transform:translateX(-50%) translateY(10px) scale(0.98); } }
+  @keyframes sentCircle { to { stroke-dashoffset: 0; } }
+  @keyframes sentMark   { to { stroke-dashoffset: 0; } }
+  .fade-in { animation: fadeUp 0.3s ease both; }
+
+  .stat-num { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 22px; letter-spacing: 0.04em; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 2px; }
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.25); }
+  #content-lock { display:none;position:absolute;inset:0;z-index:20;background:rgba(13,13,13,0.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:16px;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px 24px; }
+
+  .bottom-nav { display: none; }
+  @media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .main { margin-left: 0 !important; padding: 0 12px 96px !important; width: 100% !important; max-width: 100% !important; }
+    .bottom-nav {
+      display: flex; position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 48px; right: 48px; height: 40px;
+      background: rgba(8,8,12,0.52); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+      backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+      z-index: 100; align-items: center; justify-content: center; gap: 0;
+    }
+    .bn-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+      flex: 1; height: 100%; text-decoration: none; font-size: 0; position: relative;
+      color: rgba(255,255,255,0.25); border-radius: 20px;
+      transition: color 0.22s cubic-bezier(0.22,1,0.36,1), background 0.22s cubic-bezier(0.22,1,0.36,1), transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bn-item:active { transform: scale(0.82); }
+    .bn-item.active { color: #1E90FF; background: rgba(30,144,255,0.12); }
+    .bn-item svg { width: 17px; height: 17px; transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1); }
+    .bn-item.active svg { transform: scale(1.18); }
+    .bn-item.active::after { content: ''; position: absolute; bottom: 5px; width: 3px; height: 3px; border-radius: 50%; background: #1E90FF; box-shadow: 0 0 5px #1E90FF; }
+  }
+  .paywall-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    margin: 8px 0 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 44px 32px 40px;
+    grid-column: 1 / -1;
+  }
+  .paywall-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #1E90FF 0%, #00C9A7 60%, #39D353 100%);
+  }
+  .paywall-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(30,144,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .card-blur {
+    filter: blur(6px);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.35;
+    transition: filter 0.3s;
+  }
+</style>
+  <link rel="prefetch" href="coach-news-feed.html">
+  <link rel="prefetch" href="coach-messages.html">
+  <link rel="prefetch" href="coach-profile.html">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="page-content">
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <a href="coach-feed.html" style="display:flex;justify-content:center;align-items:center;padding:4px 0;margin-bottom:8px;">
+    <img src="../eyescout-sports/logo-transparent.png" alt="EyeScout" style="height:64px;width:64px;object-fit:contain;border-radius:50%;">
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link active" href="coach-feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      Scout Players
+    </a>
+    <a class="nav-link" href="coach-news-feed.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      Feed
+    </a>
+    <a class="nav-link" href="coach-messages.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Messages
+      <span id="unread-badge" style="display:none;margin-left:auto;background:#1E90FF;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 7px;"></span>
+    </a>
+    <a class="nav-link" href="coach-profile.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      My Profile
+    </a>
+    <a class="nav-link" href="coach-settings.html">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      Settings
+    </a>
+    <a class="nav-link" href="#" onclick="logout();return false;">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      Sign Out
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="coach-avatar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.6)" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">Coach</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-uni">University</p>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main" id="main-content" tabindex="-1">
+
+  <!-- Pending Notice -->
+  <div id="pending-notice" style="display:none;padding:13px 16px;border-radius:12px;background:rgba(30,144,255,0.07);border:1px solid rgba(30,144,255,0.18);align-items:center;gap:12px;margin-bottom:16px;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;"><strong style="color:#1E90FF;">Account pending verification</strong> — we'll notify you once an admin approves it. Hang tight!</p>
+  </div>
+
+  <!-- Top filter bar -->
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Find Your Ideal Athlete</span>
+    <input class="search-input" id="search" aria-label="Search players or tournaments" placeholder="Search players or tournaments — name, class, school, stat, height…" oninput="applyFilters()">
+    <select class="filter-select" id="f-year" aria-label="Filter by graduation year" onchange="applyFilters()">
+      <option value="">All Classes</option>
+      <option>2025</option><option>2026</option><option>2027</option><option>2028</option><option>2029</option>
+    </select>
+    <select class="filter-select" id="f-position" aria-label="Filter by position" onchange="applyFilters()">
+      <option value="">All Positions</option>
+      <option>PG</option><option>SG</option><option>SF</option><option>PF</option><option>C</option>
+    </select>
+    <select class="filter-select" id="f-height" aria-label="Filter by height" onchange="applyFilters()">
+      <option value="">All Heights</option>
+      <option value="under6">Under 6'0"</option>
+      <option value="6to6-3">6'0" – 6'3"</option>
+      <option value="6-4to6-7">6'4" – 6'7"</option>
+      <option value="6-8plus">6'8"+</option>
+    </select>
+    <select class="filter-select" id="f-stat" aria-label="Filter by stat" onchange="onStatChange()">
+      <option value="">All Stats</option>
+    </select>
+    <input class="filter-num" id="f-stat-min" type="number" min="0" step="any" placeholder="Min" oninput="applyFilters()" title="Minimum value for the selected stat" disabled>
+    <span class="results-count" id="results-count"></span>
+  </div>
+
+  <!-- Tournament search results (shown when the search matches a tournament) -->
+  <div id="tournament-results"></div>
+
+  <!-- Player grid -->
+  <div style="position:relative;">
+    <div id="content-lock">
+      <div style="width:52px;height:52px;border-radius:14px;background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.22);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <p style="font-size:17px;font-weight:800;color:#fff;letter-spacing:0.03em;margin-bottom:8px;">Pending Verification</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.38);line-height:1.7;max-width:280px;">We'll notify you when your account is verified and you're ready to scout players.</p>
+    </div>
+    <div class="player-grid" id="player-grid"></div>
+  </div>
+
+</main>
+
+<!-- ── Player Drawer ── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawerIfOverlay(event)">
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <p style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Player Profile</p>
+      <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-footer" id="drawer-footer"></div>
+  </div>
+</div>
+
+<!-- ── Message Modal ── -->
+<div class="msg-modal-overlay" id="msg-modal" onclick="closeMsgModal(event)">
+  <div class="msg-modal">
+    <p class="msg-modal-title">Send Message</p>
+    <p class="msg-modal-sub" id="msg-modal-sub">To: Player</p>
+    <textarea class="msg-textarea" id="msg-text" aria-label="Message to player" placeholder="Introduce yourself and let them know why you're interested…" maxlength="1000"></textarea>
+    <div class="msg-modal-footer">
+      <button class="modal-cancel" onclick="closeMsgModal()">Cancel</button>
+      <button class="modal-send" onclick="sendMessage()">Send Message</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const coach = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
+  if (!coach) window.location.href = 'coach-login.html';
+  const _coachSub = coach ? JSON.parse(localStorage.getItem('es_coach_sub_' + coach.id) || 'null') : null;
+  const isCoachPro = typeof _subHasAccess === 'function' ? _subHasAccess(_coachSub) : !!(_coachSub && _coachSub.status === 'active');
+  if (coach && !coach.verified) {
+    document.getElementById('pending-notice').style.display = 'flex';
+    document.getElementById('content-lock').style.display = 'flex';
+  }
+
+  function logout() { localStorage.removeItem('es_coach_session'); window.location.href = 'coach-login.html'; }
+
+  if (coach) {
+    document.getElementById('sb-name').textContent = `${coach.firstName} ${coach.lastName}`;
+    document.getElementById('sb-uni').textContent = coach.university;
+  }
+
+  // ── Sport scoping ────────────────────────────────────────────────────────────
+  const coachSport = coach && coach.sport ? coach.sport : null;
+
+  // ── Players ──────────────────────────────────────────────────────────────────
+  function getPlayers() { return JSON.parse(localStorage.getItem('es_players') || '[]'); }
+
+  // ── Stats filter helpers ──────────────────────────────────────────────────────
+  function getPlayerStats(p) {
+    return Array.isArray(p.sportStats) ? p.sportStats : (Array.isArray(p.stats) ? p.stats : []);
+  }
+  function getStatValue(p, label) {
+    const s = getPlayerStats(p).find(x => (x.label || '').toLowerCase() === label.toLowerCase());
+    if (!s) return null;
+    const num = parseFloat(String(s.value).replace(/[^0-9.\-]/g, ''));
+    return isNaN(num) ? null : num;
+  }
+  function populateStatFilter() {
+    const sel = document.getElementById('f-stat');
+    if (!sel) return;
+    const current = sel.value;
+    const labels = new Set();
+    getPlayers().forEach(p => {
+      if (coachSport && p.sport !== coachSport) return;
+      getPlayerStats(p).forEach(s => { if (s.label) labels.add(s.label); });
+    });
+    const opts = [...labels].sort((a, b) => a.localeCompare(b));
+    sel.innerHTML = '<option value="">All Stats</option>' +
+      opts.map(l => `<option value="${escAttr(l)}"${l === current ? ' selected' : ''}>${escHtml(l)}</option>`).join('');
+  }
+  function onStatChange() {
+    const stat = document.getElementById('f-stat').value;
+    const minInput = document.getElementById('f-stat-min');
+    minInput.disabled = !stat;
+    if (!stat) minInput.value = '';
+    applyFilters();
+  }
+
+  let activePlayer = null;
+
+  // ── Filters ──────────────────────────────────────────────────────────────────
+  function parseHeightIn(h) {
+    if (!h) return null;
+    const m = h.match(/(\d+)'[\s"]*(\d*)/);
+    return m ? parseInt(m[1]) * 12 + (parseInt(m[2]) || 0) : null;
+  }
+
+  // Detect a height query like 6'5", 6' 5, 6-5, 6ft5, or 6' — returns total inches, else null.
+  function heightQueryInches(q) {
+    const m = q.match(/^(\d)\s*(?:'|ft|feet|-|\s)\s*(\d{1,2})?\s*(?:"|in|inches)?$/i);
+    if (!m) return null;
+    const inch = m[2] ? parseInt(m[2]) : 0;
+    if (inch > 11) return null;
+    return parseInt(m[1]) * 12 + inch;
+  }
+
+  // Free-text search across name, class, school, position, sport, height, and stats.
+  function matchesSearch(p, raw) {
+    const q = (raw || '').trim().toLowerCase();
+    if (!q) return true;
+    // A height query matches players who are that tall OR taller.
+    const qh = heightQueryInches(q);
+    if (qh !== null) {
+      const ph = parseHeightIn(p.height);
+      return ph !== null && ph >= qh;
+    }
+    const hay = [
+      `${p.athleteFirst} ${p.athleteLast}`,
+      p.school, p.gradYear, p.position, p.sport, p.height,
+      p.weight ? `${p.weight} lbs` : '',
+      ...getPlayerStats(p).flatMap(s => [s.label, s.value])
+    ].filter(Boolean).map(x => String(x).toLowerCase());
+    return hay.some(x => x.includes(q));
+  }
+
+  function applyFilters() {
+    const q        = document.getElementById('search').value;
+    const year     = document.getElementById('f-year').value;
+    const position = document.getElementById('f-position').value;
+    const hRange   = document.getElementById('f-height').value;
+    const stat     = document.getElementById('f-stat').value;
+    const statMin  = parseFloat(document.getElementById('f-stat-min').value);
+
+    const players = getPlayers().filter(p => {
+      if (p.prefs && p.prefs['priv-public'] === false) return false; // opted out of discovery
+      if (coachSport && p.sport !== coachSport) return false;
+      if (!matchesSearch(p, q)) return false;
+      if (year && p.gradYear !== year) return false;
+      if (position && (p.position || '').toUpperCase() !== position.toUpperCase()) return false;
+      if (hRange) {
+        const inches = parseHeightIn(p.height);
+        if (inches === null) return false;
+        if (hRange === 'under6'   && inches >= 72) return false;
+        if (hRange === '6to6-3'   && (inches < 72 || inches > 75)) return false;
+        if (hRange === '6-4to6-7' && (inches < 76 || inches > 79)) return false;
+        if (hRange === '6-8plus'  && inches < 80) return false;
+      }
+      if (stat) {
+        const v = getStatValue(p, stat);
+        if (v === null) return false;                 // player doesn't report this stat
+        if (!isNaN(statMin) && v < statMin) return false; // below the minimum
+      }
+      return true;
+    });
+
+    renderGrid(players);
+    renderTournamentResults(q);
+  }
+
+  // Tournaments matching the search — shown above the player grid when searched.
+  function renderTournamentResults(raw) {
+    const box = document.getElementById('tournament-results');
+    if (!box) return;
+    const q = (raw || '').trim().toLowerCase();
+    if (!q) { box.innerHTML = ''; return; }   // only surface tournaments on an active search
+
+    let tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
+    if (coachSport) tournaments = tournaments.filter(t => (t.sport || '').toLowerCase() === coachSport.toLowerCase());
+    const matches = tournaments.filter(t => {
+      const hay = [t.name, t.sport, t.location, t.date].filter(Boolean).map(x => String(x).toLowerCase());
+      return hay.some(x => x.includes(q));
+    });
+    if (!matches.length) { box.innerHTML = ''; return; }
+
+    box.innerHTML = `
+      <p style="display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:14px;">
+        <span style="width:16px;height:3px;border-radius:2px;background:var(--grad);flex-shrink:0;"></span>
+        Tournaments · ${matches.length}
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:28px;">
+        ${matches.map(t => {
+          const dateStr = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+          const meta = [dateStr, t.location].filter(Boolean).join(' · ');
+          return `
+          <a href="tournament.html?name=${encodeURIComponent(t.name || '')}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;text-decoration:none;padding:18px 18px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(123,47,190,0.12),rgba(0,201,167,0.05));border:1px solid rgba(255,255,255,0.08);transition:transform 0.15s,box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 26px rgba(30,144,255,0.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <span style="width:26px;height:3px;border-radius:2px;background:var(--grad);margin-bottom:10px;"></span>
+            <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:15px;letter-spacing:0.04em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;">${escHtml(t.name || 'Untitled')}</p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.4);">${escHtml(meta || t.sport || '')}</p>
+          </a>`;
+        }).join('')}
+      </div>`;
+  }
+
+  // ── Grid ─────────────────────────────────────────────────────────────────────
+  let _coachFeedSynced = false;
+
+  function skeletonPlayerCards(count) {
+    let cards = '';
+    for (let i = 0; i < count; i++) {
+      cards += `
+        <div class="player-card" aria-hidden="true" style="cursor:default;">
+          <div style="height:80px;background:#10141c;position:relative;">
+            <div class="skel skel-circle" style="width:68px;height:68px;position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);"></div>
+          </div>
+          <div style="padding:42px 16px 16px;text-align:center;">
+            <div class="skel" style="height:13px;border-radius:4px;margin:0 auto 8px;width:75%;"></div>
+            <div class="skel" style="height:10px;border-radius:4px;width:50%;margin:0 auto 12px;"></div>
+            <div class="skel" style="height:32px;border-radius:8px;"></div>
+          </div>
+        </div>`;
+    }
+    return cards;
+  }
+
+  function renderGrid(players) {
+    const grid = document.getElementById('player-grid');
+    document.getElementById('results-count').textContent = `${players.length} player${players.length !== 1 ? 's' : ''}`;
+
+    if (!players.length) {
+      if (!_coachFeedSynced) {
+        grid.innerHTML = skeletonPlayerCards(8);
+        return;
+      }
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>No players match your filters.<br>Try adjusting the search or sport.</p></div>`;
+      return;
+    }
+
+    if (!isCoachPro) {
+      const ghostCard = `
+        <div class="player-card card-blur" style="cursor:default;">
+          <div class="card-banner"><div class="card-avatar-wrap"><div class="card-avatar-inner" style="color:rgba(255,255,255,0.06);">#</div></div><div class="card-banner-bar"></div></div>
+          <div class="card-body">
+            <div style="height:13px;background:rgba(255,255,255,0.07);border-radius:4px;margin-bottom:8px;width:75%;"></div>
+            <div style="height:10px;background:rgba(255,255,255,0.04);border-radius:4px;width:50%;margin-bottom:12px;"></div>
+            <div style="display:flex;gap:6px;margin-bottom:14px;"><div style="height:20px;width:70px;background:rgba(255,255,255,0.06);border-radius:999px;"></div><div style="height:20px;width:55px;background:rgba(255,255,255,0.04);border-radius:999px;"></div></div>
+            <div style="height:32px;background:rgba(255,255,255,0.04);border-radius:8px;"></div>
+          </div>
+        </div>`;
+      grid.innerHTML = `
+        <div class="paywall-card">
+          <div style="width:56px;height:56px;border-radius:16px;background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:22px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Unlock Full Scouting Access</p>
+          <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:26px;max-width:340px;margin-left:auto;margin-right:auto;">${players.length} athlete${players.length !== 1 ? 's' : ''} in your sport are ready to be scouted. Subscribe to Pro to view profiles, send messages, and manage your recruit list.</p>
+          <button onclick="window.location.href='coach-checkout.html'" style="display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:10px;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.02em;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Upgrade to Pro — $15/mo
+          </button>
+          <p style="font-size:11px;color:rgba(255,255,255,0.18);margin-top:14px;">Cancel anytime · Instant access</p>
+        </div>
+        ${Array(Math.min(players.length, 8)).fill(ghostCard).join('')}`;
+      return;
+    }
+
+    grid.innerHTML = players.map((p, i) => {
+      const name = `${p.athleteFirst} ${p.athleteLast}`;
+      const initials = `${(p.athleteFirst || '?')[0]}${(p.athleteLast || '')[0] || ''}`.toUpperCase();
+      const avatarContent = p.profilePhoto
+        ? `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : `<span style="color:rgba(255,255,255,0.55);">${escHtml(initials)}</span>`;
+      const hwParts = [p.height, p.weight ? `${p.weight} lbs` : ''].filter(Boolean);
+      const hw = hwParts.join(' · ');
+      const following = isFollowingPlayer(p.id);
+      return `
+        <div class="player-card fade-in" style="animation-delay:${i * 0.04}s;position:relative;" onclick="window.location.href='profile.html?id=${p.id}&coach=1'">
+          ${following ? `<div style="position:absolute;top:8px;right:8px;z-index:2;background:linear-gradient(90deg,#1E90FF,#00C9A7);color:#fff;font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;">Following</div>` : ''}
+          <div class="card-banner">
+            <div class="card-avatar-wrap"><div class="card-avatar-inner">${avatarContent}</div></div>
+            <div class="card-banner-bar"></div>
+          </div>
+          <div class="card-body">
+            <p class="card-name">${escHtml(name)}</p>
+            ${p.school ? `<p class="card-meta">${escHtml(p.school)}</p>` : ''}
+            ${hw ? `<p class="card-hw">${escHtml(hw)}</p>` : ''}
+            <div class="card-tags">
+              <span class="card-tag">Class of ${escHtml(p.gradYear)}</span>
+              ${p.position ? `<span class="card-tag">${escHtml(p.position)}</span>` : ''}
+            </div>
+            <button class="scout-btn" onclick="event.stopPropagation();openMsgModal('${p.id}')">Message →</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Drawer ───────────────────────────────────────────────────────────────────
+  function openDrawer(playerId) {
+    const players = getPlayers();
+    const p = players.find(pl => pl.id === playerId);
+    if (!p) return;
+    activePlayer = p;
+
+    const name = `${p.athleteFirst} ${p.athleteLast}`;
+    const photoCount = (p.deliveredPhotos || []).length;
+    const avatarContent = p.profilePhoto
+      ? `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+      : `<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">#${escHtml(p.jersey)}</span>`;
+
+    document.getElementById('drawer-body').innerHTML = `
+      <div class="drawer-cover">
+        <div class="drawer-avatar-wrap"><div class="drawer-avatar-inner">${avatarContent}</div></div>
+        <div class="drawer-cover-bar"></div>
+      </div>
+      <div class="drawer-info">
+        <p class="drawer-name">${escHtml(name)}</p>
+        <p class="drawer-sub">${escHtml(p.sport)} · ${escHtml(p.school || '—')}</p>
+        ${p.bio ? `<p class="drawer-bio">${escHtml(p.bio)}</p>` : ''}
+        <div class="drawer-tags">
+          <span class="card-tag sport">${escHtml(p.sport)}</span>
+          <span class="card-tag">Class of ${escHtml(p.gradYear)}</span>
+          <span class="card-tag">Jersey #${escHtml(p.jersey)}</span>
+          ${p.purchased ? '<span class="card-tag purchased">✓ Photo Package</span>' : ''}
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <p class="drawer-section-label">Stats</p>
+        <div style="display:flex;gap:28px;">
+          <div><p class="stat-num">${photoCount || '—'}</p><p class="stat-label">Photos</p></div>
+          <div><p class="stat-num">${escHtml(p.gradYear)}</p><p class="stat-label">Class</p></div>
+          <div><p class="stat-num">#${escHtml(p.jersey)}</p><p class="stat-label">Jersey</p></div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <p class="drawer-section-label">Player Info</p>
+        ${[
+          ['Name', name],
+          ['Sport', p.sport],
+          ['School', p.school || '—'],
+          ['Grad Year', p.gradYear],
+          ['Jersey', `#${p.jersey}`],
+          ['Tournament', p.tournament || '—'],
+        ].map(([k,v]) => `
+          <div class="info-row">
+            <span class="info-key">${k}</span>
+            <span class="info-val">${escHtml(v)}</span>
+          </div>`).join('')}
+      </div>
+
+      ${photoCount ? `
+      <div class="drawer-section">
+        <p class="drawer-section-label">Photos (${photoCount})</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+          ${(p.deliveredPhotos || []).slice(0,6).map(src => `
+            <div style="aspect-ratio:1;border-radius:8px;overflow:hidden;background:#1a1a1a;">
+              <img alt="Photo" src="${escAttr(src)}" style="width:100%;height:100%;object-fit:cover;">
+            </div>`).join('')}
+        </div>
+      </div>` : ''}`;
+
+    const isSaved = getSaved().includes(p.id);
+    document.getElementById('drawer-footer').innerHTML = `
+      <button class="msg-draft-btn" onclick="openMsgModal('${p.id}')">Send Message →</button>
+      <a href="profile.html?id=${p.id}&coach=1" class="save-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Full Profile
+      </a>
+      <button class="save-btn" onclick="savePlayer('${p.id}', this)" style="${isSaved ? 'color:#ff4d6d;border-color:rgba(255,77,109,0.3);' : ''}">${isSaved ? '♥ Saved' : '♡ Save'}</button>`;
+
+    document.getElementById('drawer-overlay').classList.add('open');
+  }
+
+  function closeDrawer() { document.getElementById('drawer-overlay').classList.remove('open'); activePlayer = null; }
+  function closeDrawerIfOverlay(e) { if (e.target === document.getElementById('drawer-overlay')) closeDrawer(); }
+
+  // ── Message Modal ─────────────────────────────────────────────────────────────
+  let msgTargetId = null;
+
+  function openMsgModal(playerId) {
+    const players = getPlayers();
+    const p = players.find(pl => pl.id === playerId);
+    if (!p) return;
+    msgTargetId = playerId;
+    document.getElementById('msg-modal-sub').textContent = `To: ${p.athleteFirst} ${p.athleteLast} · #${p.jersey} ${p.sport}`;
+    document.getElementById('msg-text').value = '';
+    document.getElementById('msg-modal').classList.add('open');
+  }
+
+  function closeMsgModal(e) {
+    if (e && e.target !== document.getElementById('msg-modal')) return;
+    document.getElementById('msg-modal').classList.remove('open');
+    msgTargetId = null;
+  }
+
+  function sendMessage() {
+    const text = document.getElementById('msg-text').value.trim();
+    if (!text || !msgTargetId || !coach) return;
+
+    // Re-check subscription at send time — blocks sending once access has ended
+    const _sub = JSON.parse(localStorage.getItem('es_coach_sub_' + coach.id) || 'null');
+    if (!(typeof _subHasAccess === 'function' ? _subHasAccess(_sub) : _sub && _sub.status === 'active')) { window.location.href = 'coach-checkout.html'; return; }
+
+    const allMessages = JSON.parse(localStorage.getItem('es_messages') || '[]');
+    let thread = allMessages.find(t => t.coachId === coach.id && t.playerId === msgTargetId);
+
+    if (!thread) {
+      thread = {
+        id:          `${coach.id}_${msgTargetId}`,
+        coachId:     coach.id,
+        coachName:   `${coach.firstName} ${coach.lastName}`,
+        coachSchool: coach.university,
+        coachTitle:  coach.title,
+        coachSport:  coach.sport,
+        playerId:    msgTargetId,
+        messages:    [],
+      };
+      allMessages.push(thread);
+    }
+
+    thread.messages.push({ from: 'coach', text, timestamp: new Date().toISOString(), read: false });
+    localStorage.setItem('es_messages', JSON.stringify(allMessages));
+    if (typeof _sbSaveThread === 'function') _sbSaveThread(thread);
+
+    document.getElementById('msg-modal').classList.remove('open');
+    msgTargetId = null;
+
+    showToast('Message Sent');
+  }
+
+  function getSaved() {
+    const all = JSON.parse(localStorage.getItem('es_coach_saved') || '{}');
+    return all[coach.id] || [];
+  }
+  function getFollows() { return JSON.parse(localStorage.getItem('es_follows') || '[]'); }
+  function isFollowingPlayer(playerId) {
+    return getFollows().some(f => f.followerId === coach.id && f.followeeId === playerId);
+  }
+  function toggleSave(id) {
+    const all = JSON.parse(localStorage.getItem('es_coach_saved') || '{}');
+    const saved = all[coach.id] || [];
+    const idx = saved.indexOf(id);
+    if (idx >= 0) saved.splice(idx, 1); else saved.push(id);
+    all[coach.id] = saved;
+    localStorage.setItem('es_coach_saved', JSON.stringify(all));
+    const nowSaved = saved.includes(id);
+    if (typeof _sbToggleCoachSaved === 'function') _sbToggleCoachSaved(coach.id, id, nowSaved);
+    return nowSaved;
+  }
+  function savePlayer(id, btn) {
+    const isSaved = toggleSave(id);
+    btn.textContent = isSaved ? '♥ Saved' : '♡ Save';
+    btn.style.color = isSaved ? '#ff4d6d' : '';
+    btn.style.borderColor = isSaved ? 'rgba(255,77,109,0.3)' : '';
+  }
+
+  (async () => {
+    try {
+      if (typeof _sbSync !== 'function') return;
+      await _sbSync({ players: true, coachSaved: true, follows: true, subscription: true });
+      _coachFeedSynced = true;
+      populateStatFilter();
+      applyFilters();
+    } catch(e) { console.warn('[coach-feed] Supabase sync error:', e.message); _coachFeedSynced = true; applyFilters(); }
+  })();
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'sent-toast';
+    t.innerHTML = `
+      <span class="sent-check">
+        <svg viewBox="0 0 52 52" fill="none">
+          <circle class="sent-check-circle" cx="26" cy="26" r="23"/>
+          <path class="sent-check-mark" d="M15 27l7.5 7.5L37.5 19"/>
+        </svg>
+      </span>
+      <span class="sent-toast-label"></span>`;
+    t.querySelector('.sent-toast-label').textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.classList.add('leaving'), 1700);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  populateStatFilter();
+  applyFilters();
+
+  // Re-render whenever navigating back to this page (back button, tab switch, etc.)
+  // so Follow badges always reflect the latest state without a manual refresh
+  window.addEventListener('pageshow', () => applyFilters());
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) applyFilters(); });
+  window.addEventListener('storage', e => { if (e.key === 'es_follows') applyFilters(); });
+</script>
+</div><!-- /.page-content -->
+<nav class="bottom-nav">
+  <a class="bn-item active" href="coach-feed.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Scout
+  </a>
+  <a class="bn-item" href="coach-news-feed.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Feed
+  </a>
+  <a class="bn-item" href="coach-messages.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Messages
+  </a>
+  <a class="bn-item" href="coach-profile.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </a>
+  <a class="bn-item" href="coach-settings.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </a>
+</nav>
+<script>
+document.querySelectorAll('.bn-item:not(.active)').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href) {
+      e.preventDefault();
+      const pc = document.querySelector('.page-content');
+      pc.style.transition = 'opacity 0.12s ease';
+      pc.style.opacity = '0';
+      setTimeout(() => { window.location.href = href; }, 110);
+    }
+  });
+});
+</script>
+</body>
+</html>
