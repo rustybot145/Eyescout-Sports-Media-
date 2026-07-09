@@ -42,7 +42,7 @@
   .nav-link {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
     border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s;
+    color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s;
     text-decoration: none; letter-spacing: 0.01em;
   }
   .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
@@ -66,7 +66,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .sb-name { font-size: 13px; font-weight: 700; color: #fff; }
-  .sb-handle { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+  .sb-handle { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 1px; }
 
   /* ── Main ── */
   .main {
@@ -108,7 +108,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .section-title { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
-  .section-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+  .section-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 1px; }
   .section-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 
   /* ── Fields ── */
@@ -116,7 +116,7 @@
   .field-group { display: flex; flex-direction: column; gap: 6px; }
   .field-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
-    text-transform: uppercase; color: rgba(255,255,255,0.35);
+    text-transform: uppercase; color: rgba(255,255,255,0.7);
   }
   .field-input {
     background: var(--surface2); border: 1px solid var(--border);
@@ -128,8 +128,8 @@
     border-color: rgba(30,144,255,0.5);
     box-shadow: 0 0 0 3px rgba(30,144,255,0.08);
   }
-  .field-input::placeholder { color: rgba(255,255,255,0.2); }
-  .field-input[readonly] { color: rgba(255,255,255,0.3); cursor: default; }
+  .field-input::placeholder { color: rgba(255,255,255,0.7); }
+  .field-input[readonly] { color: rgba(255,255,255,0.7); cursor: default; }
   select.field-input {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -146,7 +146,7 @@
   .toggle-row:last-child { border-bottom: none; }
   .toggle-info { flex: 1; padding-right: 16px; }
   .toggle-label { font-size: 14px; font-weight: 600; color: #fff; }
-  .toggle-desc { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; line-height: 1.5; }
+  .toggle-desc { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; line-height: 1.5; }
   .toggle {
     width: 44px; height: 26px; border-radius: 13px; flex-shrink: 0;
     background: rgba(255,255,255,0.1); border: none; cursor: pointer;
@@ -185,7 +185,7 @@
   .danger-btn.red { color: #f87171; }
   .danger-btn.red:hover { background: rgba(248,113,113,0.06); }
   .danger-label { font-size: 14px; font-weight: 600; }
-  .danger-desc { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .danger-desc { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
 
   /* ── Custom stats ── */
   .stat-row {
@@ -202,7 +202,7 @@
   .add-stat-btn {
     display: flex; align-items: center; gap: 8px; background: none;
     border: 1.5px dashed rgba(255,255,255,0.12); border-radius: 10px;
-    padding: 11px 16px; cursor: pointer; color: rgba(255,255,255,0.35);
+    padding: 11px 16px; cursor: pointer; color: rgba(255,255,255,0.7);
     font-size: 13px; font-weight: 600; transition: all 0.15s; width: 100%;
     font-family: inherit;
   }
@@ -231,7 +231,7 @@
     padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700;
     letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
     border: 1px solid rgba(255,255,255,0.08); background: none;
-    color: rgba(255,255,255,0.3); transition: all 0.15s; font-family: inherit;
+    color: rgba(255,255,255,0.7); transition: all 0.15s; font-family: inherit;
   }
   .photo-remove-btn:hover { color: #f87171; border-color: rgba(248,113,113,0.3); }
 
@@ -288,7 +288,7 @@
   .mob-nav-btn {
     display: flex; flex-direction: column; align-items: center; gap: 3px;
     background: none; border: none; cursor: pointer;
-    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    color: rgba(255,255,255,0.7); padding: 6px 12px;
     text-decoration: none; font-size: 10px; font-weight: 600;
     letter-spacing: 0.06em; transition: color 0.15s;
     position: relative;
@@ -385,9 +385,9 @@
   <div class="page-header">
     <div>
       <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.01em;color:#fff;">Settings</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,0.35);margin-top:3px;">Manage your profile, athlete info, and account</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">Manage your profile, athlete info, and account</p>
     </div>
-    <a href="profile.html" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.3);text-decoration:none;padding:8px 14px;border-radius:8px;border:1px solid var(--border);transition:all 0.15s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.color='rgba(255,255,255,0.3)';this.style.borderColor='var(--border)'">
+    <a href="profile.html" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);text-decoration:none;padding:8px 14px;border-radius:8px;border:1px solid var(--border);transition:all 0.15s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.color='rgba(255,255,255,0.7)';this.style.borderColor='var(--border)'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       View Profile
     </a>
@@ -429,7 +429,7 @@
           <input type="file" id="photo-file-input" aria-label="Upload profile photo" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
           <button class="photo-upload-btn" onclick="document.getElementById('photo-file-input').click()">Change Photo</button>
           <button class="photo-remove-btn" onclick="removePhoto()">Remove Photo</button>
-          <p id="photo-status" style="font-size:11px;color:rgba(255,255,255,0.25);"></p>
+          <p id="photo-status" style="font-size:11px;color:rgba(255,255,255,0.7);"></p>
         </div>
       </div>
     </div>
@@ -537,7 +537,7 @@
     <div class="section-body">
       <div class="field-group">
         <textarea class="field-input" id="s-bio" aria-label="Bio" placeholder="Write a short bio — highlights, goals, what makes you stand out as an athlete…" style="min-height:110px;"></textarea>
-        <p style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:6px;text-align:right;"><span id="bio-count">0</span> / 300 characters</p>
+        <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:6px;text-align:right;"><span id="bio-count">0</span> / 300 characters</p>
       </div>
     </div>
   </div>
@@ -652,9 +652,9 @@
     </button>
   </div>
 
-  <p style="font-size:11px;color:rgba(255,255,255,0.12);text-align:center;margin-top:24px;line-height:1.7;">
+  <p style="font-size:11px;color:rgba(255,255,255,0.7);text-align:center;margin-top:24px;line-height:1.7;">
     © 2026 EyeScout Sports · Film Em. Scout Em. Stardom.<br>
-    <a href="#" onclick="openLegal('pp');return false;" style="color:rgba(255,255,255,0.2);text-decoration:none;">Privacy Policy</a> · <a href="#" onclick="openLegal('tos');return false;" style="color:rgba(255,255,255,0.2);text-decoration:none;">Terms</a>
+    <a href="#" onclick="openLegal('pp');return false;" style="color:rgba(255,255,255,0.7);text-decoration:none;">Privacy Policy</a> · <a href="#" onclick="openLegal('tos');return false;" style="color:rgba(255,255,255,0.7);text-decoration:none;">Terms</a>
   </p>
 
 </div>
@@ -694,18 +694,18 @@
           </div>
           <div>
             <p style="font-size:14px;font-weight:700;color:#fff;">EyeScout Pro · $15/month</p>
-            <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;">${isCancelled ? 'Pro access until ' + nextStr : 'Next billing: ' + nextStr}</p>
+            <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">${isCancelled ? 'Pro access until ' + nextStr : 'Next billing: ' + nextStr}</p>
           </div>
         </div>
         ${isCancelled
-          ? `<p style="font-size:12px;color:rgba(255,255,255,0.4);">Your Pro access ends ${nextStr}. You won't be charged again.</p>`
+          ? `<p style="font-size:12px;color:rgba(255,255,255,0.7);">Your Pro access ends ${nextStr}. You won't be charged again.</p>`
           : `<button onclick="showCancelModal()" style="background:rgba(255,77,109,0.07);border:1px solid rgba(255,77,109,0.18);border-radius:8px;padding:10px 18px;color:rgba(255,77,109,0.6);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,77,109,0.14)';this.style.color='#ff4d6d'" onmouseout="this.style.background='rgba(255,77,109,0.07)';this.style.color='rgba(255,77,109,0.6)'">Cancel Subscription</button>`}`;
     } else {
       desc.textContent = 'You\'re on the free plan';
       body.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
           <div>
-            <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;">Unlock the full EyeScout experience — post, search, message, and get discovered.</p>
+            <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.6;">Unlock the full EyeScout experience — post, search, message, and get discovered.</p>
           </div>
           <a href="subscription.html" style="flex-shrink:0;margin-left:20px;display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);color:#fff;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -818,7 +818,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           <div style="flex:1;">
             <p style="font-size:13px;font-weight:700;color:#F59E0B;">Adding &amp; editing stats is a Pro feature</p>
-            <p style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">Upgrade to add sport-specific stats to your profile card.</p>
+            <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">Upgrade to add sport-specific stats to your profile card.</p>
           </div>
           <a href="subscription.html" style="flex-shrink:0;padding:9px 16px;border-radius:8px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">Upgrade — $15/mo</a>
         </div>`;
@@ -866,7 +866,7 @@
 
     status.textContent = 'Uploading…';
     status.style.color = '#1E90FF';
-    preview.innerHTML = `<span style="font-size:11px;color:rgba(255,255,255,0.3);">Uploading…</span>`;
+    preview.innerHTML = `<span style="font-size:11px;color:rgba(255,255,255,0.7);">Uploading…</span>`;
     try {
       const url = await _sbUploadImage('avatars', session.id, cropped.file);
       pendingPhoto = url;
@@ -1058,10 +1058,10 @@
   .legal-modal { background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:16px; max-width:560px; width:100%; max-height:80vh; display:flex; flex-direction:column; }
   .legal-modal-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
   .legal-modal-head h3 { font-family:Impact,'Arial Narrow',Arial,sans-serif; font-size:18px; letter-spacing:0.05em; text-transform:uppercase; color:#fff; }
-  .legal-modal-close { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.35); padding:4px; transition:color 0.15s; }
+  .legal-modal-close { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.7); padding:4px; transition:color 0.15s; }
   .legal-modal-close:hover { color:#fff; }
-  .legal-modal-body { overflow-y:auto; padding:20px 24px 24px; font-size:13px; line-height:1.7; color:rgba(255,255,255,0.55); }
-  .legal-modal-body h4 { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin:20px 0 8px; }
+  .legal-modal-body { overflow-y:auto; padding:20px 24px 24px; font-size:13px; line-height:1.7; color:rgba(255,255,255,0.7); }
+  .legal-modal-body h4 { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.7); margin:20px 0 8px; }
   .legal-modal-body h4:first-child { margin-top:0; }
   .legal-modal-body p { margin-bottom:8px; }
   .legal-modal-body a { color:rgba(30,144,255,0.8); }
@@ -1073,7 +1073,7 @@
   @keyframes confirmPop { from { opacity:0; transform:scale(0.94) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
   .confirm-icon { width:56px; height:56px; border-radius:16px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
   .confirm-modal h3 { font-family:Impact,'Arial Narrow',Arial,sans-serif; font-size:21px; letter-spacing:0.03em; text-transform:uppercase; color:#fff; margin-bottom:10px; }
-  .confirm-modal p { font-size:13.5px; line-height:1.6; color:rgba(255,255,255,0.5); margin-bottom:24px; }
+  .confirm-modal p { font-size:13.5px; line-height:1.6; color:rgba(255,255,255,0.7); margin-bottom:24px; }
   .confirm-actions { display:flex; gap:10px; }
   .confirm-actions button { flex:1; padding:12px 16px; border-radius:11px; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.15s, opacity 0.15s, transform 0.1s; }
   .confirm-actions button:active { transform:scale(0.97); }
@@ -1225,7 +1225,7 @@
     color: #fff; text-align: center; margin-bottom: 10px;
   }
   .cancel-body {
-    font-size: 13px; color: rgba(255,255,255,0.4); text-align: center;
+    font-size: 13px; color: rgba(255,255,255,0.7); text-align: center;
     line-height: 1.65; margin-bottom: 28px;
   }
   .cancel-actions { display: flex; flex-direction: column; gap: 10px; }

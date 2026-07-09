@@ -29,32 +29,32 @@
     transition: border-color 0.2s, box-shadow 0.2s; appearance: none; -webkit-appearance: none;
   }
   .field:focus { border-color: rgba(30,144,255,0.5); box-shadow: 0 0 0 3px rgba(30,144,255,0.08); }
-  .field::placeholder { color: rgba(255,255,255,0.22); }
+  .field::placeholder { color: rgba(255,255,255,0.7); }
   select.field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
   select.field option { background: #1a1a1a; color: #fff; }
 
-  .tab { cursor: pointer; padding: 10px 0; font-size: 13px; font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.35); border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+  .tab { cursor: pointer; padding: 10px 0; font-size: 13px; font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.7); border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
   .tab.active { color: #fff; border-color: #1E90FF; }
-  .tab:hover:not(.active) { color: rgba(255,255,255,0.6); }
+  .tab:hover:not(.active) { color: rgba(255,255,255,0.7); }
 
   /* Player / Coach role toggle */
   .role-switch { display: inline-flex; background: #161616; border: 1px solid rgba(255,255,255,0.08); border-radius: 11px; padding: 4px; gap: 4px; margin-top: 16px; }
-  .role-opt { padding: 9px 30px; border: none; background: none; border-radius: 8px; cursor: pointer; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); transition: color 0.2s, background 0.2s; }
+  .role-opt { padding: 9px 30px; border: none; background: none; border-radius: 8px; cursor: pointer; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.7); transition: color 0.2s, background 0.2s; }
   .role-opt.active { color: #fff; background: #1E90FF; }
   .role-opt:hover:not(.active) { color: rgba(255,255,255,0.75); }
 
-  .section-label { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .field-label { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; color: rgba(255,255,255,0.55); margin-bottom: 6px; text-transform: uppercase; }
+  .section-label { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .field-label { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); margin-bottom: 6px; text-transform: uppercase; }
   .err-msg { color: #ff5555; font-size: 12px; margin-top: 6px; display: none; }
   .password-wrap { position: relative; }
-  .toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.3); padding: 0; transition: color 0.2s; }
+  .toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.7); padding: 0; transition: color 0.2s; }
   .toggle-pw:hover { color: rgba(255,255,255,0.7); }
   .fade-in { animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   .required { color: rgba(30,144,255,0.7); margin-left: 2px; }
   .age-gate-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:14px; }
   .age-gate-row input[type=checkbox] { width:16px; height:16px; margin-top:2px; flex-shrink:0; accent-color:#1E90FF; cursor:pointer; }
-  .age-gate-row label { font-size:12px; color:rgba(255,255,255,0.4); cursor:pointer; line-height:1.5; }
+  .age-gate-row label { font-size:12px; color:rgba(255,255,255,0.7); cursor:pointer; line-height:1.5; }
   .age-gate-row label strong { color:rgba(255,255,255,0.75); }
   /* Legal modal */
   .legal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; align-items:center; justify-content:center; padding:20px; }
@@ -62,10 +62,10 @@
   .legal-modal { background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:16px; max-width:560px; width:100%; max-height:80vh; display:flex; flex-direction:column; }
   .legal-modal-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
   .legal-modal-head h3 { font-family:Impact,'Arial Narrow',Arial,sans-serif; font-size:18px; letter-spacing:0.05em; text-transform:uppercase; color:#fff; }
-  .legal-modal-close { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.35); padding:4px; transition:color 0.15s; }
+  .legal-modal-close { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.7); padding:4px; transition:color 0.15s; }
   .legal-modal-close:hover { color:#fff; }
-  .legal-modal-body { overflow-y:auto; padding:20px 24px 24px; font-size:13px; line-height:1.7; color:rgba(255,255,255,0.55); }
-  .legal-modal-body h4 { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin:20px 0 8px; }
+  .legal-modal-body { overflow-y:auto; padding:20px 24px 24px; font-size:13px; line-height:1.7; color:rgba(255,255,255,0.7); }
+  .legal-modal-body h4 { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.7); margin:20px 0 8px; }
   .legal-modal-body h4:first-child { margin-top:0; }
   .legal-modal-body p { margin-bottom:8px; }
   .legal-modal-body a { color:rgba(30,144,255,0.8); }
@@ -94,7 +94,7 @@
   <a href="https://eyescoutsports.com" class="flex items-center no-underline">
     <img src="../logo-transparent.png" alt="EyeScout Sports" style="height:40px;width:40px;object-fit:contain;border-radius:50%;">
   </a>
-  <a href="../index.html" class="cond text-xs tracking-[0.15em] uppercase text-white/40 hover:text-white transition-colors">← Go Back</a>
+  <a href="../index.html" class="cond text-xs tracking-[0.15em] uppercase text-white/70 hover:text-white transition-colors">← Go Back</a>
 </nav>
 
 <div class="orb orb-1 fixed"></div>
@@ -105,7 +105,7 @@
 
     <div class="text-center mb-8">
       <img src="../logo-transparent.png" alt="EyeScout Sports" style="height:80px;width:80px;object-fit:contain;border-radius:50%;margin:0 auto 12px;">
-      <p id="tagline" class="cond text-xs tracking-[0.2em] uppercase text-white/30">Film Em. Scout Em. Stardom.</p>
+      <p id="tagline" class="cond text-xs tracking-[0.2em] uppercase text-white/70">Film Em. Scout Em. Stardom.</p>
       <div class="role-switch">
         <button type="button" class="role-opt active" id="role-btn-player" onclick="switchRole('player')">Player</button>
         <button type="button" class="role-opt" id="role-btn-coach" onclick="switchRole('coach')">Coach</button>
@@ -212,11 +212,11 @@
           <span class="field-label mb-3 block" id="purchase-q">Have you purchased your photo session?<span class="required">*</span></span>
           <div class="grid grid-cols-2 gap-3 mb-3" id="purchase-toggle" role="group" aria-labelledby="purchase-q">
             <button type="button" id="btn-no" onclick="setPurchased(false)" aria-pressed="false"
-              style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">
+              style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">
               Not Yet
             </button>
             <button type="button" id="btn-yes" onclick="setPurchased(true)" aria-pressed="false"
-              style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">
+              style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">
               Yes, I Have a Code
             </button>
           </div>
@@ -255,14 +255,14 @@
         </div>
         <p class="err-msg" id="age-error" style="margin-bottom:10px;">Please confirm the athlete is 13 or older.</p>
 
-        <p class="text-xs leading-relaxed mb-5" style="color: rgba(255,255,255,0.28);">
-          By clicking "Create Profile", it signifies my electronic signature and consent as parent/legal guardian and on behalf of my child, to share personal information with and be contacted by Eyescout Sports at the number(s) provided via recurring calls or texts, including by autodialer, AI, or prerecorded voice, and to receive a free profile. I understand the athlete's profile — including their name, school, sport, jersey number, and photos — will be visible to verified coaches on the EyeScout Sports platform. Consent is not required for purchase. To revoke consent: Please email us at <a href="mailto:info@eyescoutsport.com" class="underline underline-offset-2 hover:text-white/60 transition-colors">info@eyescoutsport.com</a> or call us at <a href="tel:6028580798" class="underline underline-offset-2 hover:text-white/60 transition-colors">602.858.0798</a>. I agree to the <a href="#" onclick="openLegal('pp');return false;" class="underline underline-offset-2 hover:text-white/60 transition-colors">Privacy Policy</a> and <a href="#" onclick="openLegal('tos');return false;" class="underline underline-offset-2 hover:text-white/60 transition-colors">Terms of Use</a>.
+        <p class="text-xs leading-relaxed mb-5" style="color: rgba(255,255,255,0.7);">
+          By clicking "Create Profile", it signifies my electronic signature and consent as parent/legal guardian and on behalf of my child, to share personal information with and be contacted by Eyescout Sports at the number(s) provided via recurring calls or texts, including by autodialer, AI, or prerecorded voice, and to receive a free profile. I understand the athlete's profile — including their name, school, sport, jersey number, and photos — will be visible to verified coaches on the EyeScout Sports platform. Consent is not required for purchase. To revoke consent: Please email us at <a href="mailto:info@eyescoutsport.com" class="underline underline-offset-2 hover:text-white/70 transition-colors">info@eyescoutsport.com</a> or call us at <a href="tel:6028580798" class="underline underline-offset-2 hover:text-white/70 transition-colors">602.858.0798</a>. I agree to the <a href="#" onclick="openLegal('pp');return false;" class="underline underline-offset-2 hover:text-white/70 transition-colors">Privacy Policy</a> and <a href="#" onclick="openLegal('tos');return false;" class="underline underline-offset-2 hover:text-white/70 transition-colors">Terms of Use</a>.
         </p>
 
         <button type="submit" class="g-btn w-full py-4 rounded-lg cond text-base font-black tracking-[0.15em] uppercase text-white">
           Create Profile
         </button>
-        <p class="text-center text-white/30 text-xs mt-5">Already have an account? <button type="button" onclick="switchTab('login')" class="text-white/60 hover:text-white underline underline-offset-2 transition-colors">Log in here</button></p>
+        <p class="text-center text-white/70 text-xs mt-5">Already have an account? <button type="button" onclick="switchTab('login')" class="text-white/70 hover:text-white underline underline-offset-2 transition-colors">Log in here</button></p>
 
       </form>
 
@@ -283,14 +283,14 @@
           </div>
         </div>
         <div class="flex justify-end mb-8">
-          <a href="#" onclick="forgotPassword();return false;" class="text-xs text-white/30 hover:text-white/60 transition-colors underline underline-offset-2">Forgot password?</a>
+          <a href="#" onclick="forgotPassword();return false;" class="text-xs text-white/70 hover:text-white/70 transition-colors underline underline-offset-2">Forgot password?</a>
         </div>
         <p class="err-msg mb-4" id="login-error">Incorrect email or password.</p>
 
         <button type="submit" class="g-btn w-full py-4 rounded-lg cond text-base font-black tracking-[0.15em] uppercase text-white">
           Log In
         </button>
-        <p class="text-center text-white/30 text-xs mt-5">Don't have an account? <button type="button" onclick="switchTab('signup')" class="text-white/60 hover:text-white underline underline-offset-2 transition-colors">Create one here</button></p>
+        <p class="text-center text-white/70 text-xs mt-5">Don't have an account? <button type="button" onclick="switchTab('signup')" class="text-white/70 hover:text-white underline underline-offset-2 transition-colors">Create one here</button></p>
 
       </form>
 
@@ -385,14 +385,14 @@
           <p class="err-msg" id="coach-email-taken">An account with this email already exists.</p>
         </div>
 
-        <p class="text-xs leading-relaxed mb-5" style="color: rgba(255,255,255,0.28);">
-          By clicking "Create Coach Account", it signifies my electronic signature and consent to share personal information with and be contacted by Eyescout Sports at the number(s) provided via recurring calls or texts, including by autodialer, AI, or prerecorded voice. Consent is not required for purchase. To revoke consent: Please email us at <a href="mailto:info@eyescoutsport.com" class="underline underline-offset-2 hover:text-white/60 transition-colors">info@eyescoutsport.com</a> or call us at <a href="tel:6028580798" class="underline underline-offset-2 hover:text-white/60 transition-colors">602.858.0798</a>. I agree to the <a href="#" onclick="openLegal('pp');return false;" class="underline underline-offset-2 hover:text-white/60 transition-colors">Privacy Policy</a> and <a href="#" onclick="openLegal('tos');return false;" class="underline underline-offset-2 hover:text-white/60 transition-colors">Terms of Use</a>.
+        <p class="text-xs leading-relaxed mb-5" style="color: rgba(255,255,255,0.7);">
+          By clicking "Create Coach Account", it signifies my electronic signature and consent to share personal information with and be contacted by Eyescout Sports at the number(s) provided via recurring calls or texts, including by autodialer, AI, or prerecorded voice. Consent is not required for purchase. To revoke consent: Please email us at <a href="mailto:info@eyescoutsport.com" class="underline underline-offset-2 hover:text-white/70 transition-colors">info@eyescoutsport.com</a> or call us at <a href="tel:6028580798" class="underline underline-offset-2 hover:text-white/70 transition-colors">602.858.0798</a>. I agree to the <a href="#" onclick="openLegal('pp');return false;" class="underline underline-offset-2 hover:text-white/70 transition-colors">Privacy Policy</a> and <a href="#" onclick="openLegal('tos');return false;" class="underline underline-offset-2 hover:text-white/70 transition-colors">Terms of Use</a>.
         </p>
 
         <button type="submit" class="g-btn w-full py-4 rounded-lg cond text-base font-black tracking-[0.15em] uppercase text-white">
           Create Coach Account
         </button>
-        <p class="text-center text-white/30 text-xs mt-5">Already have an account? <button type="button" onclick="switchTab('login')" class="text-white/60 hover:text-white underline underline-offset-2 transition-colors">Log in here</button></p>
+        <p class="text-center text-white/70 text-xs mt-5">Already have an account? <button type="button" onclick="switchTab('login')" class="text-white/70 hover:text-white underline underline-offset-2 transition-colors">Log in here</button></p>
 
       </form>
 
@@ -412,19 +412,19 @@
           </div>
         </div>
         <div class="flex justify-end mb-8">
-          <a href="#" onclick="forgotPasswordCoach();return false;" class="text-xs text-white/30 hover:text-white/60 transition-colors underline underline-offset-2">Forgot password?</a>
+          <a href="#" onclick="forgotPasswordCoach();return false;" class="text-xs text-white/70 hover:text-white/70 transition-colors underline underline-offset-2">Forgot password?</a>
         </div>
         <p class="err-msg mb-4" id="coach-login-error">Incorrect email or password.</p>
 
         <button type="submit" class="g-btn w-full py-4 rounded-lg cond text-base font-black tracking-[0.15em] uppercase text-white">Log In</button>
-        <p class="text-center text-white/30 text-xs mt-5">Don't have an account? <button type="button" onclick="switchTab('signup')" class="text-white/60 hover:text-white underline underline-offset-2 transition-colors">Create one here</button></p>
+        <p class="text-center text-white/70 text-xs mt-5">Don't have an account? <button type="button" onclick="switchTab('signup')" class="text-white/70 hover:text-white underline underline-offset-2 transition-colors">Create one here</button></p>
       </form>
 
       </div><!-- /role-coach -->
 
     </div>
 
-    <p class="text-center text-white/15 text-xs mt-6 cond tracking-widest uppercase">EyeScout Sports</p>
+    <p class="text-center text-white/70 text-xs mt-6 cond tracking-widest uppercase">EyeScout Sports</p>
 
   </div>
 </div>
@@ -497,11 +497,11 @@
     const grad = 'linear-gradient(90deg,#7B2FBE,#1E90FF,#00C9A7,#39D353)';
     if (val) {
       btnYes.style.background = grad; btnYes.style.color = '#fff'; btnYes.style.border = '1px solid transparent';
-      btnNo.style.background = 'rgba(255,255,255,0.04)'; btnNo.style.color = 'rgba(255,255,255,0.35)'; btnNo.style.border = '1px solid rgba(255,255,255,0.08)';
+      btnNo.style.background = 'rgba(255,255,255,0.04)'; btnNo.style.color = 'rgba(255,255,255,0.7)'; btnNo.style.border = '1px solid rgba(255,255,255,0.08)';
       codeField.style.display = 'block';
     } else {
       btnNo.style.background = grad; btnNo.style.color = '#fff'; btnNo.style.border = '1px solid transparent';
-      btnYes.style.background = 'rgba(255,255,255,0.04)'; btnYes.style.color = 'rgba(255,255,255,0.35)'; btnYes.style.border = '1px solid rgba(255,255,255,0.08)';
+      btnYes.style.background = 'rgba(255,255,255,0.04)'; btnYes.style.color = 'rgba(255,255,255,0.7)'; btnYes.style.border = '1px solid rgba(255,255,255,0.08)';
       codeField.style.display = 'none';
       document.getElementById('code-error').style.display = 'none';
     }

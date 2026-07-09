@@ -40,7 +40,7 @@
   .nav-link {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
     border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s;
+    color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s;
     text-decoration: none; letter-spacing: 0.01em; border-left: 3px solid transparent;
   }
   .nav-link:hover { background: rgba(30,144,255,0.06); color: rgba(255,255,255,0.9); }
@@ -74,7 +74,7 @@
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .page-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
-  .page-sub { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+  .page-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 3px; }
 
   /* ── Section ── */
   .settings-section {
@@ -90,7 +90,7 @@
     display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
   }
   .section-title { font-size: 14px; font-weight: 700; color: #fff; }
-  .section-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .section-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
   .section-body { padding: 20px 22px; }
 
   /* ── Subscription card ── */
@@ -102,7 +102,7 @@
   .sub-card.inactive {
     background: rgba(255,255,255,0.02); border-color: var(--border);
   }
-  .sub-label { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
+  .sub-label { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
   .sub-status {
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
   }
@@ -113,8 +113,8 @@
     background: rgba(57,211,83,0.1); border: 1px solid rgba(57,211,83,0.25);
     font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #39D353;
   }
-  .sub-badge.inactive { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); }
-  .sub-meta { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 6px; }
+  .sub-badge.inactive { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+  .sub-meta { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 6px; }
   .sub-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
   .sub-upgrade-btn {
     display: inline-flex; align-items: center; gap: 8px;
@@ -134,7 +134,7 @@
 
   /* ── Feature list ── */
   .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .feat-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.55); }
+  .feat-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.7); }
   .feat-check { width: 16px; height: 16px; border-radius: 50%; background: rgba(57,211,83,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
   /* ── Toggles ── */
@@ -144,7 +144,7 @@
   }
   .toggle-info { flex: 1; min-width: 0; }
   .toggle-label { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); }
-  .toggle-desc { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .toggle-desc { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
   .toggle {
     width: 42px; height: 24px; border-radius: 12px; border: none; cursor: pointer;
     background: rgba(255,255,255,0.1); position: relative; flex-shrink: 0; margin-left: 16px;
@@ -162,13 +162,13 @@
   .danger-btn {
     width: 100%; display: flex; align-items: center; justify-content: space-between;
     padding: 14px 22px; background: none; border: none; border-top: 1px solid var(--border);
-    cursor: pointer; text-align: left; color: rgba(255,255,255,0.6); transition: background 0.15s;
+    cursor: pointer; text-align: left; color: rgba(255,255,255,0.7); transition: background 0.15s;
     font-family: inherit;
   }
   .danger-btn:hover { background: rgba(255,255,255,0.03); }
   .danger-btn.red:hover { background: rgba(248,113,113,0.05); }
   .danger-label { font-size: 14px; font-weight: 600; color: inherit; }
-  .danger-desc { font-size: 12px; color: rgba(255,255,255,0.25); margin-top: 2px; }
+  .danger-desc { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
   .danger-btn.red .danger-label { color: rgba(248,113,113,0.7); }
 
   /* ── Toast ── */
@@ -212,7 +212,7 @@
     .bn-item {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       flex: 1; height: 100%; text-decoration: none; font-size: 0;
-      color: rgba(255,255,255,0.25); border-radius: 20px;
+      color: rgba(255,255,255,0.7); border-radius: 20px;
       transition: color 0.22s, background 0.22s, transform 0.22s;
       -webkit-tap-highlight-color: transparent;
     }
@@ -267,7 +267,7 @@
     </div>
     <div>
       <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">Coach</p>
-      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-sub">Coach Portal</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;" id="sb-sub">Coach Portal</p>
     </div>
   </div>
 </aside>
@@ -354,7 +354,7 @@
       </button>
     </div>
 
-    <p style="font-size:11px;color:rgba(255,255,255,0.12);text-align:center;margin-top:24px;line-height:1.7;">
+    <p style="font-size:11px;color:rgba(255,255,255,0.7);text-align:center;margin-top:24px;line-height:1.7;">
       © 2026 EyeScout Sports · Film Em. Scout Em. Stardom.
     </p>
 
@@ -373,7 +373,7 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
     </div>
     <p style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;">Cancel Subscription?</p>
-    <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:24px;">You'll lose access to Pro scouting features at the end of your current billing period.</p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:24px;">You'll lose access to Pro scouting features at the end of your current billing period.</p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button id="confirm-cancel-btn" onclick="confirmCancel()" style="padding:13px;border-radius:10px;background:rgba(255,77,109,0.09);border:1px solid rgba(255,77,109,0.22);color:rgba(255,77,109,0.8);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,77,109,0.18)';this.style.color='#ff4d6d'" onmouseout="this.style.background='rgba(255,77,109,0.09)';this.style.color='rgba(255,77,109,0.8)'">Yes, Cancel Subscription</button>
       <button onclick="closeCancelModal()" style="padding:13px;border-radius:10px;background:var(--grad);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.95;transition:opacity 0.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.95'">Keep My Subscription</button>
@@ -388,7 +388,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
     </div>
     <p id="coach-delete-title" style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;">Delete your account?</p>
-    <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:24px;">This permanently removes your coach profile and all your messages. This can't be undone.</p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:24px;">This permanently removes your coach profile and all your messages. This can't be undone.</p>
     <div style="display:flex;gap:10px;">
       <button onclick="closeDeleteModal()" style="flex:1;padding:13px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Cancel</button>
       <button onclick="performDelete()" style="flex:1;padding:13px;border-radius:10px;background:#f0453a;border:1px solid #f0453a;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;" onmouseover="this.style.background='#d83a30'" onmouseout="this.style.background='#f0453a'">Delete Account</button>
@@ -468,7 +468,7 @@
           </div>
           <div class="sub-actions">
             ${isCancelled
-              ? `<p style="font-size:12px;color:rgba(255,255,255,0.4);">Your Pro access ends ${fmt(next)}. You won't be charged again.</p>`
+              ? `<p style="font-size:12px;color:rgba(255,255,255,0.7);">Your Pro access ends ${fmt(next)}. You won't be charged again.</p>`
               : `<button class="sub-cancel-btn" onclick="showCancelModal()">Cancel Subscription</button>`}
           </div>
         </div>`;

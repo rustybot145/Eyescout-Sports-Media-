@@ -29,7 +29,7 @@
   .nav-link {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
     border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s; text-decoration: none;
+    color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s; text-decoration: none;
   }
   .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
   .nav-link.active { color: #fff; font-weight: 700; }
@@ -70,7 +70,7 @@
   }
   .search-icon {
     position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
-    color: rgba(255,255,255,0.25); pointer-events: none;
+    color: rgba(255,255,255,0.7); pointer-events: none;
   }
   .search-bar {
     width: 100%; background: rgba(255,255,255,0.05);
@@ -79,12 +79,12 @@
     font-family: system-ui, sans-serif; transition: border-color 0.2s, box-shadow 0.2s;
   }
   .search-bar:focus { border-color: rgba(30,144,255,0.5); box-shadow: 0 0 0 3px rgba(30,144,255,0.08); }
-  .search-bar::placeholder { color: rgba(255,255,255,0.2); }
+  .search-bar::placeholder { color: rgba(255,255,255,0.7); }
   .search-clear {
     position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
     background: rgba(255,255,255,0.08); border: none; border-radius: 50%;
     width: 26px; height: 26px; display: none; align-items: center; justify-content: center;
-    cursor: pointer; color: rgba(255,255,255,0.5); transition: all 0.15s;
+    cursor: pointer; color: rgba(255,255,255,0.7); transition: all 0.15s;
   }
   .search-clear:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
@@ -95,7 +95,7 @@
   .filter-tab {
     padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none;
-    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7);
     transition: all 0.15s;
   }
   .filter-tab:hover { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.7); }
@@ -113,9 +113,9 @@
   .section-label {
     font-family: Impact, 'Arial Narrow', Arial, sans-serif;
     font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.7);
   }
-  .section-count { font-size: 12px; color: rgba(255,255,255,0.2); }
+  .section-count { font-size: 12px; color: rgba(255,255,255,0.7); }
 
   /* ── Player cards ── */
   .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
@@ -129,11 +129,11 @@
   .card-avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1a1a1a; border: 2px solid var(--surface); display: flex; align-items: center; justify-content: center; font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 18px; overflow: hidden; }
   .card-body { padding: 22px 16px 18px; text-align: center; }
   .card-name { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+  .card-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 10px; }
   .card-tags { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
   .card-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; }
   .tag-sport { background: rgba(30,144,255,0.1); border: 1px solid rgba(30,144,255,0.25); color: #1E90FF; }
-  .tag-year { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+  .tag-year { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
   .tag-photos { background: rgba(57,211,83,0.08); border: 1px solid rgba(57,211,83,0.2); color: #39D353; }
 
   /* ── Tournament cards ── */
@@ -150,8 +150,8 @@
   .tournament-card:hover { border-color: rgba(123,47,190,0.35); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
   .t-hash { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 20px; letter-spacing: 0.04em; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
   .t-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .t-date { font-size: 12px; color: rgba(255,255,255,0.3); }
-  .t-posts { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-top: 14px; }
+  .t-date { font-size: 12px; color: rgba(255,255,255,0.7); }
+  .t-posts { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-top: 14px; }
 
   /* ── Sport cards ── */
   .sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -164,12 +164,12 @@
   .sport-card:hover { border-color: rgba(0,201,167,0.35); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
   .sport-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
   .sport-name { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
-  .sport-count { font-size: 11px; color: rgba(255,255,255,0.25); }
+  .sport-count { font-size: 11px; color: rgba(255,255,255,0.7); }
 
   /* ── Empty / no results ── */
   .no-results { text-align: center; padding: 60px 20px; }
   .no-results-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
-  .no-results p { font-size: 14px; color: rgba(255,255,255,0.25); line-height: 1.7; }
+  .no-results p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7; }
 
   /* ── Default browse grid (no search) ── */
   .browse-section { margin-bottom: 40px; }
@@ -219,7 +219,7 @@
   .mob-nav-btn {
     display: flex; flex-direction: column; align-items: center; gap: 3px;
     background: none; border: none; cursor: pointer;
-    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    color: rgba(255,255,255,0.7); padding: 6px 12px;
     text-decoration: none; font-size: 10px; font-weight: 600;
     letter-spacing: 0.06em; transition: color 0.15s;
     position: relative;
@@ -307,7 +307,7 @@
     <div class="sidebar-avatar"><div class="sidebar-avatar-inner"></div></div>
     <div>
       <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">My Profile</p>
-      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-handle">@eyescout</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;" id="sb-handle">@eyescout</p>
     </div>
   </a>
 </aside>
@@ -346,12 +346,12 @@
       </div>
       <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;">Pro Feature</p>
       <p style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Search Players &amp; Coaches</p>
-      <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:30px;">Find players by sport, school, or name. Discover coaches and get on their radar. Available with EyeScout Pro.</p>
+      <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:30px;">Find players by sport, school, or name. Discover coaches and get on their radar. Available with EyeScout Pro.</p>
       <button onclick="window.location.href='subscription.html'" style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Upgrade to Pro — $15/mo
       </button>
-      <p style="font-size:12px;color:rgba(255,255,255,0.18);margin-top:14px;">Cancel anytime · Instant access</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:14px;">Cancel anytime · Instant access</p>
     </div>
   </div>
 
@@ -442,7 +442,7 @@
     } else {
       follows.push({ followerId: session.id, followeeId: coachId, createdAt: new Date().toISOString() });
       btn.textContent = 'Following';
-      btn.style.cssText = 'flex-shrink:0;padding:5px 14px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:0.06em;border:1px solid rgba(255,255,255,0.15);cursor:pointer;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);';
+      btn.style.cssText = 'flex-shrink:0;padding:5px 14px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:0.06em;border:1px solid rgba(255,255,255,0.15);cursor:pointer;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);';
     }
     saveFollows(follows);
     if (typeof _sbToggleFollow === 'function') _sbToggleFollow(session.id, coachId, idx < 0);
@@ -457,14 +457,14 @@
         <div class="card-body">
           <div class="card-avatar-wrap">
             <div class="card-avatar-inner">
-              ${c.profilePhoto ? `<img alt="" src="${escAttr(c.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : `<span style="font-size:16px;color:rgba(255,255,255,0.6);">${escHtml(initials)}</span>`}
+              ${c.profilePhoto ? `<img alt="" src="${escAttr(c.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : `<span style="font-size:16px;color:rgba(255,255,255,0.7);">${escHtml(initials)}</span>`}
             </div>
           </div>
           <p class="card-name">${escHtml(name)}${c.verified ? ' <span style="color:#1E90FF;font-size:10px;">✓</span>' : ''}</p>
           <p class="card-sub" style="white-space:normal;overflow:visible;">${escHtml(c.university || c.school || '')}</p>
           <div class="card-tags">
             ${c.sport ? `<span class="card-tag tag-sport">${escHtml(c.sport)}</span>` : ''}
-            ${c.title ? `<span class="card-tag" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);">${escHtml(c.title)}</span>` : ''}
+            ${c.title ? `<span class="card-tag" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">${escHtml(c.title)}</span>` : ''}
           </div>
         </div>
       </div>`;
@@ -597,7 +597,7 @@
             <div class="no-results-icon" style="width:72px;height:72px;margin-bottom:20px;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </div>
-            <p style="font-size:14px;color:rgba(255,255,255,0.2);line-height:1.8;">No coaches have joined yet</p>
+            <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.8;">No coaches have joined yet</p>
           </div>`;
         return;
       }
@@ -615,7 +615,7 @@
           <div class="no-results-icon" style="width:72px;height:72px;margin-bottom:20px;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
-          <p style="font-size:14px;color:rgba(255,255,255,0.2);line-height:1.8;">Search for players, coaches, tournaments, or sports</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.8;">Search for players, coaches, tournaments, or sports</p>
         </div>`;
       return;
     }
@@ -627,7 +627,7 @@
       area.innerHTML = `
         <div class="no-results">
           <div class="no-results-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <p>No results for "<strong style="color:rgba(255,255,255,0.5);">${escHtml(q)}</strong>"<br>Try a different name, sport, or tournament.</p>
+          <p>No results for "<strong style="color:rgba(255,255,255,0.7);">${escHtml(q)}</strong>"<br>Try a different name, sport, or tournament.</p>
         </div>`;
       return;
     }
@@ -661,7 +661,7 @@
   }
 
   function noResults() {
-    return `<div class="no-results"><p style="color:rgba(255,255,255,0.2);">No results found.</p></div>`;
+    return `<div class="no-results"><p style="color:rgba(255,255,255,0.7);">No results found.</p></div>`;
   }
 
   render();

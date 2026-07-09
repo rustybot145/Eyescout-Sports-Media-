@@ -32,7 +32,7 @@
   .nav-link {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
     border-radius: 12px; font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s; text-decoration: none;
+    color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s; text-decoration: none;
   }
   .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
   .nav-link.active { color: #fff; font-weight: 700; }
@@ -79,11 +79,11 @@
   .ftab {
     padding: 14px 0; margin-right: 28px; font-size: 13px; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
-    color: rgba(255,255,255,0.3); border-bottom: 2px solid transparent;
+    color: rgba(255,255,255,0.7); border-bottom: 2px solid transparent;
     transition: color 0.15s, border-color 0.15s; background: none; border-top: none; border-left: none; border-right: none;
   }
   .ftab.active { color: #fff; border-bottom-color: #1E90FF; }
-  .ftab:hover:not(.active) { color: rgba(255,255,255,0.6); }
+  .ftab:hover:not(.active) { color: rgba(255,255,255,0.7); }
 
   /* ── Notification list (cards) ── */
   .notif-list { padding: 18px 24px 40px; display: flex; flex-direction: column; gap: 10px; }
@@ -128,7 +128,7 @@
   .notif-body { flex: 1; min-width: 0; }
   .notif-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.5; margin-bottom: 3px; }
   .notif-text strong { color: #fff; }
-  .notif-time { font-size: 11.5px; color: rgba(255,255,255,0.3); }
+  .notif-time { font-size: 11.5px; color: rgba(255,255,255,0.7); }
 
   .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #1E90FF; flex-shrink: 0; box-shadow: 0 0 8px rgba(30,144,255,0.6); }
 
@@ -136,7 +136,7 @@
   .empty-state { text-align: center; padding: 80px 32px; }
   .empty-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
   .empty-title { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin-bottom: 8px; }
-  .empty-body { font-size: 13px; color: rgba(255,255,255,0.3); line-height: 1.7; }
+  .empty-body { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.7; }
 
   /* ── Follow-back button ── */
   .follow-back-btn {
@@ -146,7 +146,7 @@
     color: #4aa8ff; transition: all 0.15s;
   }
   .follow-back-btn:hover { background: rgba(30,144,255,0.2); color: #fff; }
-  .follow-back-btn.following { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.14); color: rgba(255,255,255,0.5); }
+  .follow-back-btn.following { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.14); color: rgba(255,255,255,0.7); }
 
   @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
   .fade-in { animation: fadeUp 0.2s ease both; }
@@ -154,7 +154,7 @@
   .date-group-label {
     padding: 10px 32px 6px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
   }
 
   /* ── Mobile header (hidden on desktop) ── */
@@ -199,7 +199,7 @@
   .mob-nav-btn {
     display: flex; flex-direction: column; align-items: center; gap: 3px;
     background: none; border: none; cursor: pointer;
-    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    color: rgba(255,255,255,0.7); padding: 6px 12px;
     text-decoration: none; font-size: 10px; font-weight: 600;
     letter-spacing: 0.06em; transition: color 0.15s;
     position: relative;
@@ -287,7 +287,7 @@
     <div class="sidebar-avatar"><div class="sidebar-avatar-inner"></div></div>
     <div>
       <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">My Profile</p>
-      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-handle">@eyescout</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;" id="sb-handle">@eyescout</p>
     </div>
   </a>
 </aside>
@@ -315,12 +315,12 @@
       </div>
       <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;">Pro Feature</p>
       <p style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Activity &amp; Notifications</p>
-      <p style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:30px;">See when coaches view your profile, when players follow you, and get notified about new photo drops. Pro only.</p>
+      <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:30px;">See when coaches view your profile, when players follow you, and get notified about new photo drops. Pro only.</p>
       <button onclick="window.location.href='subscription.html'" style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Upgrade to Pro — $15/mo
       </button>
-      <p style="font-size:12px;color:rgba(255,255,255,0.18);margin-top:14px;">Cancel anytime · Instant access</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:14px;">Cancel anytime · Instant access</p>
     </div>
   </div>
 </main>
@@ -516,7 +516,7 @@
             </div>
             <div class="notif-body">
               <p class="notif-text"><strong>${escHtml(n.actorName)}</strong> ${n.actorTitle ? `(${n.actorTitle}${n.actorSchool ? `, ${n.actorSchool}` : ''})` : ''} sent you a message</p>
-              <p class="notif-time" style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">"${escHtml(n.text)}"</p>
+              <p class="notif-time" style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">"${escHtml(n.text)}"</p>
               <p class="notif-time" style="margin-top:4px;">${formatTime(n.timestamp)}</p>
             </div>
             ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}

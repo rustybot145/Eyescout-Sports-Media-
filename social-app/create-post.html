@@ -28,7 +28,7 @@
   .nav-link {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
     border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s;
+    color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s;
     text-decoration: none; user-select: none;
   }
   .nav-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
@@ -49,7 +49,7 @@
   .sidebar-avatar { width: 38px; height: 38px; border-radius: 50%; padding: 2px; background: var(--grad); flex-shrink: 0; }
   .sidebar-avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1a1a1a; overflow: hidden; display: flex; align-items: center; justify-content: center; }
   .sidebar-name { font-size: 14px; font-weight: 700; color: #fff; }
-  .sidebar-handle { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+  .sidebar-handle { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 1px; }
 
   /* Main */
   .main { margin-left: var(--sidebar-w); flex: 1; padding: 48px 40px; max-width: 900px; }
@@ -89,14 +89,14 @@
     transition: border-color 0.2s;
   }
   .caption-box:focus { border-color: rgba(255,255,255,0.2); }
-  .caption-box::placeholder { color: rgba(255,255,255,0.22); }
+  .caption-box::placeholder { color: rgba(255,255,255,0.7); }
 
   /* Tournament pill */
   .tourn-pill {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 14px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.08);
     background: #141414; cursor: pointer; transition: border-color 0.15s, background 0.15s;
-    font-size: 14px; color: rgba(255,255,255,0.55);
+    font-size: 14px; color: rgba(255,255,255,0.7);
   }
   .tourn-pill:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
   .tourn-pill.selected {
@@ -183,7 +183,7 @@
   .mob-nav-btn {
     display: flex; flex-direction: column; align-items: center; gap: 3px;
     background: none; border: none; cursor: pointer;
-    color: rgba(255,255,255,0.35); padding: 6px 12px;
+    color: rgba(255,255,255,0.7); padding: 6px 12px;
     text-decoration: none; font-size: 10px; font-weight: 600;
     letter-spacing: 0.06em; transition: color 0.15s;
     position: relative;
@@ -278,17 +278,17 @@
 
   <!-- Step 1: Pick a photo -->
   <div id="step-pick">
-    <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">New Post</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:8px;">New Post</p>
     <h1 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:34px;letter-spacing:0.04em;text-transform:uppercase;color:#fff;margin-bottom:6px;">Choose a photo</h1>
-    <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-bottom:28px;">Pick one of your profile photos to share.</p>
+    <p style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:28px;">Pick one of your profile photos to share.</p>
 
     <!-- No photos state -->
     <div id="no-photos" style="display:none;text-align:center;padding:60px 0;">
       <div style="width:60px;height:60px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       </div>
-      <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.3);margin-bottom:6px;">No photos on your profile yet</p>
-      <p style="font-size:13px;color:rgba(255,255,255,0.18);">Add photos on your <a href="profile.html" style="color:rgba(30,144,255,0.75);text-decoration:underline;">profile</a> first, then come back to post them.</p>
+      <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:6px;">No photos on your profile yet</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.7);">Add photos on your <a href="profile.html" style="color:rgba(30,144,255,0.75);text-decoration:underline;">profile</a> first, then come back to post them.</p>
     </div>
 
     <!-- Photo grid -->
@@ -298,7 +298,7 @@
 
   <!-- Step 2: Preview + caption -->
   <div id="step-caption" style="display:none;">
-    <button onclick="goBack()" style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.35);font-size:13px;cursor:pointer;background:none;border:none;margin-bottom:28px;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
+    <button onclick="goBack()" style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.7);font-size:13px;cursor:pointer;background:none;border:none;margin-bottom:28px;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
     </button>
@@ -312,16 +312,16 @@
 
       <!-- Caption + tournament + post -->
       <div>
-        <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">Caption</p>
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:10px;">Caption</p>
         <textarea class="caption-box" id="caption-input" aria-label="Post caption" rows="4" maxlength="220" placeholder="Write something about this photo…"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;margin-bottom:20px;">
-          <span style="font-size:12px;color:rgba(255,255,255,0.2);" id="char-count">0 / 220</span>
+          <span style="font-size:12px;color:rgba(255,255,255,0.7);" id="char-count">0 / 220</span>
         </div>
 
         <!-- Tournament tag -->
-        <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">Tournament <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:rgba(255,255,255,0.2);">— optional</span></p>
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:10px;">Tournament <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:rgba(255,255,255,0.7);">— optional</span></p>
         <div id="tournament-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;"></div>
-        <div id="no-tournaments" style="display:none;font-size:13px;color:rgba(255,255,255,0.2);margin-bottom:20px;">No tournaments added yet — an admin can add them from the admin panel.</div>
+        <div id="no-tournaments" style="display:none;font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:20px;">No tournaments added yet — an admin can add them from the admin panel.</div>
 
         <button class="post-btn" id="post-btn" onclick="submitPost()">Share Post →</button>
         <p id="post-err" style="display:none;font-size:12px;color:#f87171;margin-top:10px;"></p>
@@ -336,7 +336,7 @@
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h2 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:32px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:10px;">Posted!</h2>
-    <p style="font-size:14px;color:rgba(255,255,255,0.4);">Taking you to your profile…</p>
+    <p style="font-size:14px;color:rgba(255,255,255,0.7);">Taking you to your profile…</p>
   </div>
 
 </main>
@@ -456,7 +456,7 @@
         <div style="display:flex;align-items:center;gap:10px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
           <span style="font-weight:600;">${t.name}</span>
-          ${t.sport ? `<span style="font-size:12px;color:rgba(255,255,255,0.3);">${t.sport}</span>` : ''}
+          ${t.sport ? `<span style="font-size:12px;color:rgba(255,255,255,0.7);">${t.sport}</span>` : ''}
         </div>
         <span class="tag-badge">#${t.name.replace(/\s+/g,'')}</span>
       </div>`).join('');

@@ -29,9 +29,9 @@
     font-family: system-ui, -apple-system, sans-serif;
   }
   .field:focus { border-color: rgba(123,47,190,0.6); box-shadow: 0 0 0 3px rgba(123,47,190,0.12); }
-  .field::placeholder { color: rgba(255,255,255,0.18); }
+  .field::placeholder { color: rgba(255,255,255,0.7); }
   .field-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-  .field-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 7px; font-family: 'Arial Narrow', Arial, sans-serif; }
+  .field-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 7px; font-family: 'Arial Narrow', Arial, sans-serif; }
 
   /* Card number formatting */
   #card-number { letter-spacing: 0.12em; }
@@ -46,7 +46,7 @@
   .line:last-child { border-bottom: none; }
 
   /* Card brand indicator */
-  .card-brand { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); transition: color 0.2s; }
+  .card-brand { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); transition: color 0.2s; }
 
   .fade-in { animation: fadeIn 0.35s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -69,8 +69,8 @@
       <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h1 class="cond g-text" style="font-size:42px;font-weight:900;letter-spacing:0.04em;text-transform:uppercase;line-height:1;margin-bottom:12px;">Payment Successful</h1>
-    <p style="font-size:15px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:8px;">Your photos are being edited by our team.</p>
-    <p style="font-size:13px;color:rgba(255,255,255,0.25);margin-bottom:36px;">A receipt has been sent to your email.</p>
+    <p style="font-size:15px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:8px;">Your photos are being edited by our team.</p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:36px;">A receipt has been sent to your email.</p>
     <a href="profile.html" style="display:inline-block;text-decoration:none;" class="g-btn px-10 py-4 rounded-xl cond text-sm font-black tracking-[0.18em] uppercase text-white">
       View My Profile →
     </a>
@@ -85,7 +85,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(57,211,83,0.7)" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    <span class="cond" style="font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Secure Checkout</span>
+    <span class="cond" style="font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Secure Checkout</span>
   </div>
 </nav>
 
@@ -93,9 +93,9 @@
 
   <!-- Breadcrumb -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:36px;">
-    <a href="profile.html" style="font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.25);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.25)'">Profile</a>
+    <a href="profile.html" style="font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='rgba(255,255,255,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">Profile</a>
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    <span class="cond" style="font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Checkout</span>
+    <span class="cond" style="font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Checkout</span>
   </div>
 
   <div id="checkout-grid" style="display:grid;gap:32px;">
@@ -105,7 +105,7 @@
 
       <!-- Contact -->
       <div style="margin-bottom:28px;">
-        <h2 class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05);">Contact</h2>
+        <h2 class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05);">Contact</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
           <div>
             <label class="field-label" for="f-first">First Name</label>
@@ -124,7 +124,7 @@
 
       <!-- Payment -->
       <div style="margin-bottom:28px;">
-        <h2 class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05);">Payment</h2>
+        <h2 class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05);">Payment</h2>
 
         <!-- Card number -->
         <div style="margin-bottom:12px;">
@@ -161,7 +161,7 @@
 
       <!-- Billing address -->
       <div style="margin-bottom:32px;">
-        <h2 class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05);">Billing Address</h2>
+        <h2 class="cond" style="font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05);">Billing Address</h2>
 
         <div style="margin-bottom:12px;">
           <label class="field-label" for="b-address">Address</label>
@@ -199,23 +199,23 @@
 
       <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span style="font-size:11px;color:rgba(255,255,255,0.2);font-family:'Arial Narrow',Arial,sans-serif;letter-spacing:0.08em;">256-bit SSL · Secured by PayPal</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.7);font-family:'Arial Narrow',Arial,sans-serif;letter-spacing:0.08em;">256-bit SSL · Secured by PayPal</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
 
       <!-- Card brands -->
       <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;">
         <div style="padding:5px 11px;border-radius:5px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.07);">
-          <span class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.05em;color:rgba(255,255,255,0.3);">VISA</span>
+          <span class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.05em;color:rgba(255,255,255,0.7);">VISA</span>
         </div>
         <div style="padding:5px 11px;border-radius:5px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.07);">
-          <span class="cond" style="font-size:9px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.3);">MASTERCARD</span>
+          <span class="cond" style="font-size:9px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.7);">MASTERCARD</span>
         </div>
         <div style="padding:5px 11px;border-radius:5px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.07);">
-          <span class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.05em;color:rgba(255,255,255,0.3);">AMEX</span>
+          <span class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.05em;color:rgba(255,255,255,0.7);">AMEX</span>
         </div>
         <div style="padding:5px 11px;border-radius:5px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.07);">
-          <span class="cond" style="font-size:9px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.3);">DISCOVER</span>
+          <span class="cond" style="font-size:9px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.7);">DISCOVER</span>
         </div>
       </div>
 
@@ -227,34 +227,34 @@
 
         <!-- Player card -->
         <div style="background:#161616;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:22px;margin-bottom:16px;">
-          <p class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:14px;">Your Order</p>
+          <p class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:14px;">Your Order</p>
 
           <!-- Photo grid -->
           <div id="photo-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;"></div>
-          <p id="photo-label" class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:16px;"></p>
+          <p id="photo-label" class="cond" style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:16px;"></p>
 
           <!-- Line items -->
           <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:14px;">
             <div class="line">
               <div>
                 <p style="font-size:13px;color:rgba(255,255,255,0.75);font-weight:500;">EyeScout Photo Package</p>
-                <p class="cond" style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.28);margin-top:2px;">Professional editing · Downloads</p>
+                <p class="cond" style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-top:2px;">Professional editing · Downloads</p>
               </div>
               <span style="font-size:14px;font-weight:600;color:#fff;margin-left:12px;white-space:nowrap;">$149.00</span>
             </div>
             <div class="line">
-              <span style="font-size:12px;color:rgba(255,255,255,0.35);">Watermark removal</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.7);">Watermark removal</span>
               <span style="font-size:12px;color:#39D353;font-weight:600;">Free</span>
             </div>
             <div class="line">
-              <span style="font-size:12px;color:rgba(255,255,255,0.35);">Lifetime download access</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.7);">Lifetime download access</span>
               <span style="font-size:12px;color:#39D353;font-weight:600;">Free</span>
             </div>
           </div>
 
           <!-- Total -->
           <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:10px;margin-top:14px;background:linear-gradient(135deg,rgba(123,47,190,0.1),rgba(30,144,255,0.07));border:1px solid rgba(123,47,190,0.18);">
-            <span class="cond" style="font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Total</span>
+            <span class="cond" style="font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Total</span>
             <span class="cond g-text" style="font-size:28px;font-weight:900;">$149.00</span>
           </div>
         </div>
@@ -266,25 +266,25 @@
               <div style="width:20px;height:20px;border-radius:50%;background:rgba(57,211,83,0.12);border:1px solid rgba(57,211,83,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <span style="font-size:12px;color:rgba(255,255,255,0.5);">Professionally edited photos</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.7);">Professionally edited photos</span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
               <div style="width:20px;height:20px;border-radius:50%;background:rgba(57,211,83,0.12);border:1px solid rgba(57,211,83,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <span style="font-size:12px;color:rgba(255,255,255,0.5);">Watermarks removed on all photos</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.7);">Watermarks removed on all photos</span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
               <div style="width:20px;height:20px;border-radius:50%;background:rgba(57,211,83,0.12);border:1px solid rgba(57,211,83,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <span style="font-size:12px;color:rgba(255,255,255,0.5);">High-resolution instant downloads</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.7);">High-resolution instant downloads</span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
               <div style="width:20px;height:20px;border-radius:50%;background:rgba(57,211,83,0.12);border:1px solid rgba(57,211,83,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <span style="font-size:12px;color:rgba(255,255,255,0.5);">Yours forever — no expiry</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.7);">Yours forever — no expiry</span>
             </div>
           </div>
         </div>
@@ -348,7 +348,7 @@
     else if (first === '5') { brandEl.textContent = 'MC';         brandEl.style.color = '#f97316'; }
     else if (first === '3') { brandEl.textContent = 'AMEX';       brandEl.style.color = '#34d399'; }
     else if (first === '6') { brandEl.textContent = 'DISCOVER';   brandEl.style.color = '#facc15'; }
-    else                    { brandEl.textContent = 'CARD';        brandEl.style.color = 'rgba(255,255,255,0.3)'; }
+    else                    { brandEl.textContent = 'CARD';        brandEl.style.color = 'rgba(255,255,255,0.7)'; }
   });
 
   // Expiry formatting

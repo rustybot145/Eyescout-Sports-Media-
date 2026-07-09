@@ -40,7 +40,7 @@
   .nav-link {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
     border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s; text-decoration: none;
+    color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s; text-decoration: none;
     border-left: 3px solid transparent;
   }
   .nav-link:hover { background: rgba(30,144,255,0.06); color: rgba(255,255,255,0.9); }
@@ -92,7 +92,7 @@
     transition: border-color 0.15s, opacity 0.15s;
   }
   .filter-num:focus { border-color: rgba(30,144,255,0.4); }
-  .filter-num::placeholder { color: rgba(255,255,255,0.3); }
+  .filter-num::placeholder { color: rgba(255,255,255,0.7); }
   .filter-num:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .search-input {
@@ -103,9 +103,9 @@
     transition: border-color 0.15s;
   }
   .search-input:focus { border-color: rgba(30,144,255,0.4); }
-  .search-input::placeholder { color: rgba(255,255,255,0.22); }
+  .search-input::placeholder { color: rgba(255,255,255,0.7); }
 
-  .results-count { font-size: 12px; color: rgba(255,255,255,0.3); margin-left: auto; flex-shrink: 0; white-space: nowrap; }
+  .results-count { font-size: 12px; color: rgba(255,255,255,0.7); margin-left: auto; flex-shrink: 0; white-space: nowrap; }
 
   /* ── Player Grid ── */
   .player-grid {
@@ -149,15 +149,15 @@
 
   .card-body { padding: 42px 16px 16px; text-align: center; }
   .card-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 3px; }
-  .card-meta { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
-  .card-hw { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 10px; letter-spacing: 0.02em; }
+  .card-meta { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .card-hw { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 10px; letter-spacing: 0.02em; }
 
   .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; justify-content: center; }
   .card-tag {
     font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
     padding: 3px 9px; border-radius: 6px;
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.7);
   }
   .card-tag.sport { background: rgba(30,144,255,0.1); border-color: rgba(30,144,255,0.25); color: #1E90FF; }
   .card-tag.purchased { background: rgba(57,211,83,0.08); border-color: rgba(57,211,83,0.22); color: #39D353; }
@@ -192,7 +192,7 @@
   }
   .drawer-close {
     width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.04); cursor: pointer; color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.04); cursor: pointer; color: rgba(255,255,255,0.7);
     display: flex; align-items: center; justify-content: center;
     transition: all 0.15s;
   }
@@ -218,15 +218,15 @@
   }
   .drawer-info { padding: 52px 24px 20px; border-bottom: 1px solid var(--border); }
   .drawer-name { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 26px; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; margin-bottom: 4px; }
-  .drawer-sub { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
-  .drawer-bio { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.65; margin-bottom: 14px; }
+  .drawer-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
+  .drawer-bio { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.65; margin-bottom: 14px; }
   .drawer-tags { display: flex; flex-wrap: wrap; gap: 7px; }
 
   .drawer-section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
-  .drawer-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 14px; }
+  .drawer-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
   .info-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: flex-start; }
   .info-row:last-child { border-bottom: none; }
-  .info-key { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.25); width: 110px; flex-shrink: 0; padding-top: 1px; }
+  .info-key { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.7); width: 110px; flex-shrink: 0; padding-top: 1px; }
   .info-val { font-size: 13px; color: rgba(255,255,255,0.7); }
 
   .drawer-footer { padding: 20px 24px; flex-shrink: 0; border-top: 1px solid var(--border); display: flex; gap: 10px; }
@@ -239,7 +239,7 @@
   .save-btn {
     padding: 13px 18px; border-radius: 10px; background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.12); font-size: 13px; font-weight: 700;
-    color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.15s;
+    color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.15s;
   }
   .save-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
 
@@ -257,7 +257,7 @@
   }
   .msg-modal-overlay.open .msg-modal { transform: translateY(0); }
   .msg-modal-title { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin-bottom: 6px; }
-  .msg-modal-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+  .msg-modal-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
   .msg-textarea {
     width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px; padding: 14px; color: #fff; font-size: 14px; line-height: 1.6;
@@ -265,16 +265,16 @@
     transition: border-color 0.2s; min-height: 120px; margin-bottom: 16px;
   }
   .msg-textarea:focus { border-color: rgba(30,144,255,0.4); }
-  .msg-textarea::placeholder { color: rgba(255,255,255,0.2); }
+  .msg-textarea::placeholder { color: rgba(255,255,255,0.7); }
   .msg-modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
-  .modal-cancel { padding: 10px 20px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.15s; }
+  .modal-cancel { padding: 10px 20px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.15s; }
   .modal-cancel:hover { color: #fff; }
   .modal-send { padding: 10px 24px; border-radius: 10px; background: var(--grad); border: none; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: opacity 0.15s, transform 0.15s; }
   .modal-send:hover { opacity: 0.88; transform: translateY(-1px); }
 
   /* ── Empty ── */
   .empty-state { text-align: center; padding: 80px 40px; }
-  .empty-state p { font-size: 14px; color: rgba(255,255,255,0.25); line-height: 1.7; }
+  .empty-state p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7; }
 
   @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
 
@@ -300,7 +300,7 @@
   .fade-in { animation: fadeUp 0.3s ease both; }
 
   .stat-num { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 22px; letter-spacing: 0.04em; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 2px; }
-  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.25); }
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
   #content-lock { display:none;position:absolute;inset:0;z-index:20;background:rgba(13,13,13,0.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:16px;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px 24px; }
 
   .bottom-nav { display: none; }
@@ -317,7 +317,7 @@
     .bn-item {
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
       flex: 1; height: 100%; text-decoration: none; font-size: 0; position: relative;
-      color: rgba(255,255,255,0.25); border-radius: 20px;
+      color: rgba(255,255,255,0.7); border-radius: 20px;
       transition: color 0.22s cubic-bezier(0.22,1,0.36,1), background 0.22s cubic-bezier(0.22,1,0.36,1), transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
       -webkit-tap-highlight-color: transparent;
     }
@@ -406,7 +406,7 @@
     </div>
     <div>
       <p style="font-size:13px;font-weight:700;color:#fff;" id="sb-name">Coach</p>
-      <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px;" id="sb-uni">University</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;" id="sb-uni">University</p>
     </div>
   </div>
 </aside>
@@ -417,7 +417,7 @@
   <!-- Pending Notice -->
   <div id="pending-notice" style="display:none;padding:13px 16px;border-radius:12px;background:rgba(30,144,255,0.07);border:1px solid rgba(30,144,255,0.18);align-items:center;gap:12px;margin-bottom:16px;">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;"><strong style="color:#1E90FF;">Account pending verification</strong> — we'll notify you once an admin approves it. Hang tight!</p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5;"><strong style="color:#1E90FF;">Account pending verification</strong> — we'll notify you once an admin approves it. Hang tight!</p>
   </div>
 
   <!-- Top filter bar -->
@@ -456,7 +456,7 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
       <p style="font-size:17px;font-weight:800;color:#fff;letter-spacing:0.03em;margin-bottom:8px;">Pending Verification</p>
-      <p style="font-size:13px;color:rgba(255,255,255,0.38);line-height:1.7;max-width:280px;">We'll notify you when your account is verified and you're ready to scout players.</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.7;max-width:280px;">We'll notify you when your account is verified and you're ready to scout players.</p>
     </div>
     <div class="player-grid" id="player-grid"></div>
   </div>
@@ -467,7 +467,7 @@
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawerIfOverlay(event)">
   <div class="drawer" id="drawer">
     <div class="drawer-header">
-      <p style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Player Profile</p>
+      <p style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Player Profile</p>
       <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -631,7 +631,7 @@
     if (!matches.length) { box.innerHTML = ''; return; }
 
     box.innerHTML = `
-      <p style="display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:14px;">
+      <p style="display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:14px;">
         <span style="width:16px;height:3px;border-radius:2px;background:var(--grad);flex-shrink:0;"></span>
         Tournaments · ${matches.length}
       </p>
@@ -643,7 +643,7 @@
           <a href="tournament.html?name=${encodeURIComponent(t.name || '')}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;text-decoration:none;padding:18px 18px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(123,47,190,0.12),rgba(0,201,167,0.05));border:1px solid rgba(255,255,255,0.08);transition:transform 0.15s,box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 26px rgba(30,144,255,0.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
             <span style="width:26px;height:3px;border-radius:2px;background:var(--grad);margin-bottom:10px;"></span>
             <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:15px;letter-spacing:0.04em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;">${escHtml(t.name || 'Untitled')}</p>
-            <p style="font-size:11px;color:rgba(255,255,255,0.4);">${escHtml(meta || t.sport || '')}</p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.7);">${escHtml(meta || t.sport || '')}</p>
           </a>`;
         }).join('')}
       </div>`;
@@ -686,7 +686,7 @@
     if (!isCoachPro) {
       const ghostCard = `
         <div class="player-card card-blur" style="cursor:default;">
-          <div class="card-banner"><div class="card-avatar-wrap"><div class="card-avatar-inner" style="color:rgba(255,255,255,0.06);">#</div></div><div class="card-banner-bar"></div></div>
+          <div class="card-banner"><div class="card-avatar-wrap"><div class="card-avatar-inner" style="color:rgba(255,255,255,0.7);">#</div></div><div class="card-banner-bar"></div></div>
           <div class="card-body">
             <div style="height:13px;background:rgba(255,255,255,0.07);border-radius:4px;margin-bottom:8px;width:75%;"></div>
             <div style="height:10px;background:rgba(255,255,255,0.04);border-radius:4px;width:50%;margin-bottom:12px;"></div>
@@ -700,12 +700,12 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:22px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Unlock Full Scouting Access</p>
-          <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.65;margin-bottom:26px;max-width:340px;margin-left:auto;margin-right:auto;">${players.length} athlete${players.length !== 1 ? 's' : ''} in your sport are ready to be scouted. Subscribe to Pro to view profiles, send messages, and manage your recruit list.</p>
+          <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:26px;max-width:340px;margin-left:auto;margin-right:auto;">${players.length} athlete${players.length !== 1 ? 's' : ''} in your sport are ready to be scouted. Subscribe to Pro to view profiles, send messages, and manage your recruit list.</p>
           <button onclick="window.location.href='coach-checkout.html'" style="display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:10px;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.02em;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Upgrade to Pro — $15/mo
           </button>
-          <p style="font-size:11px;color:rgba(255,255,255,0.18);margin-top:14px;">Cancel anytime · Instant access</p>
+          <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:14px;">Cancel anytime · Instant access</p>
         </div>
         ${Array(Math.min(players.length, 8)).fill(ghostCard).join('')}`;
       return;
@@ -716,7 +716,7 @@
       const initials = `${(p.athleteFirst || '?')[0]}${(p.athleteLast || '')[0] || ''}`.toUpperCase();
       const avatarContent = p.profilePhoto
         ? `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : `<span style="color:rgba(255,255,255,0.55);">${escHtml(initials)}</span>`;
+        : `<span style="color:rgba(255,255,255,0.7);">${escHtml(initials)}</span>`;
       const hwParts = [p.height, p.weight ? `${p.weight} lbs` : ''].filter(Boolean);
       const hw = hwParts.join(' · ');
       const following = isFollowingPlayer(p.id);
