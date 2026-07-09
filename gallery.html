@@ -106,13 +106,30 @@
     @media (max-width: 900px) { .masonry { columns: 2; } }
     @media (max-width: 500px) { .masonry { columns: 2; } }
   </style>
+  <style id="es-a11y-css">
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
+    textarea:focus-visible,[tabindex]:focus-visible,[role="button"]:focus-visible,
+    [contenteditable="true"]:focus-visible{
+      outline:3px solid #4ea1ff!important;outline-offset:2px!important;
+      box-shadow:0 0 0 4px rgba(78,161,255,0.35)!important;border-radius:6px;}
+    .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+    .skip-link{position:absolute;left:8px;top:-48px;z-index:100000;background:#111;
+      color:#fff;padding:10px 16px;border-radius:8px;font-weight:700;text-decoration:none;
+      transition:top .15s ease;}
+    .skip-link:focus{top:8px;}
+    @media (prefers-reduced-motion: reduce){*,*::before,*::after{
+      animation-duration:.001ms!important;animation-iteration-count:1!important;
+      transition-duration:.001ms!important;scroll-behavior:auto!important;}}
+  </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
 <a id="skip-link" href="#main-content">Skip to main content</a>
 
 <div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
-  <button id="mob-close" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+  <button id="mob-close" aria-label="Close menu" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
   </button>
   <a href="index.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Home</a>
