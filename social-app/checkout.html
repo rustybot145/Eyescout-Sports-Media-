@@ -22,25 +22,6 @@
     min-height: 100vh; display: flex; flex-direction: column;
   }
 
-  /* ── Dev banner ── */
-  #dev-banner {
-    display: none; background: #1a1200;
-    border-bottom: 1px solid rgba(245,158,11,0.3);
-    padding: 10px 24px; align-items: center; justify-content: space-between; gap: 16px;
-    font-size: 12px; color: rgba(245,158,11,0.8);
-  }
-  #dev-banner.show { display: flex; }
-  .dev-label { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: 0.04em; }
-  .dev-dot { width: 6px; height: 6px; border-radius: 50%; background: #F59E0B; animation: blink 1.4s ease-in-out infinite; }
-  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .dev-sim-btn {
-    padding: 6px 16px; border-radius: 7px;
-    background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);
-    color: #F59E0B; font-size: 12px; font-weight: 700; cursor: pointer;
-    font-family: inherit; transition: all 0.15s; white-space: nowrap;
-  }
-  .dev-sim-btn:hover { background: rgba(245,158,11,0.22); border-color: rgba(245,158,11,0.55); }
-
   /* ── Top bar ── */
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
@@ -237,15 +218,6 @@
 </head>
 <body>
 
-<!-- Dev mode banner (localhost only) -->
-<div id="dev-banner">
-  <div class="dev-label">
-    <div class="dev-dot"></div>
-    DEV MODE — localhost only
-  </div>
-  <button class="dev-sim-btn" onclick="simulatePurchase()">⚡ Simulate Purchase</button>
-</div>
-
 <!-- Top bar -->
 <header class="topbar">
   <a href="feed.html" class="topbar-brand">
@@ -366,50 +338,10 @@
   const existingSub = JSON.parse(localStorage.getItem('es_sub_' + (session?.id || '')) || 'null');
   if (typeof _subHasAccess === 'function' ? _subHasAccess(existingSub) : existingSub?.status === 'active') window.location.href = 'subscription.html';
 
-  // Show dev banner on localhost only
-  if (_isDev) {
-    document.getElementById('dev-banner').classList.add('show');
-  }
-
-  // ── Card brand detection ──────────────────────────────────────────────────
-  function getCardBrand(n) {
-    n = n.replace(/\s/g, '');
-    if (/^4/.test(n)) return 'visa';
-    if (/^5[1-5]|^2[2-7]/.test(n)) return 'mc';
-    if (/^3[47]/.test(n)) return 'amex';
-    return null;
-  }
-  function updateCardBrand(val) {
-    const badge = document.getElementById('card-brand-badge');
-    const brand = getCardBrand(val);
-    if (brand === 'visa') {
-      badge.innerHTML = `<span style="font-size:10px;font-weight:900;color:#1a1f71;background:#fff;padding:2px 7px;border-radius:3px;letter-spacing:-0.3px;line-height:1.5;">VISA</span>`;
-    } else if (brand === 'mc') {
-      badge.innerHTML = `<div style="display:flex;align-items:center;"><div style="width:19px;height:19px;border-radius:50%;background:#EB001B;"></div><div style="width:19px;height:19px;border-radius:50%;background:#F79E1B;margin-left:-7px;opacity:0.9;"></div></div>`;
-    } else if (brand === 'amex') {
-      badge.innerHTML = `<span style="font-size:9px;font-weight:800;color:#fff;background:#2E77BC;padding:2px 6px;border-radius:3px;letter-spacing:0.04em;line-height:1.5;">AMEX</span>`;
-    } else {
-      badge.innerHTML = '';
-    }
-  }
-  function formatCard(el) {
-    let v = el.value.replace(/\D/g, '').slice(0, 16);
-    el.value = v.replace(/(.{4})/g, '$1 ').trim();
-    updateCardBrand(el.value);
-    el.classList.remove('error');
-  }
-  function formatExpiry(el) {
-    let v = el.value.replace(/\D/g, '').slice(0, 4);
-    if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2);
-    el.value = v;
-    el.classList.remove('error');
-  }
-
   function showError(msg) {
     const el = document.getElementById('form-error');
     el.textContent = msg; el.classList.add('show');
   }
-  function clearError() { document.getElementById('form-error').classList.remove('show'); }
 
   // ── Activate subscription ─────────────────────────────────────────────────
   // The authoritative grant happens SERVER-SIDE: the server verifies the PayPal
@@ -496,51 +428,6 @@
 
     // Auto-redirect after 5.5s
     setTimeout(() => { window.location.href = 'feed.html'; }, 5500);
-  }
-
-  // ── Real checkout ─────────────────────────────────────────────────────────
-  function completeSubscription() {
-    clearError();
-    const nameEl = document.getElementById('card-name');
-    const numEl  = document.getElementById('card-number');
-    const expEl  = document.getElementById('card-expiry');
-    const cvcEl  = document.getElementById('card-cvc');
-    const name   = nameEl.value.trim();
-    const number = numEl.value.replace(/\s/g, '');
-    const expiry = expEl.value.trim();
-    const cvc    = cvcEl.value.trim();
-
-    [nameEl, numEl, expEl, cvcEl].forEach(el => el.classList.remove('error'));
-    let err = false;
-    if (!name)              { nameEl.classList.add('error'); err = true; }
-    if (number.length < 15) { numEl.classList.add('error');  err = true; }
-    if (expiry.length < 7)  { expEl.classList.add('error');  err = true; }
-    if (cvc.length < 3)     { cvcEl.classList.add('error');  err = true; }
-    if (err) { showError('Please fill in all payment fields correctly.'); return; }
-
-    const btn = document.getElementById('pay-btn');
-    btn.disabled = true;
-    btn.innerHTML = `<div class="spinner"></div> Processing…`;
-
-    setTimeout(() => {
-      activateSubscription();
-      showSuccess();
-    }, 1800);
-  }
-
-  // ── Dev: simulate purchase (localhost only) ───────────────────────────────
-  function simulatePurchase() {
-    // If no real session exists in dev mode, create a temporary one
-    if (!session) {
-      session = { id: 'dev-' + Date.now(), firstName: 'Dev', lastName: 'Tester', sport: 'Basketball' };
-      localStorage.setItem('es_session', JSON.stringify(session));
-    }
-    const btn = document.querySelector('.dev-sim-btn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Simulating…'; }
-    setTimeout(() => {
-      activateSubscription();   // sets es_sub_<id> = active + saves to Supabase
-      showSuccess();
-    }, 500);
   }
 
   // Supabase: if already subscribed via DB, redirect
