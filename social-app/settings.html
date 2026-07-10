@@ -962,9 +962,11 @@
   // Ask the local server to delete the Supabase Auth user (service-role only).
   async function deleteAuthUser(userId) {
     try {
+      let token = '';
+      try { const { data } = await _SB.auth.getSession(); token = data?.session?.access_token || ''; } catch (e) {}
       const r = await fetch('/api/delete-user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
         body: JSON.stringify({ userId }),
       });
       const data = await r.json().catch(() => ({}));
