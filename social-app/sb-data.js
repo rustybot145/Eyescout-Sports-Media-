@@ -489,10 +489,16 @@ async function _sbUploadImage(bucket, keyPrefix, fileOrBlob) {
 // ── Fire-and-forget Supabase write helpers ────────────────────────────────────
 
 function _sbSavePlayer(p) {
-  // Returns { error } so callers can tell whether the write actually persisted
-  // (settings/profile save await this). Previously errors were swallowed, which
-  // hid RLS/auth failures behind a false "Saved" and a silent revert on refresh.
-  return _SB.from('profiles').upsert(_playerToRow(p)).then(
+  // Use UPDATE (not upsert). The row always exists once the player has signed up
+  // (signup does a direct .insert()), and an UPSERT / ON CONFLICT on `profiles`
+  // requires TABLE-level SELECT — which supabase-phase1c revoked when it switched
+  // to column-level SELECT grants to hide contact PII (email/phone/parent/zip).
+  // That mismatch rejected every profile save with 403 "permission denied for
+  // table profiles" (the change saved locally, then reverted on refresh). A plain
+  // UPDATE works fine with the column-level grant.
+  // Returns { error } so callers can tell whether the write actually persisted.
+  const row = _playerToRow(p);
+  return _SB.from('profiles').update(row).eq('id', row.id).then(
     ({ error }) => { if (error) console.error('[sb save player]', error.message || error); return { error }; },
     (error)     => { console.error('[sb save player]', error?.message || error); return { error }; }
   );
@@ -502,7 +508,11 @@ function _sbSavePlayer(p) {
 // (e.g. bulk photo delivery updating several profiles at once).
 function _sbSavePlayers(players) {
   if (!Array.isArray(players) || !players.length) return;
-  _SB.from('profiles').upsert(players.map(_playerToRow)).then(undefined, () => {});
+  // Per-row UPDATE (not a batch upsert) — see _sbSavePlayer for why upsert 403s.
+  players.forEach(p => {
+    const row = _playerToRow(p);
+    _SB.from('profiles').update(row).eq('id', row.id).then(undefined, () => {});
+  });
 }
 
 // Returns a promise so callers can await the delete before redirecting away —
@@ -907,8 +917,9 @@ function _sbMarkStorySeenBatch(userId, postIds) {
 }
 
 function _sbSaveCoach(c) {
-  _SB.from('profiles').upsert({
-    id:            c.id,
+  // UPDATE (not upsert) — coach rows are created at signup; upsert on `profiles`
+  // 403s under the phase1c column-level SELECT grant (see _sbSavePlayer).
+  _SB.from('profiles').update({
     email:         c.email         || null,
     athlete_first: c.firstName     || null,
     athlete_last:  c.lastName      || null,
@@ -924,7 +935,7 @@ function _sbSaveCoach(c) {
     banner_photo:  c.bannerPhoto   || null,
     bio:           c.bio           || null,
     role:          'coach',
-  }).then(undefined, () => {});
+  }).eq('id', c.id).then(undefined, () => {});
 }
 
 // ── Reported posts ────────────────────────────────────────────────────────────
