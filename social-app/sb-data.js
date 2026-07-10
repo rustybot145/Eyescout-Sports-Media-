@@ -209,10 +209,6 @@ function _rowToThread(r) {
   };
 }
 
-function _rowToCode(r) {
-  return { code: r.code, used: !!r.used, usedByEmail: r.used_by_email || null, createdAt: r.created_at };
-}
-
 // Merge server threads with the device's local threads so a just-sent message or a
 // brand-new conversation that hasn't finished saving to the DB isn't wiped out by a
 // sync. For threads in both, keep whichever has more messages (covers unsynced sends);
@@ -231,19 +227,19 @@ function _mergeThreads(dbThreads, localMine) {
 // ── Main sync: populate localStorage from Supabase ────────────────────────────
 // opts keys: players, coaches, posts, tournaments, hypes, follows,
 //            notifications, subscription, messages, coachMessages,
-//            codes, coachSaved
+//            coachSaved
 //
 // PAGINATION: every list query below is bounded — nothing fetches an unlimited
 // result set. Pass `true` (or omit) to get the default first page, or pass an
 // object `{ limit, offset }` to page, e.g. _sbSync({ posts: { limit: 20, offset: 40 } }).
-// Naturally-ordered lists (posts / notifications / reports / codes / tournaments)
+// Naturally-ordered lists (posts / notifications / reports / tournaments)
 // page newest-first, so page 0 is the newest N. The reference tables the app
 // joins against client-side (players / coaches / hypes / follows / membership)
 // use a high safety cap instead of a small page, because capping them low would
 // break profile lookups and hype counts; true per-id fetching is the larger
 // refactor if those ever outgrow the cap.
 const _SB_PAGE_LIMITS = {
-  posts: 100, notifs: 100, reports: 200, codes: 500, tourneys: 200,
+  posts: 100, notifs: 100, reports: 200, tourneys: 200,
   msgs: 500, cmsgs: 500,
   players: 2000, coaches: 2000, hypes: 5000, follows: 5000,
   csaved: 2000, seen: 5000,
@@ -273,7 +269,6 @@ const _SEL_FOLLOW = 'follower_id, followee_id, created_at';
 const _SEL_NOTIF  = 'id, type, actor_id, actor_name, target_id, created_at, read';
 const _SEL_SUB    = 'status, plan, price, started_at, expires_at, paypal_subscription_id';
 const _SEL_THREAD = 'id, player_id, coach_id, coach_name, coach_title, coach_school, thread';
-const _SEL_CODE   = 'code, used, used_by_email, created_at';
 const _SEL_REPORT = 'id, post_id, author_id, author_name, caption, media_data, media_type, reason, reporter_id, reporter_name, reporter_role, status, created_at';
 
 async function _sbSync(opts = {}) {
@@ -295,11 +290,19 @@ async function _sbSync(opts = {}) {
   if (opts.subscription  && uid)          q('sub',      _SB.from('subscriptions').select(_SEL_SUB).eq('user_id', uid).maybeSingle());
   if (opts.messages      && session?.id)  q('msgs',     _sbPaginate(_SB.from('messages').select(_SEL_THREAD).eq('player_id', session.id), opts.messages, 'msgs'));
   if (opts.coachMessages && coachSession?.id) q('cmsgs', _sbPaginate(_SB.from('messages').select(_SEL_THREAD).eq('coach_id', coachSession.id), opts.coachMessages, 'cmsgs'));
-  if (opts.codes)                         q('codes',    _sbPaginate(_SB.from('codes').select(_SEL_CODE).order('created_at', { ascending: false }), opts.codes, 'codes'));
   if (opts.reports)                       q('reports',  _sbPaginate(_SB.from('reports').select(_SEL_REPORT).order('created_at', { ascending: false }), opts.reports, 'reports'));
   if (opts.coachSaved && coachSession?.id) q('csaved',  _sbPaginate(_SB.from('coach_saved').select('player_id').eq('coach_id', coachSession.id), opts.coachSaved, 'csaved'));
   if (opts.seenStories && uid)            q('seen',     _sbPaginate(_SB.from('seen_stories').select('post_id').eq('user_id', uid), opts.seenStories, 'seen'));
-  if (uid)                                q('me',       _SB.from('profiles').select(_SEL_PLAYER).eq('id', uid).single());
+  // Always refresh "my own" row so admin-side edits (like coach verification)
+  // show up on the next sync without a re-login. MUST select the coach column
+  // set for a coach session — _SEL_PLAYER has no `verified`/`title`/`division`/
+  // etc. columns, so using it here was silently overwriting a just-approved
+  // coach's session back to verified:false on every single sync (role comes
+  // from _SEL_PLAYER already; _SEL_COACH doesn't include it, so it's appended).
+  if (uid) {
+    const isCoachMe = !session && !!coachSession;
+    q('me', _SB.from('profiles').select(isCoachMe ? _SEL_COACH + ', role' : _SEL_PLAYER).eq('id', uid).single());
+  }
 
   // NOTE: Supabase query builders are thenable but have NO .catch method,
   // so we convert each to a real promise before catching.
@@ -380,9 +383,6 @@ async function _sbSync(opts = {}) {
         localStorage.setItem('es_messages', JSON.stringify([...other, ...merged]));
         break;
       }
-      case 'codes':
-        localStorage.setItem('es_codes', JSON.stringify(data.map(_rowToCode)));
-        break;
       case 'reports':
         localStorage.setItem('es_reports', JSON.stringify(data.map(_rowToReport)));
         break;
@@ -519,11 +519,6 @@ function _sbSaveTournament(t) {
 
 function _sbDeleteTournament(id) {
   _SB.from('tournaments').delete().eq('id', id).then(undefined, () => {});
-}
-
-function _sbSaveCode(c) {
-  _SB.from('codes').upsert({ code: c.code, used: !!c.used, used_by_email: c.usedByEmail || null,
-    created_at: c.createdAt || new Date().toISOString() }).then(undefined, () => {});
 }
 
 function _sbSavePost(p) {
@@ -678,6 +673,64 @@ function _subHasAccess(sub) {
     return !!(until && Date.now() < new Date(until).getTime());
   }
   return false;
+}
+
+// Set of player ids that currently have Pro access — used to gate coach
+// discovery (search + follow) to Pro players only. Backed by the
+// active_pro_player_ids() RPC (supabase-phase4-pro-discovery.sql), which is the
+// only path allowed to reveal other users' Pro status (RLS otherwise limits
+// subscription reads to your own row). Returns null on error OR when the RPC
+// isn't deployed yet, and callers MUST treat null as "unknown → don't filter"
+// (fail open) so the coach experience never breaks before the migration is run.
+async function _sbActiveProIds() {
+  try {
+    const { data, error } = await _SB.rpc('active_pro_player_ids');
+    if (error || !Array.isArray(data)) return null;
+    // SETOF uuid comes back as an array of strings (or 1-key objects, defensively).
+    const ids = data.map(row => typeof row === 'string' ? row : (row && (row.active_pro_player_ids ?? Object.values(row)[0])));
+    return new Set(ids.filter(Boolean));
+  } catch (e) {
+    return null;
+  }
+}
+
+// The 2-post feed teaser for non-Pro players. With the server-side paywall
+// (supabase-phase5-server-paywall.sql) the full posts table is Pro-gated at the
+// row level, so a non-Pro player's normal posts sync returns nothing to preview.
+// This RPC hands back AT MOST 2 recent public-player posts (cap enforced in the
+// DB function, so it can't be gamed). Returns an array on success, or null when
+// the function isn't deployed yet — callers MUST treat null as "fall back to the
+// old behavior" so deploying the client before the SQL never breaks the feed.
+async function _sbFeedPreview() {
+  try {
+    const { data, error } = await _SB.rpc('feed_preview');
+    if (error || !Array.isArray(data)) return null;
+    return data.map(_rowToPost);
+  } catch (e) {
+    return null;
+  }
+}
+
+// This week's frozen "Most Hyped" winners (global + one per sport). Backed by
+// get_weekly_hype_winners() (supabase-phase7-weekly-hype-winner.sql), which
+// locks in the top hyped-this-week post every Monday and holds it until the
+// next reset — replacing the old live recompute-on-every-render behavior.
+// Returns [{category, post_id, week_start, hype_count, updated_at}, ...] on
+// success, or null when the RPC isn't deployed yet (callers fall back to no
+// rings rendering, same as having no data, rather than erroring).
+async function _sbWeeklyHypeWinners() {
+  try {
+    const { data, error } = await _SB.rpc('get_weekly_hype_winners');
+    if (error || !Array.isArray(data)) return null;
+    return data.map(r => ({
+      category:  r.category,
+      postId:    r.post_id,
+      weekStart: r.week_start,
+      hypeCount: r.hype_count || 0,
+    }));
+  } catch (e) {
+    return null;
+  }
 }
 
 // Ask the local server to cancel the real PayPal subscription. The secret lives

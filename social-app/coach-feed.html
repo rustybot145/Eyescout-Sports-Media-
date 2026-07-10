@@ -302,10 +302,16 @@
   .stat-num { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 22px; letter-spacing: 0.04em; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 2px; }
   .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
   #content-lock { display:none;position:absolute;inset:0;z-index:20;background:rgba(13,13,13,0.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:16px;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px 24px; }
+  /* Full-page Pro gate — same treatment as the player-side #sub-gate (activity.html
+     / explore.html), restyled with the coach blue accent used everywhere else on
+     this page instead of the player purple. Shown only once a coach is verified
+     but hasn't subscribed — an unverified coach sees #content-lock instead. */
+  #sub-gate { display:none;position:fixed;top:0;left:var(--sidebar-w);right:0;bottom:0;z-index:30;background:rgba(13,13,13,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);align-items:center;justify-content:center;flex-direction:column; }
 
   .bottom-nav { display: none; }
   @media (max-width: 768px) {
     .sidebar { display: none !important; }
+    #sub-gate { left: 0 !important; right: 0 !important; top: 0 !important; bottom: 96px !important; padding: 0 20px; }
     .main { margin-left: 0 !important; padding: 0 12px 96px !important; width: 100% !important; max-width: 100% !important; }
     .bottom-nav {
       display: flex; position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 48px; right: 48px; height: 40px;
@@ -394,6 +400,10 @@
       <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       Settings
     </a>
+    <a class="nav-link" id="nav-upgrade" href="coach-checkout.html" style="display:none;color:#fff;font-weight:700;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);margin-top:6px;">
+      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+      Upgrade to Pro
+    </a>
     <a class="nav-link" href="#" onclick="logout();return false;">
       <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       Sign Out
@@ -413,6 +423,25 @@
 
 <!-- ── Main ── -->
 <main class="main" id="main-content" tabindex="-1">
+
+  <!-- Full-page Pro gate — shown once verified, until subscribed. Same visual
+       language as the player-side #sub-gate (activity.html/explore.html), just
+       recolored to the coach's existing blue accent. -->
+  <div id="sub-gate">
+    <div style="text-align:center;max-width:400px;padding:40px 32px;">
+      <div style="width:64px;height:64px;border-radius:18px;background:rgba(30,144,255,0.12);border:1px solid rgba(30,144,255,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;">Pro Feature</p>
+      <p style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;">Scout Players</p>
+      <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:30px;">See every athlete in your sport, filter by class, position, height, and stats, and message them directly. Available with EyeScout Pro.</p>
+      <button onclick="window.location.href='coach-checkout.html'" style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Upgrade to Pro — $15/mo
+      </button>
+      <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:14px;">Cancel anytime · Instant access</p>
+    </div>
+  </div>
 
   <!-- Pending Notice -->
   <div id="pending-notice" style="display:none;padding:13px 16px;border-radius:12px;background:rgba(30,144,255,0.07);border:1px solid rgba(30,144,255,0.18);align-items:center;gap:12px;margin-bottom:16px;">
@@ -493,12 +522,29 @@
 <script>
   const coach = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
   if (!coach) window.location.href = 'coach-login.html';
-  const _coachSub = coach ? JSON.parse(localStorage.getItem('es_coach_sub_' + coach.id) || 'null') : null;
-  const isCoachPro = typeof _subHasAccess === 'function' ? _subHasAccess(_coachSub) : !!(_coachSub && _coachSub.status === 'active');
-  if (coach && !coach.verified) {
-    document.getElementById('pending-notice').style.display = 'flex';
-    document.getElementById('content-lock').style.display = 'flex';
+
+  // Re-reads localStorage every call (not a one-time const) so a subscription
+  // that lands via the background sync below is picked up without a refresh.
+  function isCoachPro() {
+    const sub = JSON.parse(localStorage.getItem('es_coach_sub_' + (coach?.id || '')) || 'null');
+    return typeof _subHasAccess === 'function' ? _subHasAccess(sub) : !!(sub && sub.status === 'active');
   }
+
+  // Two independent gates: verification (own notice + #content-lock, scoped to
+  // just the grid) and Pro (full-page #sub-gate). An unverified coach sees only
+  // the verification notice — showing "Upgrade to Pro" before they're even
+  // verified would be confusing, since paying doesn't unlock anything yet.
+  function applyCoachGates() {
+    const verified = !!(coach && coach.verified);
+    document.getElementById('pending-notice').style.display = (coach && !verified) ? 'flex' : 'none';
+    document.getElementById('content-lock').style.display   = (coach && !verified) ? 'flex' : 'none';
+    document.getElementById('sub-gate').style.display       = (coach && verified && !isCoachPro()) ? 'flex' : 'none';
+    // Persistent sidebar reminder — visible on every coach page, regardless of
+    // verification, so a non-Pro coach always has a way to upgrade.
+    const navUpgrade = document.getElementById('nav-upgrade');
+    if (navUpgrade) navUpgrade.style.display = isCoachPro() ? 'none' : 'flex';
+  }
+  applyCoachGates();
 
   function logout() { localStorage.removeItem('es_coach_session'); window.location.href = 'coach-login.html'; }
 
@@ -590,6 +636,7 @@
     const statMin  = parseFloat(document.getElementById('f-stat-min').value);
 
     const players = getPlayers().filter(p => {
+      if (_proIds && !_proIds.has(p.id)) return false; // Pro-only public profiles (non-Pro hidden from coaches)
       if (p.prefs && p.prefs['priv-public'] === false) return false; // opted out of discovery
       if (coachSport && p.sport !== coachSport) return false;
       if (!matchesSearch(p, q)) return false;
@@ -652,6 +699,18 @@
   // ── Grid ─────────────────────────────────────────────────────────────────────
   let _coachFeedSynced = false;
 
+  // Set of player ids with active Pro access. Only Pro players get a public,
+  // discoverable profile — non-Pro players are hidden from coach search + follow.
+  // null = "not known yet" (RPC pending or not deployed) → we FAIL OPEN and show
+  // everyone, so the grid never breaks before supabase-phase4-pro-discovery.sql
+  // is run. Populated by refreshProIds() on load and after each sync.
+  let _proIds = null;
+  async function refreshProIds() {
+    if (typeof _sbActiveProIds !== 'function') return;
+    const ids = await _sbActiveProIds();
+    if (ids) { _proIds = ids; applyFilters(); }
+  }
+
   function skeletonPlayerCards(count) {
     let cards = '';
     for (let i = 0; i < count; i++) {
@@ -674,40 +733,16 @@
     const grid = document.getElementById('player-grid');
     document.getElementById('results-count').textContent = `${players.length} player${players.length !== 1 ? 's' : ''}`;
 
+    // Non-Pro (or unverified) coaches never reach this point with real data —
+    // the full-page #sub-gate / #content-lock overlay (toggled once at load,
+    // see below) already covers the whole page in that case. This function only
+    // needs to handle the actual scouting UI for a coach who has real access.
     if (!players.length) {
       if (!_coachFeedSynced) {
         grid.innerHTML = skeletonPlayerCards(8);
         return;
       }
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>No players match your filters.<br>Try adjusting the search or sport.</p></div>`;
-      return;
-    }
-
-    if (!isCoachPro) {
-      const ghostCard = `
-        <div class="player-card card-blur" style="cursor:default;">
-          <div class="card-banner"><div class="card-avatar-wrap"><div class="card-avatar-inner" style="color:rgba(255,255,255,0.7);">#</div></div><div class="card-banner-bar"></div></div>
-          <div class="card-body">
-            <div style="height:13px;background:rgba(255,255,255,0.07);border-radius:4px;margin-bottom:8px;width:75%;"></div>
-            <div style="height:10px;background:rgba(255,255,255,0.04);border-radius:4px;width:50%;margin-bottom:12px;"></div>
-            <div style="display:flex;gap:6px;margin-bottom:14px;"><div style="height:20px;width:70px;background:rgba(255,255,255,0.06);border-radius:999px;"></div><div style="height:20px;width:55px;background:rgba(255,255,255,0.04);border-radius:999px;"></div></div>
-            <div style="height:32px;background:rgba(255,255,255,0.04);border-radius:8px;"></div>
-          </div>
-        </div>`;
-      grid.innerHTML = `
-        <div class="paywall-card">
-          <div style="width:56px;height:56px;border-radius:16px;background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:22px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Unlock Full Scouting Access</p>
-          <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:26px;max-width:340px;margin-left:auto;margin-right:auto;">${players.length} athlete${players.length !== 1 ? 's' : ''} in your sport are ready to be scouted. Subscribe to Pro to view profiles, send messages, and manage your recruit list.</p>
-          <button onclick="window.location.href='coach-checkout.html'" style="display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:10px;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.02em;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Upgrade to Pro — $15/mo
-          </button>
-          <p style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:14px;">Cancel anytime · Instant access</p>
-        </div>
-        ${Array(Math.min(players.length, 8)).fill(ghostCard).join('')}`;
       return;
     }
 
@@ -846,8 +881,7 @@
     if (!text || !msgTargetId || !coach) return;
 
     // Re-check subscription at send time — blocks sending once access has ended
-    const _sub = JSON.parse(localStorage.getItem('es_coach_sub_' + coach.id) || 'null');
-    if (!(typeof _subHasAccess === 'function' ? _subHasAccess(_sub) : _sub && _sub.status === 'active')) { window.location.href = 'coach-checkout.html'; return; }
+    if (!isCoachPro()) { window.location.href = 'coach-checkout.html'; return; }
 
     const allMessages = JSON.parse(localStorage.getItem('es_messages') || '[]');
     let thread = allMessages.find(t => t.coachId === coach.id && t.playerId === msgTargetId);
@@ -907,9 +941,11 @@
       if (typeof _sbSync !== 'function') return;
       await _sbSync({ players: true, coachSaved: true, follows: true, subscription: true });
       _coachFeedSynced = true;
+      applyCoachGates();   // subscription may have just synced — re-check the paywall
       populateStatFilter();
       applyFilters();
-    } catch(e) { console.warn('[coach-feed] Supabase sync error:', e.message); _coachFeedSynced = true; applyFilters(); }
+      refreshProIds();
+    } catch(e) { console.warn('[coach-feed] Supabase sync error:', e.message); _coachFeedSynced = true; applyCoachGates(); applyFilters(); }
   })();
 
   function showToast(msg) {
@@ -932,6 +968,7 @@
   // ── Init ─────────────────────────────────────────────────────────────────────
   populateStatFilter();
   applyFilters();
+  refreshProIds();
 
   // Re-render whenever navigating back to this page (back button, tab switch, etc.)
   // so Follow badges always reflect the latest state without a manual refresh

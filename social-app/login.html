@@ -108,7 +108,7 @@
       <p id="tagline" class="cond text-xs tracking-[0.2em] uppercase text-white/70">Film Em. Scout Em. Stardom.</p>
       <div class="role-switch">
         <button type="button" class="role-opt active" id="role-btn-player" onclick="switchRole('player')">Player</button>
-        <button type="button" class="role-opt" id="role-btn-coach" onclick="switchRole('coach')">Coach</button>
+        <button type="button" class="role-opt" id="role-btn-coach" onclick="switchRole('coach')">Scout/Coach</button>
       </div>
     </div>
 
@@ -204,26 +204,6 @@
           <div>
             <label class="field-label" for="fld-zip">Zip Code<span class="required">*</span></label>
             <input class="field" type="text" name="zip" placeholder="85001" required maxlength="10" pattern="\d{5}(-\d{4})?" id="fld-zip">
-          </div>
-        </div>
-
-        <p class="section-label">Purchase Status</p>
-        <div class="mb-6">
-          <span class="field-label mb-3 block" id="purchase-q">Have you purchased your photo session?<span class="required">*</span></span>
-          <div class="grid grid-cols-2 gap-3 mb-3" id="purchase-toggle" role="group" aria-labelledby="purchase-q">
-            <button type="button" id="btn-no" onclick="setPurchased(false)" aria-pressed="false"
-              style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">
-              Not Yet
-            </button>
-            <button type="button" id="btn-yes" onclick="setPurchased(true)" aria-pressed="false"
-              style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">
-              Yes, I Have a Code
-            </button>
-          </div>
-          <div id="code-field" style="display:none;" class="fade-in">
-            <label class="field-label" for="purchase-code">Purchase Code<span class="required">*</span></label>
-            <input class="field" type="text" id="purchase-code" placeholder="ES-XXXXXX" maxlength="20" style="text-transform:uppercase;letter-spacing:0.1em;">
-            <p class="err-msg" id="code-error">Invalid or already used code. Please check your code and try again.</p>
           </div>
         </div>
 
@@ -484,29 +464,6 @@
     btn.style.color = hidden ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)';
   }
 
-  // ── Purchase toggle ────────────────────────────────────────────────────────
-  let hasPurchased = null;
-
-  function setPurchased(val) {
-    hasPurchased = val;
-    const btnYes = document.getElementById('btn-yes');
-    const btnNo  = document.getElementById('btn-no');
-    const codeField = document.getElementById('code-field');
-    btnYes.setAttribute('aria-pressed', val ? 'true' : 'false');
-    btnNo.setAttribute('aria-pressed', val ? 'false' : 'true');
-    const grad = 'linear-gradient(90deg,#7B2FBE,#1E90FF,#00C9A7,#39D353)';
-    if (val) {
-      btnYes.style.background = grad; btnYes.style.color = '#fff'; btnYes.style.border = '1px solid transparent';
-      btnNo.style.background = 'rgba(255,255,255,0.04)'; btnNo.style.color = 'rgba(255,255,255,0.7)'; btnNo.style.border = '1px solid rgba(255,255,255,0.08)';
-      codeField.style.display = 'block';
-    } else {
-      btnNo.style.background = grad; btnNo.style.color = '#fff'; btnNo.style.border = '1px solid transparent';
-      btnYes.style.background = 'rgba(255,255,255,0.04)'; btnYes.style.color = 'rgba(255,255,255,0.7)'; btnYes.style.border = '1px solid rgba(255,255,255,0.08)';
-      codeField.style.display = 'none';
-      document.getElementById('code-error').style.display = 'none';
-    }
-  }
-
   // ── Sign up ────────────────────────────────────────────────────────────────
   async function handleSignup(e) {
     e.preventDefault();
@@ -516,7 +473,6 @@
 
     document.getElementById('pw-error').style.display    = 'none';
     document.getElementById('email-taken').style.display = 'none';
-    document.getElementById('code-error').style.display  = 'none';
     document.getElementById('age-error').style.display   = 'none';
 
     if (!document.getElementById('age-gate').checked) {

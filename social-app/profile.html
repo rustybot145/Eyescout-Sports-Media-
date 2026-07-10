@@ -1010,6 +1010,17 @@
   // Are we viewing another player's profile?
   const isOwnProfile = !isCoachView && (!viewId || !!(session && viewId === session.id));
 
+  // Messaging a player is a Pro feature for coaches (same gate as
+  // coach-messages.html). Re-reads localStorage every call so it stays correct
+  // after a background sync. Also enforced server-side (messages RLS requires
+  // feed access to write as a coach) — this is the client-side half so the
+  // button/handlers don't even try when it'll just get rejected.
+  function isCoachViewerPro() {
+    if (!coachSession || !coachSession.verified) return false;
+    const sub = JSON.parse(localStorage.getItem('es_coach_sub_' + coachSession.id) || 'null');
+    return typeof _subHasAccess === 'function' ? _subHasAccess(sub) : !!(sub && sub.status === 'active');
+  }
+
   async function logout() {
     await sb.auth.signOut();
     localStorage.removeItem('es_session');
@@ -1253,6 +1264,10 @@
   // that player opted in) and merged into the info tab below. Own contact rides
   // on the session, already re-attached by _sbSync.
   let _viewedContact = null;
+  // Whether the player being viewed has a public (Pro) profile. Only meaningful
+  // in coach view: a non-Pro player isn't followable by coaches. null = unknown
+  // yet (fail open → allow follow) until the Pro set resolves after sync.
+  let _viewedIsPro = null;
 
   function render() {
     const me = getLatestPlayer();
@@ -1302,12 +1317,25 @@
     document.getElementById('btn-edit').style.display        = isOwnProfile ? '' : 'none';
     document.getElementById('btn-add-photos').style.display  = isOwnProfile && isSubscribed() ? '' : 'none';
     document.getElementById('btn-follow').style.display      = (!isOwnProfile && !isCoachView) ? '' : 'none';
-    document.getElementById('btn-coach-msg').style.display   = isCoachView ? '' : 'none';
+    // Coaches can't message a non-Pro player either — you can't reach a private
+    // (non-discoverable) profile to start a conversation. _viewedIsPro === false
+    // means confirmed non-Pro; null (pre-sync) fails open so it isn't hidden
+    // while still loading. (An already-open thread in coach-messages is untouched.)
+    document.getElementById('btn-coach-msg').style.display   = (isCoachView && _viewedIsPro !== false && isCoachViewerPro()) ? '' : 'none';
     if (!isOwnProfile && !isCoachView) updateFollowButton();
     if (isCoachView) {
       document.body.classList.add('coach-viewing');
       const cfBtn = document.getElementById('btn-coach-follow');
-      if (cfBtn) { cfBtn.style.display = ''; updateCoachFollowBtn(); }
+      if (cfBtn) {
+        // Non-Pro players don't have a public profile, so coaches can't follow
+        // them. _viewedIsPro === false means "confirmed not Pro"; null (unknown,
+        // pre-sync) fails open so the button isn't wrongly hidden while loading.
+        if (_viewedIsPro === false) {
+          cfBtn.style.display = 'none';
+        } else {
+          cfBtn.style.display = ''; updateCoachFollowBtn();
+        }
+      }
     }
 
     // Avatar click only on own profile
@@ -1551,9 +1579,13 @@
 
   // ── Photos Tab ─────────────────────────────────────────────────────────────
   function photosTabHTML(p) {
-    // Own-upload section for subscribers (always shown at top) — photos + videos
+    // Photos/videos on your profile — including any an admin added for you.
+    // Always shown to the player regardless of Pro status: VIEWING your photos
+    // is free; only UPLOADING more is the Pro feature (gated on the Add Photos
+    // button / handlers). This is what makes admin-delivered photos visible to
+    // a player who isn't on the Pro plan.
     let ownSection = '';
-    if (isSubscribed()) {
+    {
       const photos = getOwnPhotos();
       const clips  = getOwnClips(session.id);
       if (photos.length || clips.length) {
@@ -1577,19 +1609,14 @@
       }
     }
 
-    const stateContent = !p.selectionSubmitted ? stateNoSelection(p) :
-      p.purchased ? (p.deliveredPhotos?.length ? stateDelivered(p) : stateTypeA(p)) : stateTypeB(p);
+    // If photos have been delivered to this player, always show them — no matter
+    // the purchase/selection state or Pro plan (the public view already does
+    // this; keep the player's own view consistent).
+    const stateContent = (p.deliveredPhotos && p.deliveredPhotos.length) ? stateDelivered(p) :
+      !p.selectionSubmitted ? stateNoSelection(p) :
+      p.purchased ? stateTypeA(p) : stateTypeB(p);
 
-    const browseLink = `
-      <div style="margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.05);text-align:center;">
-        <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:12px;">Looking for your event photos?</p>
-        <a href="photo-select.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;text-decoration:none;transition:all 0.15s;letter-spacing:0.06em;text-transform:uppercase;" onmouseover="this.style.background='rgba(255,255,255,0.09)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='rgba(255,255,255,0.7)'">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Browse Event Photos
-        </a>
-      </div>`;
-
-    return ownSection + stateContent + browseLink;
+    return ownSection + stateContent;
   }
 
   function stateNoSelection(p) {
@@ -1607,21 +1634,10 @@
       </div>`;
     }
 
-    return `
-    <div class="fade-in">
-      <div class="browse-cta" style="max-width:600px;margin:0 auto;position:relative;overflow:hidden;">
-        <div style="width:64px;height:64px;border-radius:18px;background:rgba(30,144,255,0.08);border:1px solid rgba(30,144,255,0.18);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.7)" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        </div>
-        <h2 class="g-text" style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:28px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Browse Your Photos</h2>
-        <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.7;max-width:420px;margin:0 auto 28px;">Browse the tournament gallery and pick the photos you want.</p>
-        <a href="photo-select.html" class="g-btn" tabindex="-1" style="pointer-events:none;">Select My Photos →</a>
-        <div style="position:absolute;inset:0;z-index:2;background:rgba(0,0,0,0.9);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.8" stroke-linecap="round" style="margin-bottom:14px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:24px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;">Coming Soon</p>
-        </div>
-      </div>
-    </div>`;
+    // No purchase yet, and nothing to browse in-app right now (the old
+    // tournament-gallery browse/select flow is on hold — see the new
+    // Dropbox-via-messages pipeline).
+    return `<div class="empty-state"><div class="empty-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><p class="empty-label">No posts yet.</p></div>`;
   }
 
   function stateDelivered(p) {
@@ -2061,7 +2077,17 @@
   }
 
 
+  // Posting your own photos/videos is a Pro feature. The buttons are already
+  // hidden for non-subscribers, but guard the handlers too so there's no way in
+  // without Pro (defense-in-depth).
+  function requireProToPost() {
+    if (isSubscribed()) return true;
+    window.location.href = 'subscription.html';
+    return false;
+  }
+
   async function handleOwnPhotos(event) {
+    if (!requireProToPost()) { event.target.value = ''; return; }
     const files = Array.from(event.target.files);
     event.target.value = '';
     if (!files.length) return;
@@ -2081,6 +2107,7 @@
 
   // Add Post — accepts photos and videos. Photos land in Content, videos in Highlights.
   async function handleAddPost(event) {
+    if (!requireProToPost()) { event.target.value = ''; return; }
     const files = Array.from(event.target.files);
     event.target.value = '';
     if (!files.length) return;
@@ -2157,6 +2184,7 @@
   }
 
   async function handleOwnClips(event) {
+    if (!requireProToPost()) { event.target.value = ''; return; }
     const files = Array.from(event.target.files);
     event.target.value = '';
     if (!files.length) return;
@@ -2235,6 +2263,7 @@
 
   function openCoachMsgModal() {
     if (!isCoachView || !coachSession) return;
+    if (!isCoachViewerPro()) { window.location.href = 'coach-checkout.html'; return; }
     const p = getPlayerById(viewId);
     if (!p) return;
     const overlay = document.createElement('div');
@@ -2256,8 +2285,9 @@
   }
 
   function sendCoachMsg(playerId) {
+    if (!coachSession || !isCoachViewerPro()) { window.location.href = 'coach-checkout.html'; return; }
     const text = document.getElementById('coach-msg-text')?.value?.trim();
-    if (!text || !coachSession) return;
+    if (!text) return;
     const allMessages = JSON.parse(localStorage.getItem('es_messages') || '[]');
     let thread = allMessages.find(t => t.coachId === coachSession.id && t.playerId === playerId);
     if (!thread) {
@@ -2313,6 +2343,11 @@
       // Viewing another player: pull their contact (only returned if they opted in)
       if (!isOwnProfile && viewId && typeof _sbPlayerContact === 'function') {
         _viewedContact = await _sbPlayerContact(viewId);
+      }
+      // Coach view: is this athlete on Pro (i.e. publicly discoverable/followable)?
+      if (isCoachView && viewId && typeof _sbActiveProIds === 'function') {
+        const proSet = await _sbActiveProIds();
+        if (proSet) _viewedIsPro = proSet.has(viewId);   // null (RPC absent) → stays unknown, follow allowed
       }
       render();
       if (isCoachView) updateCoachFollowBtn();

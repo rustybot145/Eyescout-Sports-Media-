@@ -395,16 +395,19 @@
   // Real tournaments created in the admin panel (synced from Supabase).
   function getTournaments() { return JSON.parse(localStorage.getItem('es_tournaments') || '[]'); }
 
+  // Custom icon() helper so every sport with a matching PNG in icons/ renders
+  // it the same way basketball already did (grayscale-to-white via the CSS filter).
+  const _sportIconImg = file => `<img alt="" src="icons/${file}" width="24" height="24" style="object-fit:contain;filter:brightness(0) invert(1);">`;
   const ALL_SPORTS = [
-    { name: 'Football',      icon: '🏈', bg: 'rgba(30,144,255,0.12)',  border: 'rgba(30,144,255,0.25)' },
-    { name: 'Basketball',    icon: `<img alt="" src="icons/icons8-basketball-50.png" width="24" height="24" style="object-fit:contain;filter:brightness(0) invert(1);">`, bg: 'rgba(255,107,0,0.12)',   border: 'rgba(255,107,0,0.25)' },
-    { name: 'Baseball',      icon: '⚾', bg: 'rgba(57,211,83,0.1)',    border: 'rgba(57,211,83,0.22)' },
-    { name: 'Softball',      icon: '🥎', bg: 'rgba(255,77,109,0.1)',   border: 'rgba(255,77,109,0.22)' },
-    { name: 'Soccer',        icon: '⚽', bg: 'rgba(0,201,167,0.1)',    border: 'rgba(0,201,167,0.25)' },
-    { name: 'Track & Field', icon: '🏃', bg: 'rgba(255,213,0,0.1)',    border: 'rgba(255,213,0,0.2)' },
-    { name: 'Volleyball',    icon: '🏐', bg: 'rgba(123,47,190,0.12)',  border: 'rgba(123,47,190,0.28)' },
-    { name: 'Wrestling',     icon: '🤼', bg: 'rgba(255,107,0,0.1)',    border: 'rgba(255,107,0,0.2)' },
-    { name: 'Lacrosse',      icon: '🥍', bg: 'rgba(30,144,255,0.1)',   border: 'rgba(30,144,255,0.2)' },
+    { name: 'Football',      icon: _sportIconImg('icon-football.png'), bg: 'rgba(30,144,255,0.12)',  border: 'rgba(30,144,255,0.25)' },
+    { name: 'Basketball',    icon: _sportIconImg('icons8-basketball-50.png'), bg: 'rgba(255,107,0,0.12)',   border: 'rgba(255,107,0,0.25)' },
+    { name: 'Baseball',      icon: _sportIconImg('icons8-baseball-50.png'), bg: 'rgba(57,211,83,0.1)',    border: 'rgba(57,211,83,0.22)' },
+    { name: 'Softball',      icon: _sportIconImg('icon-softball.png'), bg: 'rgba(255,77,109,0.1)',   border: 'rgba(255,77,109,0.22)' },
+    { name: 'Soccer',        icon: _sportIconImg('icons8-soccer-ball-50.png'), bg: 'rgba(0,201,167,0.1)',    border: 'rgba(0,201,167,0.25)' },
+    { name: 'Track & Field', icon: _sportIconImg('icons8-track-and-field-50.png'), bg: 'rgba(255,213,0,0.1)',    border: 'rgba(255,213,0,0.2)' },
+    { name: 'Volleyball',    icon: _sportIconImg('icons8-volleyball-50.png'), bg: 'rgba(123,47,190,0.12)',  border: 'rgba(123,47,190,0.28)' },
+    { name: 'Wrestling',     icon: _sportIconImg('icons8-wrestling-50.png'), bg: 'rgba(255,107,0,0.1)',    border: 'rgba(255,107,0,0.2)' },
+    { name: 'Lacrosse',      icon: _sportIconImg('icons8-lacrosse-stick-50.png'), bg: 'rgba(30,144,255,0.1)',   border: 'rgba(30,144,255,0.2)' },
   ];
 
   let activeTab = 'all';
@@ -426,8 +429,14 @@
     return `<div class="player-grid">${cards}</div>`;
   }
 
-  function getPlayers() { return JSON.parse(localStorage.getItem('es_players') || '[]'); }
-  function getCoaches() { return JSON.parse(localStorage.getItem('es_coaches') || '[]'); }
+  // Search is Pro-only. Return NOTHING to a non-subscriber even if a stale player
+  // list is still cached in this browser from before — so deleting the #sub-gate
+  // overlay reveals an empty search, not real data. (The real, un-bypassable gate
+  // is server-side: supabase-phase5-server-paywall.sql stops the DB from sending
+  // the player list to a non-Pro account at all. This just closes the window
+  // where old cached data could still be searched before the next sync clears it.)
+  function getPlayers() { if (!isSubscribed()) return []; return JSON.parse(localStorage.getItem('es_players') || '[]'); }
+  function getCoaches() { if (!isSubscribed()) return []; return JSON.parse(localStorage.getItem('es_coaches') || '[]'); }
   function getFollows() { return JSON.parse(localStorage.getItem('es_follows') || '[]'); }
   function saveFollows(f) { localStorage.setItem('es_follows', JSON.stringify(f)); }
   function isFollowing(targetId) { return getFollows().some(f => f.followerId === session.id && f.followeeId === targetId); }
@@ -552,6 +561,14 @@
 
   function render() {
     const area = document.getElementById('results-area');
+    // Search is a Pro feature. A non-subscriber gets an EMPTY results area no
+    // matter what they type or which tab they pick — so even with the #sub-gate
+    // overlay deleted in DevTools, nothing (players, coaches, tournaments, sports)
+    // ever renders. This is every search path's single choke point. The real,
+    // un-bypassable protection is still server-side (phase5 RLS stops the DB from
+    // sending the player/coach list to a non-Pro account at all); this just makes
+    // the page itself show nothing so there's never anything to reveal.
+    if (!isSubscribed()) { area.innerHTML = ''; return; }
     const q = searchQuery;
     const players = getPlayers();
     const coaches = getCoaches();
