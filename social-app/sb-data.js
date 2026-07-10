@@ -489,7 +489,13 @@ async function _sbUploadImage(bucket, keyPrefix, fileOrBlob) {
 // ── Fire-and-forget Supabase write helpers ────────────────────────────────────
 
 function _sbSavePlayer(p) {
-  _SB.from('profiles').upsert(_playerToRow(p)).then(undefined, () => {});
+  // Returns { error } so callers can tell whether the write actually persisted
+  // (settings/profile save await this). Previously errors were swallowed, which
+  // hid RLS/auth failures behind a false "Saved" and a silent revert on refresh.
+  return _SB.from('profiles').upsert(_playerToRow(p)).then(
+    ({ error }) => { if (error) console.error('[sb save player]', error.message || error); return { error }; },
+    (error)     => { console.error('[sb save player]', error?.message || error); return { error }; }
+  );
 }
 
 // Batch version — one upsert request for many players instead of one per player

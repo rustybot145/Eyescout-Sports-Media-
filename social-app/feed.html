@@ -1031,8 +1031,11 @@
 
 <script>
   // ── Supabase auth guard ────────────────────────────────────────────────────
-  const { createClient: _sbCreate } = supabase;
-  const sb = _sbCreate('https://auvnwuliwghmjbhhovbo.supabase.co', 'sb_publishable_7qKzHagsIYotquLIiARBqg_cbTSv9C5');
+  // Reuse the single client created in sb-data.js. Creating a SECOND client here
+  // spun up a second GoTrueClient sharing the same auth storage key; the two
+  // raced on token refresh, so writes could go out with a stale/absent token and
+  // be rejected by Supabase with 403 (Forbidden).
+  const sb = _SB;
   sb.auth.getSession().then(({ data: { session: authSess } }) => {
     // Don't wipe/redirect a locally logged-in user just because Supabase's single
     // auth token is stale or reflects the other role — only bounce if no local session.

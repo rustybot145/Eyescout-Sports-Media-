@@ -733,15 +733,25 @@
     const all = JSON.parse(localStorage.getItem('es_players') || '[]');
     return all.find(p => p.id === session.id) || session;
   }
-  function savePatch(patch) {
+  async function savePatch(patch) {
     const all = JSON.parse(localStorage.getItem('es_players') || '[]');
     const idx = all.findIndex(p => p.id === session.id);
-    if (idx > -1) {
-      Object.assign(all[idx], patch);
-      localStorage.setItem('es_players', JSON.stringify(all));
-      localStorage.setItem('es_session', JSON.stringify(all[idx]));
-      if (typeof _sbSavePlayer === 'function') _sbSavePlayer(all[idx]);
-    }
+    // Always resolve a target row. Previously, if the user's own row wasn't in
+    // es_players (idx === -1) this function silently did nothing — no local save,
+    // no server write — while the caller still showed "Saved".
+    let target;
+    if (idx > -1) { Object.assign(all[idx], patch); target = all[idx]; }
+    else { target = { ...session, ...patch }; all.push(target); }
+    localStorage.setItem('es_players', JSON.stringify(all));
+    localStorage.setItem('es_session', JSON.stringify(target));
+    session = target;
+    if (typeof _sbSavePlayer !== 'function') return { error: null };
+    // Make sure a valid auth token is attached before writing. Without this, an
+    // expired/not-yet-restored session sends the write as `anon`, which RLS
+    // silently rejects — the classic "saved, then reverts on refresh" symptom.
+    try { await _SB.auth.getSession(); } catch (e) {}
+    const res = await _sbSavePlayer(target);
+    return res || { error: null };
   }
 
   // ── Load current values ───────────────────────────────────────────────────
@@ -901,7 +911,7 @@
   }
 
   // ── Save ─────────────────────────────────────────────────────────────────
-  function saveSettings() {
+  async function saveSettings() {
     const btn = document.getElementById('save-btn');
     btn.disabled = true;
     btn.textContent = 'Saving…';
@@ -932,13 +942,17 @@
     localStorage.setItem('es_prefs_' + session.id, JSON.stringify(newPrefs));
     patch.prefs = newPrefs;
 
-    savePatch(patch);
+    const { error } = await savePatch(patch);
 
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = 'Save Changes';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+    if (error) {
+      // Surface the real reason instead of a false success — the write did NOT
+      // persist to the server, so a refresh would revert these changes.
+      showToast('Couldn’t save: ' + (error.message || 'server error'), true);
+    } else {
       showToast('✓ Settings saved');
-    }, 320);
+    }
   }
 
   // ── Toast ─────────────────────────────────────────────────────────────────

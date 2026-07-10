@@ -966,8 +966,12 @@
 
 <script>
   // ── Supabase auth guard ────────────────────────────────────────────────────
-  const { createClient: _sbCreate } = supabase;
-  const sb = _sbCreate('https://auvnwuliwghmjbhhovbo.supabase.co', 'sb_publishable_7qKzHagsIYotquLIiARBqg_cbTSv9C5');
+  // Reuse the single client created in sb-data.js. Creating a SECOND client here
+  // spun up a second GoTrueClient sharing the same auth storage key; the two
+  // raced on token refresh, so writes (e.g. saving profile edits) could go out
+  // with a stale/absent token. Supabase then rejected them with 403 (Forbidden)
+  // and the change silently reverted on the next refresh.
+  const sb = _SB;
 
   // Escape user-supplied text before inserting into innerHTML (prevents stored XSS)
   function escHtml(s) {

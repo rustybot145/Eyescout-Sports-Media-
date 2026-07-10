@@ -791,8 +791,11 @@
 
 <script>
   // ── Supabase auth guard ────────────────────────────────────────────────────
-  const { createClient: _sbCreate } = supabase;
-  const sb = _sbCreate('https://auvnwuliwghmjbhhovbo.supabase.co', 'sb_publishable_7qKzHagsIYotquLIiARBqg_cbTSv9C5');
+  // Reuse the single client created in sb-data.js. Creating a SECOND client here
+  // spun up a second GoTrueClient sharing the same auth storage key; the two
+  // raced on token refresh, so writes could go out with a stale/absent token and
+  // be rejected by Supabase with 403 (Forbidden).
+  const sb = _SB;
   sb.auth.getSession().then(({ data: { session: authSess } }) => {
     // Only bounce to login if there's no local coach session either — don't false-logout
     // when Supabase's single auth token is stale or reflects the player account.
