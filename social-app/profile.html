@@ -506,6 +506,7 @@
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center;
+    padding: 20px;   /* keeps a tall modal off the screen edges (esp. on phones) */
     opacity: 0; pointer-events: none;
     transition: opacity 0.2s;
   }
@@ -518,6 +519,13 @@
     padding: 32px;
     width: 100%;
     max-width: 480px;
+    /* Cap the height to the screen and scroll the form inside when it's taller
+       than the viewport — otherwise the top/bottom get cut off with no way to
+       reach them (very common on a phone). Invisible when the form already fits. */
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transform: translateY(16px);
     transition: transform 0.25s;
   }
