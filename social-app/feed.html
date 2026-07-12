@@ -884,101 +884,6 @@
     </div>
 
     <div id="post-feed" style="display:none;">
-    <!-- Post 1 -->
-    <article class="post">
-      <div class="post-header">
-        <div class="post-user">
-          <div class="post-avatar has-story"><div class="av-inner"></div></div>
-          <div>
-            <p class="post-name">EyeScout Sports</p>
-            <p class="post-meta">Football · Desert Invitational · 2h ago</p>
-          </div>
-        </div>
-        <span class="post-more" onclick="openReportModal('demo_post_1')" title="Report post">···</span>
-      </div>
-      <div class="post-media">
-        <div class="post-media-inner">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span class="media-label">Photo Drop</span>
-        </div>
-        <div class="media-grad-bar"></div>
-      </div>
-      <div class="post-actions">
-        <button class="action-btn" data-hype data-id="demo_post_1">
-          <span class="hype-icon"></span>
-          <span class="hype-count"><span class="hype-num">248</span></span>
-        </button>
-      </div>
-      <div class="post-caption">
-        <strong>eyescoutsports</strong> Desert Invitational photos are in. Drop your jersey number in the comments and we'll tag you. <span class="tag">#EyeScout</span> <span class="tag">#DesertInvitational</span>
-      </div>
-      <p class="post-time">2 hours ago</p>
-    </article>
-
-    <!-- Post 2 — video reel -->
-    <article class="post">
-      <div class="post-header">
-        <a class="post-user" href="profile.html?id=seed_marcus_johnson">
-          <div class="post-avatar" style="background:#1e1e1e;display:flex;align-items:center;justify-content:center;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
-          <div>
-            <p class="post-name">Marcus Johnson · #12</p>
-            <p class="post-meta">Football · Class of 2027</p>
-          </div>
-        </a>
-        <span class="post-more" onclick="openReportModal('demo_post_2')" title="Report post">···</span>
-      </div>
-      <div class="post-media landscape" style="background:#111;">
-        <div class="post-media-inner">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span class="media-label">Highlight Reel</span>
-        </div>
-        <div class="media-grad-bar"></div>
-      </div>
-      <div class="post-actions">
-        <button class="action-btn" data-hype data-id="demo_post_2">
-          <span class="hype-icon"></span>
-          <span class="hype-count"><span class="hype-num">92</span></span>
-        </button>
-      </div>
-      <div class="post-caption">
-        <strong>marcus.johnson.12</strong> My highlights from the Desert Invitational. Ready for the next level. <span class="tag">#2027</span> <span class="tag">#Football</span> <span class="tag">#EyeScout</span>
-      </div>
-      <p class="post-time">5 hours ago</p>
-    </article>
-
-    <!-- Post 3 -->
-    <article class="post">
-      <div class="post-header">
-        <div class="post-user">
-          <div class="post-avatar has-story"><div class="av-inner"></div></div>
-          <div>
-            <p class="post-name">EyeScout Sports</p>
-            <p class="post-meta">Basketball · Spring Classic · 1d ago</p>
-          </div>
-        </div>
-        <span class="post-more" onclick="openReportModal('demo_post_3')" title="Report post">···</span>
-      </div>
-      <div class="post-media portrait">
-        <div class="post-media-inner">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span class="media-label">Player Spotlight</span>
-        </div>
-        <div class="media-grad-bar"></div>
-      </div>
-      <div class="post-actions">
-        <button class="action-btn" data-hype data-id="demo_post_3">
-          <span class="hype-icon"></span>
-          <span class="hype-count"><span class="hype-num">183</span></span>
-        </button>
-      </div>
-      <div class="post-caption">
-        <strong>eyescoutsports</strong> Spring Classic — Aaliyah Carter #7. Ball don't lie. <span class="tag">#Basketball</span> <span class="tag">#EyeScout</span> <span class="tag">#ClassOf2026</span>
-      </div>
-      <p class="post-time">1 day ago</p>
-    </article>
-
     </div><!-- end #post-feed -->
 
   </div>
@@ -1090,23 +995,6 @@
     return Math.floor(diff/86400) + 'd ago';
   }
 
-  // Seed demo players so static posts link to real profiles
-  (function seedDemoPlayers() {
-    const players = JSON.parse(localStorage.getItem('es_players') || '[]');
-    const seeds = [
-      { id: 'seed_marcus_johnson', athleteFirst: 'Marcus', athleteLast: 'Johnson', jersey: '12', sport: 'Football', position: 'WR', gradYear: '2027', school: 'Desert Ridge High', bio: 'Wide receiver. Ready for the next level.', role: 'player' },
-    ];
-    let changed = false;
-    seeds.forEach(seed => {
-      if (!players.find(p => p.id === seed.id)) {
-        players.push(seed);
-        changed = true;
-        // Write to Supabase so this player is discoverable by everyone
-        if (typeof _sbSavePlayer === 'function') _sbSavePlayer(seed);
-      }
-    });
-    if (changed) localStorage.setItem('es_players', JSON.stringify(players));
-  })();
   if (isCoach && !coachSession.verified) document.getElementById('coach-lock').classList.add('active');
 
   // Story system state — declared early so all functions can access
@@ -1347,7 +1235,7 @@
   function renderLivePlayerPosts() {
     const posts   = JSON.parse(localStorage.getItem('es_posts') || '[]');
     const players = JSON.parse(localStorage.getItem('es_players') || '[]');
-    if (!posts.length) { initHypeButtons(); return; }
+    if (!posts.length) { initHypeButtons(); hideOffSportPosts(); return; }
 
     const hypes = getHypes();
     const hyped = getPlayerHyped();
@@ -1495,12 +1383,47 @@
   // none of them. If a single sport is active (via the switcher), narrow to it.
   function hideOffSportPosts() {
     const active = activeSportFilter ? [activeSportFilter.toLowerCase()] : feedMySports();
-    if (!active.length) return;
-    document.querySelectorAll('#post-feed article.post').forEach(a => {
-      const meta = a.querySelector('.post-meta');
-      const txt = (meta ? meta.textContent : '').toLowerCase();
-      a.style.display = active.some(s => txt.includes(s)) ? '' : 'none';
-    });
+    if (active.length) {
+      document.querySelectorAll('#post-feed article.post').forEach(a => {
+        const meta = a.querySelector('.post-meta');
+        const txt = (meta ? meta.textContent : '').toLowerCase();
+        a.style.display = active.some(s => txt.includes(s)) ? '' : 'none';
+      });
+    }
+    updateFeedEmptyState();
+  }
+
+  // Properly-cased label for whatever sport the feed is currently scoped to
+  // (the active tab for multi-sport athletes, else their one sport).
+  function currentSportLabel() {
+    if (activeSportFilter) return activeSportFilter;
+    const p = getLatestPlayer();
+    const list = (typeof getPlayerSports === 'function' && p) ? getPlayerSports(p) : [];
+    return list[0] || p?.sport || coachSession?.sport || '';
+  }
+
+  // "No posts for your sport yet" placeholder — shown whenever nothing is
+  // visible in the feed (no live posts at all, or none for the active sport).
+  // Idempotent: safe to call after every render/filter pass.
+  function updateFeedEmptyState() {
+    const feed = document.getElementById('post-feed');
+    if (!feed) return;
+    const existing = document.getElementById('feed-empty');
+    const hasVisible = [...feed.querySelectorAll('article.post')].some(a => a.style.display !== 'none');
+    if (hasVisible) { if (existing) existing.remove(); return; }
+    if (existing) return; // already showing
+    const sport = currentSportLabel();
+    const empty = document.createElement('div');
+    empty.id = 'feed-empty';
+    empty.innerHTML = `
+      <div style="text-align:center;padding:64px 24px;">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.6" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <p style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">${sport ? `No posts for ${escHtml(sport)} yet` : 'No posts yet'}</p>
+        <p style="font-size:13.5px;color:rgba(255,255,255,0.7);line-height:1.6;max-width:320px;margin:0 auto;">Be the first to post, or check back soon — coaches are watching this feed.</p>
+      </div>`;
+    feed.appendChild(empty);
   }
 
   // The active sport tab. Multi-sport athletes always have one sport selected
@@ -1610,6 +1533,10 @@
     if (isSubscribed()) return;
 
     const visible = [...feed.querySelectorAll('article.post')].filter(a => a.style.display !== 'none');
+    // Nothing to preview-lock (e.g. a brand-new sport with zero posts yet) —
+    // the empty state already covers this, so don't show "upgrade to unlock
+    // the rest" when there's no rest to unlock.
+    if (!visible.length) return;
     visible.slice(FEED_PREVIEW_LIMIT).forEach(a => {
       a.style.display = 'none';
       a.setAttribute('data-preview-hidden', '1');
