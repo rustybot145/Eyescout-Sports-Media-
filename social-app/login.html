@@ -181,31 +181,32 @@
         </div>
 
         <div class="mb-4">
-          <label class="field-label">Sport(s)<span class="required">*</span> <span style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(255,255,255,0.45);">— check all you play</span></label>
+          <label class="field-label">Sport(s)<span class="required">*</span> <span style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(255,255,255,0.45);">— check up to 3 you play</span></label>
           <div class="ms-dropdown" id="sport-dropdown">
             <button type="button" class="field ms-trigger" id="sport-trigger" onclick="toggleSportDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
               <span id="sport-trigger-label" style="color:rgba(255,255,255,0.7);">Select sport(s)</span>
               <svg class="ms-chevron" width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
             </button>
             <div class="ms-panel" id="sport-panel" role="listbox" aria-multiselectable="true">
-              <label class="ms-option"><input type="checkbox" value="Football" onchange="onSportCheck()"><span class="ms-box"></span>Football</label>
-              <label class="ms-option"><input type="checkbox" value="Basketball" onchange="onSportCheck()"><span class="ms-box"></span>Basketball</label>
-              <label class="ms-option"><input type="checkbox" value="Baseball" onchange="onSportCheck()"><span class="ms-box"></span>Baseball</label>
-              <label class="ms-option"><input type="checkbox" value="Softball" onchange="onSportCheck()"><span class="ms-box"></span>Softball</label>
-              <label class="ms-option"><input type="checkbox" value="Soccer" onchange="onSportCheck()"><span class="ms-box"></span>Soccer</label>
-              <label class="ms-option"><input type="checkbox" value="Track & Field" onchange="onSportCheck()"><span class="ms-box"></span>Track &amp; Field</label>
-              <label class="ms-option"><input type="checkbox" value="Volleyball" onchange="onSportCheck()"><span class="ms-box"></span>Volleyball</label>
-              <label class="ms-option"><input type="checkbox" value="Wrestling" onchange="onSportCheck()"><span class="ms-box"></span>Wrestling</label>
-              <label class="ms-option"><input type="checkbox" value="Lacrosse" onchange="onSportCheck()"><span class="ms-box"></span>Lacrosse</label>
-              <label class="ms-option"><input type="checkbox" value="Tennis" onchange="onSportCheck()"><span class="ms-box"></span>Tennis</label>
-              <label class="ms-option"><input type="checkbox" value="Swimming" onchange="onSportCheck()"><span class="ms-box"></span>Swimming</label>
-              <label class="ms-option"><input type="checkbox" value="Cross Country" onchange="onSportCheck()"><span class="ms-box"></span>Cross Country</label>
-              <label class="ms-option"><input type="checkbox" value="Other" onchange="onSportCheck()"><span class="ms-box"></span>Other</label>
+              <label class="ms-option"><input type="checkbox" value="Football" onchange="onSportCheck(this)"><span class="ms-box"></span>Football</label>
+              <label class="ms-option"><input type="checkbox" value="Basketball" onchange="onSportCheck(this)"><span class="ms-box"></span>Basketball</label>
+              <label class="ms-option"><input type="checkbox" value="Baseball" onchange="onSportCheck(this)"><span class="ms-box"></span>Baseball</label>
+              <label class="ms-option"><input type="checkbox" value="Softball" onchange="onSportCheck(this)"><span class="ms-box"></span>Softball</label>
+              <label class="ms-option"><input type="checkbox" value="Soccer" onchange="onSportCheck(this)"><span class="ms-box"></span>Soccer</label>
+              <label class="ms-option"><input type="checkbox" value="Track & Field" onchange="onSportCheck(this)"><span class="ms-box"></span>Track &amp; Field</label>
+              <label class="ms-option"><input type="checkbox" value="Volleyball" onchange="onSportCheck(this)"><span class="ms-box"></span>Volleyball</label>
+              <label class="ms-option"><input type="checkbox" value="Wrestling" onchange="onSportCheck(this)"><span class="ms-box"></span>Wrestling</label>
+              <label class="ms-option"><input type="checkbox" value="Lacrosse" onchange="onSportCheck(this)"><span class="ms-box"></span>Lacrosse</label>
+              <label class="ms-option"><input type="checkbox" value="Tennis" onchange="onSportCheck(this)"><span class="ms-box"></span>Tennis</label>
+              <label class="ms-option"><input type="checkbox" value="Swimming" onchange="onSportCheck(this)"><span class="ms-box"></span>Swimming</label>
+              <label class="ms-option"><input type="checkbox" value="Cross Country" onchange="onSportCheck(this)"><span class="ms-box"></span>Cross Country</label>
+              <label class="ms-option"><input type="checkbox" value="Other" onchange="onSportCheck(this)"><span class="ms-box"></span>Other</label>
             </div>
           </div>
           <!-- Primary sport (first checked) — kept for the DB `sport` column + validation -->
           <input type="hidden" name="sport" id="fld-sport">
           <p class="err-msg" id="sport-err">Please select at least one sport.</p>
+          <p class="err-msg" id="sport-max">You can select up to 3 sports.</p>
         </div>
 
         <div class="mb-4">
@@ -467,12 +468,25 @@
     const open = dd.classList.toggle('open');
     document.getElementById('sport-trigger').setAttribute('aria-expanded', open ? 'true' : 'false');
   }
+  // Most an athlete can pick. Keep in sync with the "check up to N" label above.
+  const SIGNUP_MAX_SPORTS = 3;
   // Checked sports (list order); the first is treated as the primary.
   function getSignupSports() {
     return [...document.querySelectorAll('#sport-panel input:checked')].map(c => c.value);
   }
-  function onSportCheck() {
-    const picked = getSignupSports();
+  function onSportCheck(cb) {
+    let picked = getSignupSports();
+    // Enforce the cap: undo a pick that would exceed the max and flag it.
+    if (cb && cb.checked && picked.length > SIGNUP_MAX_SPORTS) {
+      cb.checked = false;
+      picked = getSignupSports();
+      const maxMsg = document.getElementById('sport-max');
+      if (maxMsg) {
+        maxMsg.style.display = 'block';
+        clearTimeout(onSportCheck._t);
+        onSportCheck._t = setTimeout(() => { maxMsg.style.display = 'none'; }, 2500);
+      }
+    }
     const label = document.getElementById('sport-trigger-label');
     if (picked.length) {
       label.textContent = picked.join(', ');
