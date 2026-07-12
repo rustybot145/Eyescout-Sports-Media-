@@ -181,7 +181,7 @@
         </div>
 
         <div class="mb-4">
-          <label class="field-label">Sport(s)<span class="required">*</span> <span style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(255,255,255,0.45);">— check up to 3 you play</span></label>
+          <label class="field-label">Sport(s)<span class="required">*</span> <span style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(255,255,255,0.45);">— check up to 2 you play</span></label>
           <div class="ms-dropdown" id="sport-dropdown">
             <button type="button" class="field ms-trigger" id="sport-trigger" onclick="toggleSportDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
               <span id="sport-trigger-label" style="color:rgba(255,255,255,0.7);">Select sport(s)</span>
@@ -206,7 +206,7 @@
           <!-- Primary sport (first checked) — kept for the DB `sport` column + validation -->
           <input type="hidden" name="sport" id="fld-sport">
           <p class="err-msg" id="sport-err">Please select at least one sport.</p>
-          <p class="err-msg" id="sport-max">You can select up to 3 sports.</p>
+          <p class="err-msg" id="sport-max">You can select up to 2 sports.</p>
         </div>
 
         <div class="mb-4">
@@ -469,7 +469,7 @@
     document.getElementById('sport-trigger').setAttribute('aria-expanded', open ? 'true' : 'false');
   }
   // Most an athlete can pick. Keep in sync with the "check up to N" label above.
-  const SIGNUP_MAX_SPORTS = 3;
+  const SIGNUP_MAX_SPORTS = 2;
   // Checked sports (list order); the first is treated as the primary.
   function getSignupSports() {
     return [...document.querySelectorAll('#sport-panel input:checked')].map(c => c.value);
