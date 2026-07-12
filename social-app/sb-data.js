@@ -7,6 +7,40 @@ const _SB = supabase.createClient(
   'sb_publishable_7qKzHagsIYotquLIiARBqg_cbTSv9C5'
 );
 
+// ── Multi-sport athletes ─────────────────────────────────────────────────────
+// A player can select more than one sport. This lives ONLY in localStorage
+// (key: es_player_sports = { [playerId]: ["Football","Basketball"] }) so it
+// survives DB syncs (which never touch this key) and needs no schema change.
+// The DB `sport` column still holds the PRIMARY sport (sports[0]) for backward
+// compatibility with everything that reads .sport (feeds, coach discovery, etc.).
+const ES_SPORTS = [
+  'Football', 'Basketball', 'Baseball', 'Softball', 'Soccer', 'Track & Field',
+  'Volleyball', 'Wrestling', 'Lacrosse', 'Tennis', 'Swimming', 'Cross Country', 'Other',
+];
+function _esSportsMap() { try { return JSON.parse(localStorage.getItem('es_player_sports') || '{}'); } catch (e) { return {}; } }
+// The list of sports for a player object. Prefers the durable local map, then an
+// inline `sports` array, then falls back to the single `sport` (older accounts).
+function getPlayerSports(p) {
+  if (!p) return [];
+  const fromMap = _esSportsMap()[p.id];
+  if (Array.isArray(fromMap) && fromMap.length) return fromMap.filter(Boolean);
+  if (Array.isArray(p.sports) && p.sports.length) return p.sports.filter(Boolean);
+  return p.sport ? [p.sport] : [];
+}
+function setPlayerSports(playerId, sportsArr) {
+  const clean = (sportsArr || []).filter(Boolean);
+  const map = _esSportsMap();
+  if (clean.length) map[playerId] = clean; else delete map[playerId];
+  localStorage.setItem('es_player_sports', JSON.stringify(map));
+  return clean;
+}
+// Does a post belong to any of this player's sports? (case-insensitive)
+function postMatchesSports(postSport, sportsArr) {
+  if (!sportsArr || !sportsArr.length) return true;
+  const s = (postSport || '').toLowerCase();
+  return sportsArr.some(sp => sp.toLowerCase() === s);
+}
+
 // ── Row → legacy localStorage object conversions ─────────────────────────────
 
 function _rowToPlayer(r) {

@@ -482,17 +482,13 @@
       </div>
     </div>
     <div class="section-body">
+      <div class="field-group" style="margin-bottom:16px;">
+        <label class="field-label">Sport(s) <span style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(255,255,255,0.45);">— select all you play</span></label>
+        <div id="s-sports" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        <!-- hidden mirror of the primary sport so existing code that reads s-sport keeps working -->
+        <input type="hidden" id="s-sport">
+      </div>
       <div class="field-row">
-        <div class="field-group">
-          <label class="field-label" for="s-sport">Sport</label>
-          <select class="field-input" id="s-sport">
-            <option value="">Select sport</option>
-            <option>Football</option><option>Basketball</option><option>Baseball</option>
-            <option>Softball</option><option>Soccer</option><option>Track & Field</option>
-            <option>Volleyball</option><option>Wrestling</option><option>Lacrosse</option>
-            <option>Tennis</option><option>Swimming</option><option>Cross Country</option>
-          </select>
-        </div>
         <div class="field-group">
           <label class="field-label" for="s-position">Position</label>
           <input class="field-input" type="text" id="s-position" placeholder="e.g. Quarterback">
@@ -668,6 +664,42 @@
   const session = JSON.parse(localStorage.getItem('es_session') || 'null');
   if (!session) window.location.href = 'login.html';
 
+  // ── Multi-sport chip selector ──────────────────────────────────────────────
+  const _SETTINGS_SPORTS = (typeof ES_SPORTS !== 'undefined') ? ES_SPORTS : [
+    'Football','Basketball','Baseball','Softball','Soccer','Track & Field',
+    'Volleyball','Wrestling','Lacrosse','Tennis','Swimming','Cross Country','Other'];
+  function renderSettingsSports(p) {
+    const chosen = (typeof getPlayerSports === 'function') ? getPlayerSports(p) : (p && p.sport ? [p.sport] : []);
+    const set = new Set(chosen.map(s => s.toLowerCase()));
+    const box = document.getElementById('s-sports');
+    if (!box) return;
+    box.innerHTML = _SETTINGS_SPORTS.map(sp => {
+      const on = set.has(sp.toLowerCase());
+      return `<button type="button" onclick="toggleSettingsSport(this)"
+        style="border-radius:100px;padding:8px 15px;font-size:13px;cursor:pointer;transition:all 0.15s;
+        background:${on ? 'rgba(30,144,255,0.14)' : '#1a1a1a'};
+        border:1px solid ${on ? 'rgba(30,144,255,0.6)' : 'rgba(255,255,255,0.1)'};
+        color:${on ? '#fff' : 'rgba(255,255,255,0.7)'};" class="${on ? 'selected' : ''}">${sp}</button>`;
+    }).join('');
+    syncSettingsPrimary();
+  }
+  function toggleSettingsSport(btn) {
+    const on = !btn.classList.contains('selected');
+    btn.classList.toggle('selected', on);
+    btn.style.background = on ? 'rgba(30,144,255,0.14)' : '#1a1a1a';
+    btn.style.borderColor = on ? 'rgba(30,144,255,0.6)' : 'rgba(255,255,255,0.1)';
+    btn.style.color = on ? '#fff' : 'rgba(255,255,255,0.7)';
+    syncSettingsPrimary();
+  }
+  function getSettingsSports() {
+    return [...document.querySelectorAll('#s-sports button.selected')].map(b => b.textContent.trim());
+  }
+  // Keep the hidden #s-sport input = primary (first) so existing save code works.
+  function syncSettingsPrimary() {
+    const el = document.getElementById('s-sport');
+    if (el) el.value = getSettingsSports()[0] || '';
+  }
+
   // Pro plan = active subscription. Gates stat editing (Pro-only feature).
   function isPro() {
     const sub = JSON.parse(localStorage.getItem('es_sub_' + session.id) || 'null');
@@ -761,7 +793,7 @@
   document.getElementById('s-last').value     = p.athleteLast   || '';
   document.getElementById('s-email').value    = p.email         || '';
   document.getElementById('s-phone').value    = p.phone         || '';
-  document.getElementById('s-sport').value    = p.sport         || '';
+  renderSettingsSports(p);
   document.getElementById('s-position').value = p.position      || '';
   document.getElementById('s-jersey').value   = p.jersey        || '';
   document.getElementById('s-gradyear').value = p.gradYear      || '';
@@ -916,12 +948,17 @@
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
+    // Multi-sport: persist the full list locally; the `sport` column stays the primary.
+    const chosenSports = getSettingsSports();
+    if (typeof setPlayerSports === 'function') setPlayerSports(session.id, chosenSports);
+
     const patch = {
       athleteFirst: document.getElementById('s-first').value.trim(),
       athleteLast:  document.getElementById('s-last').value.trim(),
       email:        document.getElementById('s-email').value.trim(),
       phone:        document.getElementById('s-phone').value.trim(),
-      sport:        document.getElementById('s-sport').value,
+      sport:        chosenSports[0] || document.getElementById('s-sport').value,
+      sports:       chosenSports,
       position:     document.getElementById('s-position').value.trim(),
       jersey:       document.getElementById('s-jersey').value.trim(),
       gradYear:     document.getElementById('s-gradyear').value.trim(),
@@ -1047,7 +1084,7 @@
       document.getElementById('s-last').value     = fresh.athleteLast   || '';
       document.getElementById('s-email').value    = fresh.email         || '';
       document.getElementById('s-phone').value    = fresh.phone         || '';
-      document.getElementById('s-sport').value    = fresh.sport         || '';
+      renderSettingsSports(fresh);
       document.getElementById('s-position').value = fresh.position      || '';
       document.getElementById('s-jersey').value   = fresh.jersey        || '';
       document.getElementById('s-gradyear').value = fresh.gradYear      || '';

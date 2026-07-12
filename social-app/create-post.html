@@ -318,6 +318,12 @@
           <span style="font-size:12px;color:rgba(255,255,255,0.7);" id="char-count">0 / 220</span>
         </div>
 
+        <!-- Which sport (only shown for multi-sport athletes) -->
+        <div id="post-sport-block" style="display:none;">
+          <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:10px;">Sport <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:rgba(255,255,255,0.5);">— which feed is this for?</span></p>
+          <div id="post-sport-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
+        </div>
+
         <!-- Tournament tag -->
         <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:10px;">Tournament <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:rgba(255,255,255,0.7);">— optional</span></p>
         <div id="tournament-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;"></div>
@@ -421,9 +427,38 @@
         : `<img src="${m.src}" alt="Selected media">`;
       selectedTournament = null;
       renderTournamentPicker();
+      renderPostSportPicker();
       document.getElementById('caption-input').focus();
     }, 160);
   }
+
+  // ── Which sport is this post for? (multi-sport athletes) ───────────────────
+  const _mySports = (typeof getPlayerSports === 'function') ? getPlayerSports(session) : [session.sport];
+  let selectedPostSport = _mySports[0] || session.sport || '';
+
+  function renderPostSportPicker() {
+    const block = document.getElementById('post-sport-block');
+    // Single-sport athletes don't need to choose — hide the picker entirely.
+    if (_mySports.length < 2) { block.style.display = 'none'; return; }
+    block.style.display = 'block';
+    // Built with createElement + textContent (not innerHTML) so a tampered
+    // sport value is treated as plain text and can never inject markup/script.
+    const list = document.getElementById('post-sport-list');
+    list.innerHTML = '';
+    _mySports.forEach(sp => {
+      const on = sp === selectedPostSport;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = sp;
+      btn.style.cssText = 'border-radius:100px;padding:8px 15px;font-size:13px;cursor:pointer;transition:all 0.15s;'
+        + `background:${on ? 'rgba(30,144,255,0.14)' : '#1a1a1a'};`
+        + `border:1px solid ${on ? 'rgba(30,144,255,0.6)' : 'rgba(255,255,255,0.1)'};`
+        + `color:${on ? '#fff' : 'rgba(255,255,255,0.7)'};`;
+      btn.addEventListener('click', () => selectPostSport(sp));
+      list.appendChild(btn);
+    });
+  }
+  function selectPostSport(sp) { selectedPostSport = sp; renderPostSportPicker(); }
 
   function goBack() {
     document.getElementById('step-caption').style.display = 'none';
@@ -486,7 +521,7 @@
       authorId: session.id,
       authorName: session.athleteFirst + ' ' + session.athleteLast,
       authorJersey: session.jersey,
-      sport: session.sport,
+      sport: selectedPostSport || session.sport,
       type: selectedType,
       mediaData: selectedPhoto,
       caption: document.getElementById('caption-input').value.trim(),

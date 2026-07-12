@@ -858,7 +858,10 @@
       </div>
     </div>
 
-    <div class="section-pill" id="feed-pill"><div class="dot"></div>For You</div>
+    <div class="section-pill" id="feed-pill"><div class="dot"></div>Feed</div>
+
+    <!-- Sport switcher — only shown for multi-sport athletes (populated by JS) -->
+    <div id="feed-sport-tabs" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 18px;"></div>
 
     <!-- Skeleton post cards shown until first Supabase sync resolves -->
     <div id="feed-skel" aria-hidden="true">
@@ -999,16 +1002,17 @@
           // don't flash before renderTournaments() runs.
           var sess = JSON.parse(localStorage.getItem('es_session') || 'null');
           var csess = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
-          var mySport = null;
+          var mySports = [];
           if (sess) {
             var players = JSON.parse(localStorage.getItem('es_players') || '[]');
             var me = players.find(function(p){ return p.id === sess.id; }) || sess;
-            mySport = me.sport || null;
+            mySports = (typeof getPlayerSports === 'function') ? getPlayerSports(me) : (me.sport ? [me.sport] : []);
           } else if (csess) {
-            mySport = csess.sport || null;
+            mySports = csess.sport ? [csess.sport] : [];
           }
-          if (mySport) {
-            data = data.filter(function(t){ return (t.sport || '').toLowerCase() === mySport.toLowerCase(); });
+          if (mySports.length) {
+            var lc = mySports.map(function(s){ return s.toLowerCase(); });
+            data = data.filter(function(t){ return lc.indexOf((t.sport || '').toLowerCase()) !== -1; });
           }
           if (!data.length) {
             el.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.7);padding:4px 0;">No tournaments yet.</p>';
@@ -1353,7 +1357,8 @@
     //    freshness + hype + same tournament/school). 3) On a tie, the post
     //    heating up fastest wins; if still tied, the newest wins.
     const me       = _feedMeId();
-    const mySport  = (getLatestPlayer()?.sport) || (typeof coachSession !== 'undefined' && coachSession?.sport) || null;
+    // Multi-sport: the feed includes posts from ANY of the athlete's sports.
+    const mySports = feedMySports();                 // e.g. ['football','basketball'] (lowercased) or []
     const meRec    = players.find(p => p.id === me) || null;
     const mySchool = (meRec?.school || '').toLowerCase();
     const myTourn  = (meRec?.tournament || '').toLowerCase();
@@ -1362,7 +1367,7 @@
     const sportOf = (p) => (p.sport || (players.find(pl => pl.id === p.authorId)?.sport) || '');
 
     const sorted = posts.slice()
-      .filter(p => !mySport || sportOf(p).toLowerCase() === mySport.toLowerCase())  // your sport only
+      .filter(p => !mySports.length || mySports.includes(sportOf(p).toLowerCase()))  // any of your sports
       .map(p => {
         const hype = hypes[p.id] || p.hypes || 0;
         const ageH = Math.max(0, (now - new Date(p.createdAt).getTime()) / 3600000);
@@ -1475,22 +1480,41 @@
     // Prepend live posts before demo posts
     feed.insertAdjacentHTML('afterbegin', liveHTML);
     initHypeButtons();
-    hideOffSportPosts(mySport);
+    hideOffSportPosts();
   }
 
-  // Keep the feed strictly your sport — hide any post (incl. sample posts) whose
-  // meta line doesn't name your sport.
-  function hideOffSportPosts(mySport) {
-    if (!mySport) return;
-    const s = mySport.toLowerCase();
+  // The athlete's sports, lowercased (multi-sport aware). Empty = no filtering.
+  function feedMySports() {
+    const p = getLatestPlayer();
+    const list = (typeof getPlayerSports === 'function' && p) ? getPlayerSports(p)
+               : (p?.sport ? [p.sport] : (coachSession?.sport ? [coachSession.sport] : []));
+    return list.map(s => s.toLowerCase());
+  }
+
+  // Keep the feed to the athlete's sport(s) — hide any post whose meta line names
+  // none of them. If a single sport is active (via the switcher), narrow to it.
+  function hideOffSportPosts() {
+    const active = activeSportFilter ? [activeSportFilter.toLowerCase()] : feedMySports();
+    if (!active.length) return;
     document.querySelectorAll('#post-feed article.post').forEach(a => {
       const meta = a.querySelector('.post-meta');
       const txt = (meta ? meta.textContent : '').toLowerCase();
-      a.style.display = txt.includes(s) ? '' : 'none';
+      a.style.display = active.some(s => txt.includes(s)) ? '' : 'none';
     });
   }
 
+  // The active sport tab. Multi-sport athletes always have one sport selected
+  // (defaults to their primary/first sport) — there's no combined "all sports"
+  // view, so nothing ever mixes between sports. Single-sport athletes have no
+  // tabs at all and this stays null (their one sport is the whole feed anyway).
+  // Declared here because the first render (and hideOffSportPosts) reads it.
+  let activeSportFilter = (() => {
+    const sports = (typeof getPlayerSports === 'function' && getLatestPlayer()) ? getPlayerSports(getLatestPlayer()) : [];
+    return sports.length > 1 ? sports[0] : null;
+  })();
+
   renderLivePlayerPosts();
+  renderFeedSportTabs();
 
   // ── Instagram-style feed video autoplay ───────────────────────────────────────
   function updateMuteIcon(video) {
@@ -1630,10 +1654,13 @@
       if (!list) return;
       const raw = localStorage.getItem('es_tournaments');
       let tournaments = raw ? JSON.parse(raw) : [];
-      // Only show tournaments for the viewer's sport (player's, or coach's).
-      const mySport = getLatestPlayer()?.sport || coachSession?.sport || null;
-      if (mySport) {
-        tournaments = tournaments.filter(t => (t.sport || '').toLowerCase() === mySport.toLowerCase());
+      // Only show tournaments for the viewer's sport(s) (player's, or coach's).
+      const mySports = (typeof getPlayerSports === 'function' && getLatestPlayer())
+        ? getPlayerSports(getLatestPlayer())
+        : (coachSession?.sport ? [coachSession.sport] : []);
+      if (mySports.length) {
+        const lc = mySports.map(s => s.toLowerCase());
+        tournaments = tournaments.filter(t => lc.includes((t.sport || '').toLowerCase()));
       }
       if (!tournaments.length) {
         list.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.7);padding:4px 0;">No tournaments yet.</p>';
@@ -1661,31 +1688,51 @@
     'Soccer', 'Volleyball', 'Track & Field', 'Wrestling', 'Lacrosse',
   ];
 
-  let activeSportFilter = null;
-
   renderSportStories();  // paint stories (incl. Most Hyped ring) on first load
+  syncFeedPill();
+
+  // Keep the small "Feed" pill above the stories in sync with whichever sport
+  // is active — single-sport athletes just see their one sport's name.
+  function syncFeedPill() {
+    const pill = document.getElementById('feed-pill');
+    if (!pill) return;
+    const label = activeSportFilter || getLatestPlayer()?.sport || 'Feed';
+    pill.innerHTML = `<div class="dot"></div>${escHtml(label)}`;
+  }
 
   function filterFeed(sport) {
-    activeSportFilter = activeSportFilter === sport ? null : sport;
+    activeSportFilter = sport;
     renderSportStories();
-
-    const posts = document.querySelectorAll('#post-feed article.post');
-    const pill = document.getElementById('feed-pill');
-
-    if (!activeSportFilter) {
-      posts.forEach(p => p.style.display = '');
-      pill.innerHTML = '<div class="dot"></div>For You';
-      lockFeedPreview();   // re-apply the non-subscriber 2-post lock
-      return;
-    }
-
-    pill.innerHTML = `<div class="dot"></div>${activeSportFilter}`;
-    posts.forEach(p => {
-      const meta = p.querySelector('.post-meta');
-      const matches = meta && meta.textContent.toLowerCase().includes(activeSportFilter.toLowerCase());
-      p.style.display = matches ? '' : 'none';
-    });
+    renderFeedSportTabs();
+    syncFeedPill();
+    hideOffSportPosts();   // shows ONLY the active sport's posts — never mixed
     lockFeedPreview();     // re-apply the non-subscriber 2-post lock
+  }
+
+  // Sport switcher for multi-sport athletes: one tab per sport, always exactly
+  // one active — there is no combined "all sports" view, so nothing ever mixes
+  // between sports. Single-sport athletes never see this at all.
+  function renderFeedSportTabs() {
+    const wrap = document.getElementById('feed-sport-tabs');
+    if (!wrap) return;
+    const sports = (typeof getPlayerSports === 'function') ? getPlayerSports(getLatestPlayer()) : [];
+    if (sports.length < 2) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    // Sport name goes in as escaped text; the click carries the array index
+    // (a number) rather than interpolating the name into a JS string, so a
+    // tampered sport value can never break out into markup or script.
+    wrap.innerHTML = sports.map((sp, i) => {
+      const on = activeSportFilter === sp;
+      return `<button type="button" class="feed-sport-tab" data-idx="${i}"
+        style="border-radius:100px;padding:7px 16px;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;
+        letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;
+        background:${on ? 'rgba(30,144,255,0.16)' : 'rgba(255,255,255,0.03)'};
+        border:1px solid ${on ? 'rgba(30,144,255,0.6)' : 'rgba(255,255,255,0.09)'};
+        color:${on ? '#fff' : 'rgba(255,255,255,0.6)'};">${escHtml(sp)}</button>`;
+    }).join('');
+    wrap.querySelectorAll('.feed-sport-tab').forEach(btn => {
+      btn.addEventListener('click', () => filterFeed(sports[Number(btn.dataset.idx)]));
+    });
   }
 
   function getSportPostsLast24h(sport) {
@@ -1707,14 +1754,20 @@
     const followeeIds = getFollows().filter(f => f.followerId === me).map(f => f.followeeId);
     if (!followeeIds.length) return [];
     const players = JSON.parse(localStorage.getItem('es_players') || '[]');
-    const mySport = getLatestPlayer()?.sport || null;
+    // Multi-sport: only the active tab's sport counts — never mixed with
+    // another sport. activeSportFilter is only ever null for single-sport
+    // athletes (no tabs, no combined view), in which case their one sport applies.
+    const _sports = (typeof getPlayerSports === 'function') ? getPlayerSports(getLatestPlayer()) : [];
+    const mySports = activeSportFilter ? [activeSportFilter]
+                    : (_sports.length ? _sports : (getLatestPlayer()?.sport ? [getLatestPlayer().sport] : []));
+    const mySportsLC = mySports.map(s => s.toLowerCase());
     const cutoff  = Date.now() - 24 * 60 * 60 * 1000;
     const posts   = JSON.parse(localStorage.getItem('es_posts') || '[]');
     const out = [];
     followeeIds.forEach(id => {
       const pl = players.find(p => p.id === id);
       if (!pl) return;
-      if (mySport && pl.sport && pl.sport !== mySport) return;   // only your sport
+      if (mySportsLC.length && pl.sport && !mySportsLC.includes(pl.sport.toLowerCase())) return;   // only your sport(s)
       const storyPosts = posts.filter(p =>
         p.authorId === id && (p.type === 'photo' || p.type === 'video') && p.mediaData &&
         new Date(p.createdAt).getTime() >= cutoff
@@ -1777,23 +1830,24 @@
     showStoryItem();
   }
 
-  // Most Hyped rings — two "best of" stories that always lead the story row:
+  // Most Hyped rings — "best of" stories that always lead the story row:
   //   1) "Most Hyped": this week's most-hyped post across EVERY sport.
-  //   2) "Most Hyped <YourSport>": this week's most-hyped post in the viewer's
-  //      own sport, right next to it.
+  //   2) "Most Hyped <Sport>": ONLY the active sport's ring for multi-sport
+  //      athletes (never mixed with another sport's ring) — single-sport
+  //      athletes have no tabs, so it's just their one sport.
   // FROZEN WEEKLY WINNERS, not a live computation: every Monday at 12:00 AM
   // (Phoenix time) the post with the most hype earned that week is locked in
   // as the winner and held until the next Monday, regardless of what happens
   // to hype counts afterward. Computed server-side in get_weekly_hype_winners()
   // (supabase-phase7-weekly-hype-winner.sql) and synced into es_weekly_hype —
-  // see the sync block near the bottom of this file. The sport ring already
-  // excludes whatever won the global slot (done server-side now), so the two
-  // rings never show the same post.
-  // Non-Pro viewers ALWAYS see both rings locked, even before this week's
-  // winner has been decided (e.g. nobody's hyped anything yet) — a locked ring
-  // is an upsell teaser, so it shouldn't disappear just because there's no
-  // data behind it yet. A Pro viewer only sees a ring once there's a real post
-  // to open; showing an "unlocked" ring with nothing behind it would be worse
+  // see the sync block near the bottom of this file. Each sport ring already
+  // excludes whatever won the global slot (done server-side now), so no two
+  // rings ever show the same post.
+  // Non-Pro viewers ALWAYS see rings locked, even before this week's winner
+  // has been decided (e.g. nobody's hyped anything yet) — a locked ring is an
+  // upsell teaser, so it shouldn't disappear just because there's no data
+  // behind it yet. A Pro viewer only sees a ring once there's a real post to
+  // open; showing an "unlocked" ring with nothing behind it would be worse
   // than not showing it at all.
   function mostHypedRingsHTML(subscribed) {
     const winners = JSON.parse(localStorage.getItem('es_weekly_hype') || '[]');
@@ -1803,22 +1857,29 @@
     const globalWin = winners.find(w => w.category === 'global');
     const globalTop = globalWin?.postId ? findPost(globalWin.postId) : null;
 
-    const mySport = (getLatestPlayer()?.sport) || (typeof coachSession !== 'undefined' && coachSession?.sport) || null;
-    let sportTop = null;
-    if (mySport) {
-      const sportWin = winners.find(w => w.category === mySport.toLowerCase());
-      if (sportWin?.postId) sportTop = findPost(sportWin.postId);
-    }
+    // Multi-sport: show ONLY the active sport's ring — never mixed with another
+    // sport. activeSportFilter is only null for single-sport athletes, whose
+    // one sport applies (no tabs, no combined view).
+    const _sports = (typeof getPlayerSports === 'function') ? getPlayerSports(getLatestPlayer()) : [];
+    const coachSport = (typeof coachSession !== 'undefined' && coachSession?.sport) || null;
+    const sportsToShow = activeSportFilter
+      ? [activeSportFilter]
+      : (_sports.length ? _sports : (coachSport ? [coachSport] : []));
 
     let html = '';
     if (globalTop || !subscribed) {
       html += hypeRingHTML(globalTop || { id: null }, 'Most Hyped', subscribed);
     }
-    // The sport ring uses the sport's own icon (e.g. a basketball) AND its own
-    // color (basketball = orange) so it stands apart from the purple global ring.
-    if (mySport && (sportTop || !subscribed)) {
-      html += hypeRingHTML(sportTop || { id: null }, `Most Hyped ${mySport}`, subscribed, sportIconMarkup(mySport), sportAccent(mySport));
-    }
+    // Each sport ring uses that sport's own icon + color (e.g. basketball =
+    // orange) so it stands apart from the purple global ring and from any
+    // other sport's ring.
+    sportsToShow.forEach(sp => {
+      const sportWin = winners.find(w => w.category === sp.toLowerCase());
+      const sportTop = sportWin?.postId ? findPost(sportWin.postId) : null;
+      if (sportTop || !subscribed) {
+        html += hypeRingHTML(sportTop || { id: null }, `Most Hyped ${sp}`, subscribed, sportIconMarkup(sp), sportAccent(sp));
+      }
+    });
     return html;
   }
 

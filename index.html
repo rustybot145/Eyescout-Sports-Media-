@@ -16,7 +16,8 @@
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
+    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; opacity: 0; transition: opacity 0.25s ease; }
+    body.page-loaded { opacity: 1; }
     h1,h2,h3,h4,h1.cond,h2.cond,h3.cond,h4.cond { font-family: Impact, 'Arial Narrow', Arial, sans-serif; } .cond { font-family: 'Arial Narrow', Arial, sans-serif; }
 
     /* Gradient utilities */
@@ -443,11 +444,12 @@
         <span class="hero-word g-text" style="animation-delay:0.82s">Stardom.</span>
       </h1>
       <p class="text-white/55 text-lg md:text-xl font-300 leading-relaxed max-w-xl mb-10 fade fade-d2">
-        Arizona's sports videography, photography &amp; scouting agency — scouting and capturing the moments that get athletes seen and recognized by college coaches.
+        EyeScout is the social app built for getting recruited — post your highlights, stats, and game photos, and get seen by verified college coaches who browse new posts every single day.
       </p>
       <div class="flex flex-wrap gap-4 fade fade-d3">
         <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Book a Session</a>
         <a href="gallery.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Browse the Gallery</a>
+        <button onclick="openRoleModal()" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Get Recruited</button>
       </div>
     </div>
   </div>
@@ -639,18 +641,60 @@
   </div>
 </section>
 
+<!-- ═══ THE APP ═══ -->
+<section class="py-24 bg-[#0a0a0a]">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="max-w-2xl mb-14 fade">
+      <div class="s-label mb-3">Beyond the Camera</div>
+      <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em] mb-5">Get Seen.<br><span class="g-text">Get Scouted.</span></h2>
+      <p class="text-white/40 text-lg font-300 leading-relaxed">EyeScout is more than a camera crew — it's a recruiting app built for Arizona athletes. Build your profile, post your highlights and stats, and put yourself in front of verified college coaches actively scouting for talent.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+      <div class="svc-card rounded-sm p-6 fade">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Build Your Profile</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed">Sport, stats, school, and your best photos and video — all in one recruiting profile.</p>
+      </div>
+      <div class="svc-card rounded-sm p-6 fade fade-d1">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><rect x="2" y="4" width="20" height="16" rx="1.5"/><path d="M10 9l5 3-5 3V9z" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Post Your Highlights</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed">Share game photos, clips, and stat lines straight from your phone — no editor required.</p>
+      </div>
+      <div class="svc-card rounded-sm p-6 fade fade-d2">
+        <div class="w-10 h-10 mb-5 opacity-70">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v3m0 0v3m0-3h3m-3 0H8"/></svg>
+        </div>
+        <h3 class="cond text-xl font-700 uppercase tracking-wide mb-2">Get Scouted by Coaches</h3>
+        <p class="text-white/40 text-sm font-300 leading-relaxed">Verified college coaches browse, follow, and message real prospects — that's you.</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-4 fade fade-d3">
+      <button onclick="openRoleModal()" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Create an Account</button>
+      <button onclick="openSignInModal()" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Sign In</button>
+      <span class="s-label">Start Today</span>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ CTA BANNER ═══ -->
 <section class="cta-banner py-28">
   <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-12 text-center">
     <div class="s-label mb-5 fade">Ready?</div>
     <h2 class="cond text-[clamp(48px,8vw,100px)] font-black uppercase tracking-[0.04em] leading-none mb-5 fade fade-d1">
-      Ready to Get Your<br><span class="g-text">Athlete Seen?</span>
+      Ready to Get<br><span class="g-text">Recruited?</span>
     </h2>
-    <p class="text-white/40 text-lg font-300 max-w-lg mx-auto mb-10 fade fade-d2">Book your session today. Fast turnaround. Real results. We respond within 24 hours.</p>
+    <p class="text-white/40 text-lg font-300 max-w-lg mx-auto mb-10 fade fade-d2">Create your profile and start posting today — coaches are already browsing.</p>
     <div class="flex flex-wrap justify-center gap-4 fade fade-d3">
-      <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-10 py-4 rounded-sm inline-block">Book Now</a>
-      <a href="https://instagram.com/eyescoutsports" aria-label="Eyescout Sports on Instagram" target="_blank" rel="noopener noreferrer" class="ghost ripple-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-10 py-4 rounded-sm inline-block">@eyescoutsports</a>
+      <button onclick="openRoleModal()" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-10 py-4 rounded-sm inline-block">Create an Account</button>
+      <a href="booking.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-10 py-4 rounded-sm inline-block">Book a Session</a>
     </div>
+    <p class="s-label mt-6 fade fade-d3">Takes Less Than 2 Minutes</p>
   </div>
 </section>
 
@@ -674,6 +718,8 @@
           <a href="gallery.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Gallery</a>
           <a href="services.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Services</a>
           <a href="booking.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Book a Session</a>
+          <a href="javascript:void(0)" onclick="openRoleModal()" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Create an Account</a>
+          <a href="javascript:void(0)" onclick="openSignInModal()" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Sign In</a>
         </div>
       </div>
       <!-- Social -->
@@ -702,6 +748,29 @@
 </footer>
 
 <script>
+  // ── SMOOTH PAGE TRANSITIONS ──
+  // Fades the page in on load, and fades it out before following an internal
+  // link — so navigating between pages feels like one continuous app instead
+  // of a hard page-to-page jump. External links, new-tab links, anchors, and
+  // non-navigating hrefs (mailto:, tel:, javascript:) are left untouched.
+  requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) document.body.classList.add('page-loaded'); // back/forward cache
+  });
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    const href = a.getAttribute('href');
+    if (!href || /^(#|mailto:|tel:|javascript:)/.test(href)) return;
+    let url;
+    try { url = new URL(href, location.href); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
+    e.preventDefault();
+    document.body.classList.remove('page-loaded');
+    setTimeout(() => { window.location.href = href; }, 200);
+  });
+
   // ── NAV SCROLL ──
   const nav = document.getElementById('main-nav');
   window.addEventListener('scroll', () => {
@@ -1114,8 +1183,11 @@
 <script>
   // Create Account / Sign In now go straight to the unified login page, which has
   // its own Player/Coach toggle — no role-picker popup needed.
-  function openRoleModal()   { window.location.href = 'social-app/login.html?tab=signup'; }
-  function openSignInModal() { window.location.href = 'social-app/login.html?tab=login'; }
+  // goTo() mirrors the <a>-click fade-out transition for these button-driven
+  // navigations, so Create Account / Sign In feel as smooth as a link click.
+  function goTo(href) { document.body.classList.remove('page-loaded'); setTimeout(() => { window.location.href = href; }, 200); }
+  function openRoleModal()   { goTo('social-app/login.html?tab=signup'); }
+  function openSignInModal() { goTo('social-app/login.html?tab=login'); }
   function closeRoleModal()   {}
   function closeSignInModal() {}
 </script>

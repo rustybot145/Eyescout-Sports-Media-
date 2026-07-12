@@ -130,6 +130,18 @@
     font-family: system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     display: flex;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  body.page-loaded { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* ── Sidebar (shared with feed) ── */
@@ -360,6 +372,25 @@
   }
   .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
 
+  /* ── Entrance reveal (page load) ── */
+  .profile-cover, .profile-avatar-wrap, .profile-header-row, .stats-row, .tab-bar {
+    animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .profile-avatar-wrap  { animation-delay: 0.05s; }
+  .profile-header-row   { animation-delay: 0.1s; }
+  .stats-row             { animation-delay: 0.15s; }
+  .tab-bar                { animation-delay: 0.2s; }
+
+  /* ── Ripple click feedback (primary buttons) ── */
+  .ripple-btn { position: relative; overflow: hidden; }
+  .ripple-wave {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.28);
+    transform: scale(0); animation: rippleOut 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes rippleOut { to { transform: scale(4); opacity: 0; } }
+
   /* ── Tabs ── */
   .tab-bar {
     display: flex;
@@ -384,7 +415,7 @@
   /* ── Tab Content ── */
   .tab-content { padding: 32px 40px; }
   .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
+  .tab-pane.active { display: block; animation: fadeUp 0.35s cubic-bezier(0.22,1,0.36,1) both; }
 
   /* Posted Photos tab */
   .posted-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
@@ -392,6 +423,7 @@
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
     border-radius: 14px; overflow: hidden; break-inside: avoid;
     transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
   }
   .posted-card:hover { transform: translateY(-2px); border-color: rgba(30,144,255,0.25); box-shadow: 0 10px 30px -12px rgba(30,144,255,0.25); }
   .posted-media { width: 100%; background: #111; line-height: 0; }
@@ -427,7 +459,7 @@
   .photo-grid { display: flex; flex-wrap: wrap; gap: 10px; }
   .photo-grid::after { content: ''; flex-grow: 99999; } /* keeps the last row from stretching */
   .photo-grid > * { flex: 1 1 auto; }
-  .photo-item { position: relative; border-radius: 10px; overflow: hidden; background: #111; }
+  .photo-item { position: relative; border-radius: 10px; overflow: hidden; background: #111; animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
   .photo-item img { width: 100%; height: auto; display: block; transition: transform 0.3s; cursor: zoom-in; }
   .photo-item:hover img { transform: scale(1.03); }
   /* Discourage saving/dragging other athletes' media */
@@ -526,10 +558,10 @@
     max-height: 90dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    transform: translateY(16px);
-    transition: transform 0.25s;
+    transform: translateY(16px) scale(0.98);
+    transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
   }
-  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
 
   .modal-title {
     font-family: Impact, 'Arial Narrow', Arial, sans-serif;
@@ -839,9 +871,9 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Post
         </button>
         <input type="file" id="own-photo-input-hdr" aria-label="Upload photo or video" accept="image/*,video/*" multiple style="display:none;" onchange="handleAddPost(event)">
-        <button class="btn-grad" id="btn-follow" style="display:none;" onclick="toggleFollow()">Follow</button>
+        <button class="btn-grad ripple-btn" id="btn-follow" style="display:none;" onclick="toggleFollow()">Follow</button>
         <button class="btn-outline" id="btn-coach-msg" style="display:none;" onclick="openCoachMsgModal()">Message</button>
-        <button class="btn-grad" id="btn-coach-follow" onclick="coachToggleFollow()"
+        <button class="btn-grad ripple-btn" id="btn-coach-follow" onclick="coachToggleFollow()"
           onmouseenter="coachFollowHover(true)" onmouseleave="coachFollowHover(false)"
           style="display:none;">Follow</button>
       </div>
@@ -967,12 +999,56 @@
 
     <div class="modal-footer">
       <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
-      <button class="modal-save" onclick="saveProfile()">Save Changes</button>
+      <button class="modal-save ripple-btn" onclick="saveProfile()">Save Changes</button>
     </div>
   </div>
 </div>
 
 <script>
+  // ── SMOOTH PAGE TRANSITIONS ── (fade in on load/bfcache-restore, fade out
+  // before following any internal link so static-HTML nav feels continuous)
+  requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) document.body.classList.add('page-loaded');
+  });
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    const href = a.getAttribute('href');
+    if (!href || /^(#|mailto:|tel:|javascript:)/.test(href)) return;
+    let url;
+    try { url = new URL(href, location.href); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
+    e.preventDefault();
+    document.body.classList.remove('page-loaded');
+    setTimeout(() => { window.location.href = href; }, 200);
+  });
+
+  // ── Ripple click feedback on primary buttons (.ripple-btn) ──
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ripple-btn');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.4;
+    const wave = document.createElement('span');
+    wave.className = 'ripple-wave';
+    wave.style.width = wave.style.height = size + 'px';
+    wave.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    wave.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(wave);
+    wave.addEventListener('animationend', () => wave.remove());
+  });
+
+  // Staggers the fadeUp entrance of freshly-rendered grid cards (.photo-item /
+  // .posted-card already animate via CSS; this just offsets each one slightly
+  // so a tab's content cascades in rather than popping in all at once).
+  function applyCardStagger() {
+    document.querySelectorAll('.photo-grid > *, .posted-grid > *').forEach((el, i) => {
+      el.style.animationDelay = Math.min(i * 30, 360) + 'ms';
+    });
+  }
+
   // ── Supabase auth guard ────────────────────────────────────────────────────
   // Reuse the single client created in sb-data.js. Creating a SECOND client here
   // spun up a second GoTrueClient sharing the same auth storage key; the two
@@ -1308,14 +1384,16 @@
 
     // Sidebar always shows logged-in player
     if (me) {
+      const meSports = (typeof getPlayerSports === 'function') ? getPlayerSports(me) : [me.sport];
       document.getElementById('sb-name').textContent = `${me.athleteFirst} ${me.athleteLast}`;
-      document.getElementById('sb-handle').textContent = `#${me.jersey} · ${me.sport || 'EyeScout'}`;
+      document.getElementById('sb-handle').textContent = `#${me.jersey} · ${meSports.join(' · ') || 'EyeScout'}`;
     }
 
-    // Avatar / name
+    // Avatar / name — show every sport the athlete plays
+    const pSports = (typeof getPlayerSports === 'function') ? getPlayerSports(p) : [p.sport];
     document.getElementById('profile-jersey').textContent = `#${escHtml(p.jersey)}`;
     document.getElementById('profile-name').textContent = name;
-    document.getElementById('profile-handle').textContent = `${p.sport}${p.position ? ' · ' + p.position : ''}`;
+    document.getElementById('profile-handle').textContent = `${pSports.join(' · ')}${p.position ? ' · ' + p.position : ''}`;
 
     // Total hype badge (sum of hype across all their posts)
     const totalHype = getTotalHype(p.id);
@@ -1419,6 +1497,9 @@
 
     // Size any photo/video tiles that are already cached
     if (typeof window.justifyGalleries === 'function') window.justifyGalleries();
+
+    // Stagger the entrance of freshly-rendered grid cards
+    applyCardStagger();
 
     // Autoplay muted videos in the visible tab
     initProfileVideoAutoplay();
@@ -1759,40 +1840,85 @@
 
   // ── Info Tab ────────────────────────────────────────────────────────────────
   // ── Custom Stats ─────────────────────────────────────────────────────────────
-  function statsTabHTML(p) {
-    const stats = Array.isArray(p.sportStats) ? p.sportStats : [];
-
-    const rows = stats.length
-      ? stats.map(s => `
+  // Renders one stats card per sport (sport = 'Sport' field on the row). Rows
+  // saved before multi-sport existed have no .sport, so they're treated as the
+  // primary sport's — nothing an athlete already entered disappears.
+  function statCardHTML(label, rows, editLabel) {
+    const rowsHTML = rows.length
+      ? rows.map(s => `
           <div class="info-row">
             <span class="info-key">${escHtml(s.label)}</span>
             <span class="info-val">${escHtml(s.value || '—')}</span>
           </div>`).join('')
-      : `<p style="font-size:13px;color:rgba(255,255,255,0.7);padding:8px 0;">No stats added yet. Hit Edit Profile to add your stats.</p>`;
-
+      : `<p style="font-size:13px;color:rgba(255,255,255,0.7);padding:8px 0;">${escHtml(editLabel.empty)}</p>`;
     return `
-      <div style="padding:8px 0 4px;">
+      <div style="padding:8px 0 4px;margin-bottom:18px;">
         <div style="display:flex;align-items:center;gap:10px;padding:0 0 16px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:4px;">
-          <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:16px;letter-spacing:0.08em;text-transform:uppercase;color:#fff;">${escHtml(p.sport)} Stats</p>
-          ${isOwnProfile ? `<button onclick="openEditModal()" style="margin-left:auto;font-size:11px;color:rgba(30,144,255,0.7);background:none;border:none;cursor:pointer;padding:0;">Edit Stats →</button>` : ''}
+          <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:16px;letter-spacing:0.08em;text-transform:uppercase;color:#fff;">${escHtml(label)}</p>
+          ${isOwnProfile ? `<button onclick="openEditModal()" style="margin-left:auto;font-size:11px;color:rgba(30,144,255,0.7);background:none;border:none;cursor:pointer;padding:0;">${escHtml(editLabel.button)} →</button>` : ''}
         </div>
-        ${rows}
+        ${rowsHTML}
       </div>`;
   }
 
-  function addStatRow(label = '', value = '') {
+  function statsTabHTML(p) {
+    const allStats = Array.isArray(p.sportStats) ? p.sportStats : [];
+    const mySports = (typeof getPlayerSports === 'function') ? getPlayerSports(p) : (p.sport ? [p.sport] : []);
+    const primary  = mySports[0] || p.sport || '';
+
+    if (mySports.length > 1) {
+      return mySports.map(sp => {
+        const rowsForSport = allStats.filter(s => (s.sport || primary) === sp);
+        return statCardHTML(`${sp} Stats`, rowsForSport, {
+          empty: `No ${sp} stats added yet.`,
+          button: rowsForSport.length ? 'Edit Stats' : `+ Add ${sp} Stats`,
+        });
+      }).join('');
+    }
+
+    // Single-sport — one card, same as before.
+    return statCardHTML(`${p.sport} Stats`, allStats, {
+      empty: 'No stats added yet. Hit Edit Profile to add your stats.',
+      button: 'Edit Stats',
+    });
+  }
+
+  // A stat row is { label, value, sport }. For multi-sport athletes a third
+  // field (Sport) lets each row be assigned to whichever sport it belongs to,
+  // so the profile can render separate stat cards per sport. Single-sport
+  // athletes never see the sport picker — nothing to choose.
+  function addStatRow(label = '', value = '', sport = '') {
     const container = document.getElementById('custom-stat-rows');
-    const idx = container.children.length;
+    const me = getLatestPlayer();
+    const mySports = (typeof getPlayerSports === 'function' && me) ? getPlayerSports(me) : (me?.sport ? [me.sport] : []);
+    const multiSport = mySports.length > 1;
+    const defaultSport = sport || mySports[0] || me?.sport || '';
+
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;';
-    row.innerHTML = `
-      <input placeholder="Stat name" aria-label="Stat name" value="${escAttr(label)}" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:system-ui,sans-serif;outline:none;min-width:0;"
-        onfocus="this.style.borderColor='rgba(30,144,255,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-      <input placeholder="Value" aria-label="Stat value" value="${escAttr(value)}" style="width:90px;flex-shrink:0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:system-ui,sans-serif;outline:none;"
-        onfocus="this.style.borderColor='rgba(30,144,255,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-      <button type="button" onclick="this.parentElement.remove()" aria-label="Remove stat" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;flex-shrink:0;padding:4px;transition:color 0.15s;" onmouseover="this.style.color='#ff4d6d'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>`;
+    row.className = 'stat-row';
+    row.style.cssText = multiSport
+      ? 'display:flex;flex-direction:column;gap:8px;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;'
+      : 'display:flex;align-items:center;gap:8px;';
+
+    const fieldStyle = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:system-ui,sans-serif;outline:none;';
+    const topRowHTML = `
+      <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <input placeholder="Stat name" aria-label="Stat name" value="${escAttr(label)}" class="stat-label-input" style="flex:1;${fieldStyle}min-width:0;"
+          onfocus="this.style.borderColor='rgba(30,144,255,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <input placeholder="Value" aria-label="Stat value" value="${escAttr(value)}" class="stat-value-input" style="width:90px;flex-shrink:0;${fieldStyle}"
+          onfocus="this.style.borderColor='rgba(30,144,255,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <button type="button" onclick="this.closest('.stat-row').remove()" aria-label="Remove stat" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;flex-shrink:0;padding:4px;transition:color 0.15s;" onmouseover="this.style.color='#ff4d6d'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+
+    const sportFieldHTML = multiSport
+      ? `<select class="stat-sport-select" aria-label="Which sport this stat is for" style="width:100%;${fieldStyle}appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;">
+          ${mySports.map(sp => `<option value="${escAttr(sp)}"${sp === defaultSport ? ' selected' : ''}>${escHtml(sp)}</option>`).join('')}
+        </select>`
+      : `<input type="hidden" class="stat-sport-select" value="${escAttr(defaultSport)}">`;
+
+    row.innerHTML = topRowHTML + sportFieldHTML;
     container.appendChild(row);
   }
 
@@ -1898,7 +2024,7 @@
     const container = document.getElementById('custom-stat-rows');
     container.innerHTML = '';
     const existing = Array.isArray(p.sportStats) ? p.sportStats : [];
-    existing.forEach(s => addStatRow(s.label, s.value));
+    existing.forEach(s => addStatRow(s.label, s.value, s.sport));
 
     // Reset stats section to collapsed + apply the Pro lock on the button
     document.getElementById('modal-stats-fields').style.display = 'none';
@@ -2006,15 +2132,16 @@
       if (removePhotoFlag) { delete all[idx].profilePhoto; removePhotoFlag = false; }
 
       // Save custom stat rows — Pro-only. (Also saves to sportStats, the field
-      // the profile actually reads, so Pro edits here now show up.)
+      // the profile actually reads, so Pro edits here now show up.) Each row
+      // carries a `sport` so multi-sport athletes get separate stat cards.
       if (isSubscribed()) {
-        const rows = document.querySelectorAll('#custom-stat-rows > div');
+        const rows = document.querySelectorAll('#custom-stat-rows > .stat-row');
         const sportStats = [];
         rows.forEach(row => {
-          const inputs = row.querySelectorAll('input');
-          const label = inputs[0]?.value.trim();
-          const value = inputs[1]?.value.trim();
-          if (label) sportStats.push({ label, value });
+          const label = row.querySelector('.stat-label-input')?.value.trim();
+          const value = row.querySelector('.stat-value-input')?.value.trim();
+          const sport = row.querySelector('.stat-sport-select')?.value || '';
+          if (label) sportStats.push({ label, value, sport });
         });
         all[idx].sportStats = sportStats;
       }

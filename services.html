@@ -12,7 +12,13 @@
     :root { --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
+    body { background: #111111; color: #fff; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; overflow-x: hidden; opacity: 0; transition: opacity 0.25s ease; }
+    body.page-loaded { opacity: 1; }
+    #scroll-bar { position: fixed; top: 0; left: 0; height: 2px; width: 0%; background: var(--grad); z-index: 200; transition: width 0.05s linear; }
+    .ripple-btn { position: relative; overflow: hidden; }
+    .ripple-wave { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.25); transform: scale(0); animation: rippleOut 0.6s ease-out forwards; pointer-events: none; }
+    @keyframes rippleOut { to { transform: scale(4); opacity: 0; } }
+    .mag-btn { display: inline-block; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
     h1,h2,h3,h4,h1.cond,h2.cond,h3.cond,h4.cond { font-family: Impact, 'Arial Narrow', Arial, sans-serif; } .cond { font-family: 'Arial Narrow', Arial, sans-serif; }
     .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .g-btn { background: var(--grad); transition: opacity 0.2s, transform 0.2s; }
@@ -70,6 +76,7 @@
   </style>
 </head>
 <body>
+<div id="scroll-bar" aria-hidden="true"></div>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <a id="skip-link" href="#main-content">Skip to main content</a>
@@ -81,7 +88,8 @@
   <a href="index.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Home</a>
   <a href="gallery.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Gallery</a>
   <a href="services.html" class="cond text-3xl font-bold tracking-widest uppercase text-white hover:text-[#00C9A7] transition-colors">Services</a>
-  <a href="booking.html" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Book Now</a>
+  <a href="social-app/login.html?tab=login" class="ghost cond text-xl font-bold tracking-widest uppercase text-white/70 px-10 py-4 rounded-sm" style="border:1px solid rgba(255,255,255,0.2);background:transparent;">Sign In</a>
+  <a href="social-app/login.html?tab=signup" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Create an Account</a>
 </div>
 
 <nav id="main-nav" class="px-6 md:px-12 py-5 scrolled">
@@ -97,7 +105,8 @@
       <a href="index.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Home</a>
       <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Gallery</a>
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white hover:text-white transition-colors">Services</a>
-      <a href="booking.html" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Book Now</a>
+      <a href="social-app/login.html?tab=login" class="ghost ripple-btn mag-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white/70 hover:text-white px-5 py-2.5 rounded-sm" style="border:1px solid rgba(255,255,255,0.15);background:transparent;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">Sign In</a>
+      <a href="social-app/login.html?tab=signup" class="g-btn ripple-btn mag-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Create an Account</a>
     </div>
     <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -264,7 +273,10 @@
     <div class="s-label mb-5 fade">No Pricing Sticker Shock</div>
     <h2 class="cond text-5xl md:text-7xl font-black uppercase tracking-[0.04em] mb-4 fade">Let's Talk</h2>
     <p class="text-white/40 text-base font-300 max-w-lg mx-auto mb-10 fade">Every session is different. Reach out through the booking form and we'll be in touch within 24 hours with exactly what you need.</p>
-    <a href="booking.html" class="g-btn cond text-base font-700 tracking-[0.15em] uppercase text-white px-12 py-4 rounded-sm inline-block fade">Book a Session</a>
+    <div class="flex flex-wrap justify-center gap-4 fade">
+      <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.15em] uppercase text-white px-12 py-4 rounded-sm inline-block">Book a Session</a>
+      <a href="social-app/login.html?tab=signup" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.15em] uppercase text-white/70 hover:text-white px-12 py-4 rounded-sm inline-block">Create an Account</a>
+    </div>
   </div>
 </section>
 
@@ -287,6 +299,52 @@
 </footer>
 
 <script>
+  // ── SMOOTH PAGE TRANSITIONS ── (see index.html for the full explanation)
+  requestAnimationFrame(() => document.body.classList.add('page-loaded'));
+  window.addEventListener('pageshow', (e) => { if (e.persisted) document.body.classList.add('page-loaded'); });
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    const href = a.getAttribute('href');
+    if (!href || /^(#|mailto:|tel:|javascript:)/.test(href)) return;
+    let url;
+    try { url = new URL(href, location.href); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
+    e.preventDefault();
+    document.body.classList.remove('page-loaded');
+    setTimeout(() => { window.location.href = href; }, 200);
+  });
+
+  // ── SCROLL PROGRESS BAR ──
+  const scrollBar = document.getElementById('scroll-bar');
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    scrollBar.style.width = pct + '%';
+  }, { passive: true });
+
+  // ── BUTTON RIPPLE + MAGNETIC HOVER ──
+  document.querySelectorAll('.ripple-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const r = document.createElement('span');
+      r.classList.add('ripple-wave');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+      this.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    });
+  });
+  document.querySelectorAll('.mag-btn').forEach(btn => {
+    btn.addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width  / 2) * 0.25;
+      const y = (e.clientY - rect.top  - rect.height / 2) * 0.25;
+      this.style.transform = `translate(${x}px, ${y}px) translateY(-2px)`;
+    });
+    btn.addEventListener('mouseleave', function() { this.style.transform = ''; });
+  });
+
   const nav = document.getElementById('main-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
 
