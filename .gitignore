@@ -7,4 +7,6 @@ hero-photo.jpg
 # Local-only dev test tooling — seeds a fake Pro session + registers a
 # Supabase-blocking service worker. Never ship to production.
 social-app/dev-player.html
+social-app/dev-emptyhype.html
+social-app/dev-searchtest.html
 social-app/dev-sw.js

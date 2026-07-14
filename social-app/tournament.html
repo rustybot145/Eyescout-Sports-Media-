@@ -86,6 +86,7 @@
     .post-grid { gap: 2px !important; }
   }
 </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -230,6 +231,18 @@
 
   const allTournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
   const tourn = allTournaments.find(t => t.name === tournName) || {};
+
+  // A player only ever sees tournaments in their own sport(s). Every link that
+  // reaches this page is already sport-filtered, so the only way to land on an
+  // off-sport tournament is a hand-typed/pasted URL — send those back to search
+  // rather than show it. (Coaches are unaffected.)
+  if (session && !isCoach && tourn.sport) {
+    const mySports = (typeof getPlayerSports === 'function') ? getPlayerSports(session) : (session.sport ? [session.sport] : []);
+    const lc = mySports.map(s => s.toLowerCase());
+    if (lc.length && !lc.includes((tourn.sport || '').toLowerCase())) {
+      window.location.replace('explore.html');
+    }
+  }
 
   document.getElementById('tournament-hashtag').textContent = '#' + tournName.replace(/\s+/g, '');
   document.getElementById('tournament-title').textContent   = tournName || 'Tournament';

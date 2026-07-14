@@ -206,6 +206,7 @@
     .main { margin-left: 0 !important; padding-left: 12px !important; padding-right: 12px !important; padding-top: 68px !important; padding-bottom: 72px !important; }
   }
 </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -473,7 +474,12 @@
   let selectedTournament = null;
 
   function renderTournamentPicker() {
-    const tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
+    // Only tournaments in the athlete's own sport(s) — a basketball player never
+    // sees (or can tag a post with) a baseball tournament, and a two-sport
+    // athlete sees only their two sports.
+    const _mySportsLC = _mySports.map(s => (s || '').toLowerCase());
+    const tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]')
+      .filter(t => !_mySportsLC.length || _mySportsLC.includes((t.sport || '').toLowerCase()));
     const list = document.getElementById('tournament-list');
     const empty = document.getElementById('no-tournaments');
 

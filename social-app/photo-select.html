@@ -147,6 +147,7 @@
     border-bottom: 1px solid rgba(255,255,255,0.06);
   }
 </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -334,10 +335,13 @@
   // ── Tournament grid ───────────────────────────────────────────────────────
   function renderTournaments() {
     let tournaments = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
-    // Only show tournaments for the player's sport.
-    const mySport = getLatestPlayer()?.sport || null;
-    if (mySport) {
-      tournaments = tournaments.filter(t => (t.sport || '').toLowerCase() === mySport.toLowerCase());
+    // Only show tournaments for the player's sport(s) — multi-sport athletes see
+    // events from every sport they play, single-sport athletes just their one.
+    const p = getLatestPlayer();
+    const mySports = (typeof getPlayerSports === 'function' && p) ? getPlayerSports(p) : (p?.sport ? [p.sport] : []);
+    if (mySports.length) {
+      const lc = mySports.map(s => s.toLowerCase());
+      tournaments = tournaments.filter(t => lc.includes((t.sport || '').toLowerCase()));
     }
     const grid = document.getElementById('tournament-grid');
     if (!tournaments.length) {

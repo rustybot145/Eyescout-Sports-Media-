@@ -153,19 +153,6 @@
   .t-date { font-size: 12px; color: rgba(255,255,255,0.7); }
   .t-posts { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-top: 14px; }
 
-  /* ── Sport cards ── */
-  .sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .sport-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    padding: 24px 20px; cursor: pointer; text-decoration: none; display: flex;
-    flex-direction: column; align-items: center; text-align: center; gap: 12px;
-    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-  }
-  .sport-card:hover { border-color: rgba(0,201,167,0.35); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
-  .sport-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-  .sport-name { font-family: Impact,'Arial Narrow',Arial,sans-serif; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
-  .sport-count { font-size: 11px; color: rgba(255,255,255,0.7); }
-
   /* ── Empty / no results ── */
   .no-results { text-align: center; padding: 60px 20px; }
   .no-results-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
@@ -244,6 +231,7 @@
     .main { margin-left: 0 !important; padding-left: 12px !important; padding-right: 12px !important; padding-top: 68px !important; padding-bottom: 72px !important; }
   }
 </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -333,7 +321,6 @@
     <button class="filter-tab" onclick="setTab('players')">Players</button>
     <button class="filter-tab" onclick="setTab('coaches')">Coaches</button>
     <button class="filter-tab" onclick="setTab('tournaments')">Tournaments</button>
-    <button class="filter-tab" onclick="setTab('sports')">Sports</button>
   </div>
 
   <div class="results-area" id="results-area"></div>
@@ -394,21 +381,6 @@
 
   // Real tournaments created in the admin panel (synced from Supabase).
   function getTournaments() { return JSON.parse(localStorage.getItem('es_tournaments') || '[]'); }
-
-  // Custom icon() helper so every sport with a matching PNG in icons/ renders
-  // it the same way basketball already did (grayscale-to-white via the CSS filter).
-  const _sportIconImg = file => `<img alt="" src="icons/${file}" width="24" height="24" style="object-fit:contain;filter:brightness(0) invert(1);">`;
-  const ALL_SPORTS = [
-    { name: 'Football',      icon: _sportIconImg('icon-football.png'), bg: 'rgba(30,144,255,0.12)',  border: 'rgba(30,144,255,0.25)' },
-    { name: 'Basketball',    icon: _sportIconImg('icons8-basketball-50.png'), bg: 'rgba(255,107,0,0.12)',   border: 'rgba(255,107,0,0.25)' },
-    { name: 'Baseball',      icon: _sportIconImg('icons8-baseball-50.png'), bg: 'rgba(57,211,83,0.1)',    border: 'rgba(57,211,83,0.22)' },
-    { name: 'Softball',      icon: _sportIconImg('icon-softball.png'), bg: 'rgba(255,77,109,0.1)',   border: 'rgba(255,77,109,0.22)' },
-    { name: 'Soccer',        icon: _sportIconImg('icons8-soccer-ball-50.png'), bg: 'rgba(0,201,167,0.1)',    border: 'rgba(0,201,167,0.25)' },
-    { name: 'Track & Field', icon: _sportIconImg('icons8-track-and-field-50.png'), bg: 'rgba(255,213,0,0.1)',    border: 'rgba(255,213,0,0.2)' },
-    { name: 'Volleyball',    icon: _sportIconImg('icons8-volleyball-50.png'), bg: 'rgba(123,47,190,0.12)',  border: 'rgba(123,47,190,0.28)' },
-    { name: 'Wrestling',     icon: _sportIconImg('icons8-wrestling-50.png'), bg: 'rgba(255,107,0,0.1)',    border: 'rgba(255,107,0,0.2)' },
-    { name: 'Lacrosse',      icon: _sportIconImg('icons8-lacrosse-stick-50.png'), bg: 'rgba(30,144,255,0.1)',   border: 'rgba(30,144,255,0.2)' },
-  ];
 
   let activeTab = 'all';
   let searchQuery = '';
@@ -482,7 +454,7 @@
   function setTab(tab) {
     activeTab = tab;
     document.querySelectorAll('.filter-tab').forEach((b, i) => {
-      b.classList.toggle('active', ['all','players','coaches','tournaments','sports'][i] === tab);
+      b.classList.toggle('active', ['all','players','coaches','tournaments'][i] === tab);
     });
     render();
   }
@@ -537,20 +509,17 @@
       </a>`;
   }
 
-  function renderSportCard(s) {
-    const players = getPlayers().filter(p => p.sport === s.name);
-    return `
-      <a class="sport-card fade-in" href="explore.html?sport=${encodeURIComponent(s.name)}" style="text-decoration:none;" onclick="filterBySport('${s.name}');return false;">
-        <div class="sport-icon" style="background:${s.bg};border:1px solid ${s.border};">${s.icon}</div>
-        <p class="sport-name">${s.name}</p>
-        <p class="sport-count">${players.length} player${players.length !== 1 ? 's' : ''}</p>
-      </a>`;
+  // The viewer's own sport(s) — search/browse only ever surfaces players,
+  // coaches, and tournaments within these. A single-sport athlete gets one
+  // sport; a multi-sport athlete gets all of theirs (never someone else's
+  // sport, never mixed in from outside what they actually play).
+  function mySports() {
+    const list = (typeof getPlayerSports === 'function') ? getPlayerSports(session) : (session?.sport ? [session.sport] : []);
+    return list.map(s => s.toLowerCase());
   }
-
-  function filterBySport(sport) {
-    document.getElementById('search-input').value = sport;
-    onSearch(sport);
-    setTab('players');
+  function inMySport(sport) {
+    const my = mySports();
+    return !my.length || my.includes((sport || '').toLowerCase());
   }
 
   function highlight(text, q) {
@@ -575,33 +544,30 @@
 
     const filteredPlayers = players.filter(p => {
       if (p.prefs && p.prefs['priv-public'] === false) return false; // opted out of discovery
+      if (!inMySport(p.sport)) return false; // only your own sport(s)
       if (!q) return true;
       return `${p.athleteFirst} ${p.athleteLast} ${p.sport} ${p.school || ''} ${p.gradYear}`.toLowerCase().includes(q);
     });
 
     const filteredCoaches = coaches.filter(c => {
+      if (!inMySport(c.sport)) return false; // only coaches of your own sport(s)
       if (!q) return true;
       return `${c.firstName || ''} ${c.lastName || ''} ${c.sport || ''} ${c.university || c.school || ''} ${c.title || ''}`.toLowerCase().includes(q);
     });
 
     const filteredTournaments = getTournaments().filter(t => {
+      if (!inMySport(t.sport)) return false; // only tournaments in your own sport(s)
       if (!q) return true;
       return `${t.name || ''} ${t.sport || ''} ${t.date || ''} ${t.location || ''}`.toLowerCase().includes(q);
-    });
-
-    const filteredSports = ALL_SPORTS.filter(s => {
-      if (!q) return true;
-      return s.name.toLowerCase().includes(q);
     });
 
     const showPlayers     = activeTab === 'all' || activeTab === 'players';
     const showCoaches     = activeTab === 'all' || activeTab === 'coaches';
     const showTournaments = activeTab === 'all' || activeTab === 'tournaments';
-    const showSports      = activeTab === 'all' || activeTab === 'sports';
 
-    // Coaches tab with no query — show all coaches
+    // Coaches tab with no query — show all coaches within the viewer's sport(s)
     if (!q && activeTab === 'coaches') {
-      if (!coaches.length) {
+      if (!filteredCoaches.length) {
         if (!_exploreSynced) {
           area.innerHTML = `<div class="browse-section">
             <div class="section-head"><span class="section-label">Coaches</span></div>
@@ -609,18 +575,19 @@
           </div>`;
           return;
         }
+        const msg = coaches.length ? 'No coaches for your sport yet' : 'No coaches have joined yet';
         area.innerHTML = `
           <div class="no-results" style="padding-top:80px;">
             <div class="no-results-icon" style="width:72px;height:72px;margin-bottom:20px;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </div>
-            <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.8;">No coaches have joined yet</p>
+            <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.8;">${escHtml(msg)}</p>
           </div>`;
         return;
       }
       area.innerHTML = `<div class="browse-section">
-        <div class="section-head"><span class="section-label">Coaches</span><span class="section-count">${coaches.length}</span></div>
-        <div class="player-grid">${coaches.map(renderCoachCard).join('')}</div>
+        <div class="section-head"><span class="section-label">Coaches</span><span class="section-count">${filteredCoaches.length}</span></div>
+        <div class="player-grid">${filteredCoaches.map(renderCoachCard).join('')}</div>
       </div>`;
       return;
     }
@@ -638,7 +605,7 @@
     }
 
     // Has query — show filtered results
-    const total = (showPlayers ? filteredPlayers.length : 0) + (showCoaches ? filteredCoaches.length : 0) + (showTournaments ? filteredTournaments.length : 0) + (showSports ? filteredSports.length : 0);
+    const total = (showPlayers ? filteredPlayers.length : 0) + (showCoaches ? filteredCoaches.length : 0) + (showTournaments ? filteredTournaments.length : 0);
 
     if (!total) {
       area.innerHTML = `
@@ -666,12 +633,6 @@
       html += `<div class="browse-section">
         <div class="section-head"><span class="section-label">Tournaments</span><span class="section-count">${filteredTournaments.length} result${filteredTournaments.length !== 1 ? 's' : ''}</span></div>
         <div class="tournament-grid">${filteredTournaments.map(renderTournamentCard).join('')}</div>
-      </div>`;
-    }
-    if (showSports && filteredSports.length) {
-      html += `<div class="browse-section">
-        <div class="section-head"><span class="section-label">Sports</span><span class="section-count">${filteredSports.length} result${filteredSports.length !== 1 ? 's' : ''}</span></div>
-        <div class="sport-grid">${filteredSports.map(renderSportCard).join('')}</div>
       </div>`;
     }
     area.innerHTML = html;
