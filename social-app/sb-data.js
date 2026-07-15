@@ -50,6 +50,7 @@ function _rowToPlayer(r) {
     athleteFirst: r.athlete_first || '',
     athleteLast:  r.athlete_last  || '',
     sport:        r.sport         || '',
+    sports:       Array.isArray(r.sports) && r.sports.length ? r.sports : (r.sport ? [r.sport] : []),
     jersey:       r.jersey        || '',
     school:       r.school        || '',
     gradYear:     r.grad_year     || '',
@@ -94,6 +95,11 @@ function _playerToRow(p) {
     athlete_first: p.athleteFirst  || null,
     athlete_last:  p.athleteLast   || null,
     sport:         p.sport         || null,
+    // Never write an empty array over a real one — fall back through the same
+    // localStorage-override → p.sports → p.sport chain getPlayerSports() uses,
+    // so an unrelated settings save (e.g. editing bio) can't blank this out.
+    sports:        (Array.isArray(p.sports) && p.sports.length) ? p.sports
+                     : (typeof getPlayerSports === 'function' ? getPlayerSports(p) : (p.sport ? [p.sport] : [])),
     jersey:        p.jersey        || null,
     school:        p.school        || null,
     grad_year:     p.gradYear      || null,
@@ -295,7 +301,7 @@ function _sbPaginate(query, opt, key) {
 // can't be bulk-harvested; the CURRENT user's own contact is re-attached after a
 // sync via the my_contact() RPC, and another player's (only if they opted in) is
 // fetched on demand via _sbPlayerContact(). Keep these lists free of those 7 cols.
-const _SEL_PLAYER = 'id, athlete_first, athlete_last, sport, jersey, school, grad_year, purchased, selection_submitted, selected_photos, photos_ready, delivered_photos, photo_package_size, total_photo_count, watermarked_dropbox_url, selection_dropbox_url, dropbox_url, profile_photo, bio, position, club_team, height, weight, achievements, stats, own_photos, own_clips, prefs, submitted_at, created_at, role';
+const _SEL_PLAYER = 'id, athlete_first, athlete_last, sport, sports, jersey, school, grad_year, purchased, selection_submitted, selected_photos, photos_ready, delivered_photos, photo_package_size, total_photo_count, watermarked_dropbox_url, selection_dropbox_url, dropbox_url, profile_photo, bio, position, club_team, height, weight, achievements, stats, own_photos, own_clips, prefs, submitted_at, created_at, role';
 const _SEL_COACH  = 'id, athlete_first, athlete_last, title, sport, school, division, years, link, bio, profile_photo, banner_photo, verified, created_at';
 const _SEL_POST   = 'id, author_id, author_name, author_jersey, sport, media_type, media_data, caption, tournament, likes_data, created_at';
 const _SEL_TOURNEY = 'id, name, date, location, sport, status, dropbox_url, photos, created_at';
