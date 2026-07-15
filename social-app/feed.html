@@ -738,7 +738,7 @@
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <p style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:24px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:10px;">Pending Verification</p>
-    <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:28px;">Your coach account is awaiting admin approval. You'll have full access once verified.</p>
+    <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:28px;">Your coach account is awaiting approval. You'll have full access once verified.</p>
     <button onclick="(()=>{localStorage.removeItem('es_coach_session');window.location.href='coach-login.html';})()" style="padding:12px 28px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.1em;text-transform:uppercase;">Sign Out</button>
   </div>
 </div>
@@ -1165,6 +1165,11 @@
       // Mark hyped state
       if (hyped.includes(postId)) btn.classList.add('hyped');
 
+      // Only bind the click once — this runs after every batch render, so
+      // re-binding an already-wired button would double-count each hype.
+      if (btn.dataset.hypeWired) return;
+      btn.dataset.hypeWired = '1';
+
       btn.addEventListener('click', () => {
         const latestHypes = getHypes();
         const latestHyped = getPlayerHyped();
@@ -1234,7 +1239,19 @@
     });
   }
 
+  // ── Windowed feed rendering ───────────────────────────────────────────────
+  // The For You feed can grow large, and each post can carry heavy media, so we
+  // never put the whole thing in the DOM at once. Posts render in small batches;
+  // for subscribers an IntersectionObserver sentinel at the bottom pulls in the
+  // next batch as you approach it. Scrolling back up shows the earlier posts
+  // exactly as before — they stay mounted, so nothing re-flows or changes.
+  const FEED_BATCH_SIZE = 5;
+  let _feedQueue = [];               // posts computed but not yet rendered
+  let _feedSentinelObserver = null;
+  let _feedVideoObserver = null;
+
   function renderLivePlayerPosts() {
+    resetFeedWindow();
     const posts   = JSON.parse(localStorage.getItem('es_posts') || '[]');
     const players = JSON.parse(localStorage.getItem('es_players') || '[]');
     if (!posts.length) { initHypeButtons(); hideOffSportPosts(); return; }
@@ -1255,9 +1272,15 @@
     const followSet = new Set(getFollows().filter(f => f.followerId === me).map(f => f.followeeId));
     const now = Date.now();
     const sportOf = (p) => (p.sport || (players.find(pl => pl.id === p.authorId)?.sport) || '');
+    const activeLC = activeSportFilter ? activeSportFilter.toLowerCase() : null;
 
     const sorted = posts.slice()
-      .filter(p => !mySports.length || mySports.includes(sportOf(p).toLowerCase()))  // any of your sports
+      .filter(p => {                                   // any of your sports, narrowed to the active tab
+        const sp = sportOf(p).toLowerCase();
+        if (mySports.length && !mySports.includes(sp)) return false;
+        if (activeLC && sp !== activeLC) return false;
+        return true;
+      })
       .map(p => {
         const hype = hypes[p.id] || p.hypes || 0;
         const ageH = Math.max(0, (now - new Date(p.createdAt).getTime()) / 3600000);
@@ -1285,9 +1308,13 @@
       sessionStorage.removeItem('es_just_posted');
     }
 
-    const feed = document.getElementById('post-feed');
+    _feedQueue = sorted;
+    renderNextFeedBatch();
+  }
 
-    const liveHTML = sorted.map(post => {
+  // Builds one live post's <article> markup from its data. Pulled out of the
+  // old single-pass render loop so batches can build posts one at a time.
+  function buildLivePostHTML(post, players, hypes, hyped) {
       const author  = players.find(pl => pl.id === post.authorId) || {};
       const rawName = post.authorName || [author.athleteFirst, author.athleteLast].filter(Boolean).join(' ') || 'Player';
       const name    = escHtml(rawName);
@@ -1365,12 +1392,88 @@
         ${caption ? `<div class="post-caption">${caption}</div>` : ''}
         <p class="post-time">${t}</p>
       </article>`;
-    }).join('');
+  }
 
-    // Prepend live posts before demo posts
-    feed.insertAdjacentHTML('afterbegin', liveHTML);
+  // Render the next batch from the queue, wire up just the new posts, then
+  // reposition the load-more sentinel. Called once for the first batch and
+  // again by the sentinel observer as you scroll toward the bottom.
+  function renderNextFeedBatch() {
+    const feed = document.getElementById('post-feed');
+    if (!feed) return;
+    if (!_feedQueue.length) { ensureFeedSentinel(); return; }
+    const players = JSON.parse(localStorage.getItem('es_players') || '[]');
+    const hypes = getHypes();
+    const hyped = getPlayerHyped();
+    const batch = _feedQueue.splice(0, FEED_BATCH_SIZE);
+    const html  = batch.map(post => buildLivePostHTML(post, players, hypes, hyped)).join('');
+
+    const sentinel = document.getElementById('feed-sentinel');
+    if (sentinel) sentinel.insertAdjacentHTML('beforebegin', html);
+    else feed.insertAdjacentHTML('beforeend', html);
+
     initHypeButtons();
+    initFeedVideoAutoplay();
     hideOffSportPosts();
+    ensureFeedSentinel();
+  }
+
+  // Keep exactly one sentinel at the end of the feed and observe it — but only
+  // for subscribers (non-subscribers get a fixed 2-post preview + lock, so
+  // there's nothing more to lazy-load). When the queue empties the sentinel is
+  // removed and the empty-state check runs.
+  function ensureFeedSentinel() {
+    const feed = document.getElementById('post-feed');
+    if (!feed) return;
+    let sentinel = document.getElementById('feed-sentinel');
+
+    const stop = !_feedQueue.length || (typeof isSubscribed === 'function' && !isSubscribed());
+    if (stop) {
+      if (sentinel) { if (_feedSentinelObserver) _feedSentinelObserver.unobserve(sentinel); sentinel.remove(); }
+      updateFeedEmptyState();
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {   // no observer support → just render the rest
+      const players = JSON.parse(localStorage.getItem('es_players') || '[]');
+      while (_feedQueue.length) {
+        const batch = _feedQueue.splice(0, FEED_BATCH_SIZE);
+        feed.insertAdjacentHTML('beforeend', batch.map(p => buildLivePostHTML(p, players, getHypes(), getPlayerHyped())).join(''));
+      }
+      initHypeButtons(); initFeedVideoAutoplay(); hideOffSportPosts(); updateFeedEmptyState();
+      return;
+    }
+
+    if (!sentinel) {
+      sentinel = document.createElement('div');
+      sentinel.id = 'feed-sentinel';
+      sentinel.setAttribute('aria-hidden', 'true');
+      sentinel.style.cssText = 'height:1px;';
+    }
+    feed.appendChild(sentinel);   // always keep it the last child
+
+    if (!_feedSentinelObserver) {
+      _feedSentinelObserver = new IntersectionObserver((entries) => {
+        if (entries.some(e => e.isIntersecting)) renderNextFeedBatch();
+      }, { rootMargin: '600px 0px' });
+    }
+    // Re-observe so the observer re-evaluates the (possibly still-visible)
+    // sentinel and keeps loading until it's pushed off-screen or the queue ends.
+    _feedSentinelObserver.unobserve(sentinel);
+    _feedSentinelObserver.observe(sentinel);
+  }
+
+  // Tear down the current window before a (re)render so nothing duplicates:
+  // remove rendered live posts, the sentinel, and any empty-state placeholder.
+  function resetFeedWindow() {
+    _feedQueue = [];
+    const feed = document.getElementById('post-feed');
+    if (!feed) return;
+    const sentinel = document.getElementById('feed-sentinel');
+    if (sentinel && _feedSentinelObserver) _feedSentinelObserver.unobserve(sentinel);
+    if (sentinel) sentinel.remove();
+    feed.querySelectorAll('article.post[data-live="true"]').forEach(el => el.remove());
+    const empty = document.getElementById('feed-empty');
+    if (empty) empty.remove();
   }
 
   // The athlete's sports, lowercased (multi-sport aware). Empty = no filtering.
@@ -1462,7 +1565,6 @@
     updateMuteIcon(video);
   }
 
-  let _feedVideoObserver = null;
   function initFeedVideoAutoplay() {
     if (!('IntersectionObserver' in window)) return;
     if (!_feedVideoObserver) {
@@ -1634,8 +1736,8 @@
     renderSportStories();
     renderFeedSportTabs();
     syncFeedPill();
-    hideOffSportPosts();   // shows ONLY the active sport's posts — never mixed
-    lockFeedPreview();     // re-apply the non-subscriber 2-post lock
+    renderLivePlayerPosts(); // rebuild the window for the newly-selected sport
+    lockFeedPreview();       // re-apply the non-subscriber 2-post lock
   }
 
   // Sport switcher for multi-sport athletes: one tab per sport, always exactly

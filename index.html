@@ -682,11 +682,11 @@
         </span>
 
         <div class="pro-tabs" role="tablist" aria-label="Preview switch">
-          <button type="button" class="pro-tab active" data-pro-tab="feed" role="tab" aria-selected="true" onclick="setProMockTab('feed')">Feed</button>
-          <button type="button" class="pro-tab" data-pro-tab="profile" role="tab" aria-selected="false" onclick="setProMockTab('profile')">Profile</button>
+          <button type="button" class="pro-tab active" data-pro-tab="profile" role="tab" aria-selected="true" onclick="setProMockTab('profile')">Profile</button>
+          <button type="button" class="pro-tab" data-pro-tab="feed" role="tab" aria-selected="false" onclick="setProMockTab('feed')">Feed</button>
         </div>
 
-        <div id="pro-view-feed" class="pro-view">
+        <div id="pro-view-feed" class="pro-view" style="display:none;">
           <div class="pro-ring-row">
             <div class="pro-ring">
               <div class="pro-ring-circle" style="background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc);">
@@ -732,7 +732,7 @@
           </div>
         </div>
 
-        <div id="pro-view-profile" class="pro-view" style="display:none;">
+        <div id="pro-view-profile" class="pro-view">
           <div class="pro-post">
             <div class="pro-profile-cover"></div>
             <div class="pro-profile-avatar">
