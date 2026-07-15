@@ -307,9 +307,10 @@
             </button>
           </div>
         </div>
-        <div class="flex justify-end mb-8">
+        <div class="flex justify-end mb-2">
           <a href="#" onclick="forgotPassword();return false;" class="text-xs text-white/70 hover:text-white/70 transition-colors underline underline-offset-2">Forgot password?</a>
         </div>
+        <p class="text-xs text-right mb-6" id="forgot-status" style="display:none;color:#39D353;"></p>
         <p class="err-msg mb-4" id="login-error">Incorrect email or password.</p>
 
         <button type="submit" class="g-btn w-full py-4 rounded-lg cond text-base font-black tracking-[0.15em] uppercase text-white">
@@ -436,9 +437,10 @@
             </button>
           </div>
         </div>
-        <div class="flex justify-end mb-8">
+        <div class="flex justify-end mb-2">
           <a href="#" onclick="forgotPasswordCoach();return false;" class="text-xs text-white/70 hover:text-white/70 transition-colors underline underline-offset-2">Forgot password?</a>
         </div>
+        <p class="text-xs text-right mb-6" id="forgot-status-coach" style="display:none;color:#39D353;"></p>
         <p class="err-msg mb-4" id="coach-login-error">Incorrect email or password.</p>
 
         <button type="submit" class="g-btn w-full py-4 rounded-lg cond text-base font-black tracking-[0.15em] uppercase text-white">Log In</button>
@@ -865,18 +867,32 @@
   }
 
   // ── Forgot password ────────────────────────────────────────────────────────
+  // Deliberately generic wording regardless of whether the email is actually
+  // registered — resetPasswordForEmail always "succeeds" API-side for this
+  // reason, so confirming an account exists here would defeat that and let
+  // anyone enumerate registered emails.
   async function forgotPassword() {
     const emailEl = document.querySelector('#form-player-login [name=login_email]');
     if (!emailEl.value.trim()) { emailEl.focus(); return; }
-    await sb.auth.resetPasswordForEmail(emailEl.value.trim());
-    alert('Password reset email sent — check your inbox.');
+    const statusEl = document.getElementById('forgot-status');
+    statusEl.textContent = 'Sending…';
+    statusEl.style.display = 'block';
+    await sb.auth.resetPasswordForEmail(emailEl.value.trim(), {
+      redirectTo: location.origin + '/social-app/reset-password.html'
+    });
+    statusEl.textContent = 'If an account exists for that email, a reset link is on its way.';
   }
 
   async function forgotPasswordCoach() {
     const emailEl = document.querySelector('#form-coach-login [name=email]');
     if (!emailEl.value.trim()) { emailEl.focus(); return; }
-    await sb.auth.resetPasswordForEmail(emailEl.value.trim());
-    alert('Password reset email sent — check your inbox.');
+    const statusEl = document.getElementById('forgot-status-coach');
+    statusEl.textContent = 'Sending…';
+    statusEl.style.display = 'block';
+    await sb.auth.resetPasswordForEmail(emailEl.value.trim(), {
+      redirectTo: location.origin + '/social-app/reset-password.html'
+    });
+    statusEl.textContent = 'If an account exists for that email, a reset link is on its way.';
   }
 
 </script>
