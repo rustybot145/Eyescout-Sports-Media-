@@ -346,6 +346,76 @@
       padding: 7px 14px; border-radius: 100px;
       box-shadow: 0 8px 20px -6px rgba(123,47,190,0.55);
     }
+    .pro-tabs {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 100px; padding: 4px; margin-bottom: 18px;
+    }
+    .pro-tab {
+      flex: 1; text-align: center; background: none; border: none; cursor: pointer;
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      padding: 9px 0; border-radius: 100px;
+      transition: color 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pro-tab:hover { color: rgba(255,255,255,0.8); }
+    .pro-tab:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(30,144,255,0.8); }
+    .pro-tab.active { background: var(--grad); color: #fff; box-shadow: 0 4px 14px -4px rgba(123,47,190,0.55); }
+    .pro-view-in { animation: proViewIn 0.32s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes proViewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Profile-tab wireframe (mirrors the real player profile page — no photos) */
+    .pro-profile-cover {
+      position: relative; height: 64px; overflow: hidden;
+      background: linear-gradient(135deg, #0d0b14 0%, #0e1520 50%, #0a0d10 100%);
+    }
+    .pro-profile-cover::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--grad); }
+    .pro-profile-cover::after {
+      content: ''; position: absolute; width: 150px; height: 150px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(123,47,190,0.16) 0%, transparent 70%);
+      top: -65px; right: -25px;
+    }
+    .pro-profile-avatar {
+      width: 54px; height: 54px; border-radius: 50%; padding: 2.5px;
+      background: var(--grad); margin: -27px 0 0 16px; position: relative;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+    .pro-profile-avatar-inner {
+      width: 100%; height: 100%; border-radius: 50%; background: #1a1a1a;
+      border: 2px solid #1c1c1c; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .pro-profile-avatar-inner img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; display: block; }
+    .pro-hype-total { display: inline-flex; align-items: center; gap: 5px; }
+    .pro-hype-total-icon {
+      width: 15px; height: 15px; flex-shrink: 0; background: #a855f7;
+      -webkit-mask: url('social-app/star.png') no-repeat center / contain;
+      mask: url('social-app/star.png') no-repeat center / contain;
+      filter: drop-shadow(0 0 6px rgba(168,85,247,0.5));
+    }
+    .pro-hype-total-num { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.01em; line-height: 1; }
+    .pro-stats-row {
+      display: flex; margin-top: 12px; padding: 10px 0;
+      border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .pro-stat { flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.07); }
+    .pro-stat:last-child { border-right: none; }
+    .pro-stat-num { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 16px; font-weight: 800; color: #fff; line-height: 1; }
+    .pro-stat-label { font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 4px; }
+    .pro-mini-tabs { display: flex; gap: 16px; margin-top: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .pro-mini-tab {
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); padding-bottom: 8px; border-bottom: 2px solid transparent;
+    }
+    .pro-mini-tab.active { color: #fff; border-bottom-color: #1E90FF; }
+    .pro-photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
+    .pro-photo-tile {
+      aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.025);
+      border: 1px dashed rgba(255,255,255,0.14);
+      display: flex; align-items: center; justify-content: center;
+    }
     .pro-ring-row { display: flex; gap: 14px; margin-bottom: 18px; }
     .pro-ring { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 62px; }
     .pro-ring-circle {
@@ -368,7 +438,12 @@
       position: relative;
     }
     .pro-post-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
-    .pro-post-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--grad); flex-shrink: 0; }
+    .pro-post-avatar {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--grad); flex-shrink: 0;
+      overflow: hidden; position: relative;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
+    }
+    .pro-post-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; display: block; }
     .pro-post-name { font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,0.85); }
     .pro-post-meta { font-size: 10.5px; color: rgba(255,255,255,0.4); margin-top: 1px; }
     .pro-post-media {
@@ -605,44 +680,101 @@
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Pro Feature
         </span>
-        <div class="pro-ring-row">
-          <div class="pro-ring">
-            <div class="pro-ring-circle" style="background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc);">
-              <div class="pro-ring-inner"><span style="width:20px;height:20px;background:#a855f7;-webkit-mask:url('social-app/star.png') no-repeat center/contain;mask:url('social-app/star.png') no-repeat center/contain;display:block;"></span></div>
-              <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+
+        <div class="pro-tabs" role="tablist" aria-label="Preview switch">
+          <button type="button" class="pro-tab active" data-pro-tab="feed" role="tab" aria-selected="true" onclick="setProMockTab('feed')">Feed</button>
+          <button type="button" class="pro-tab" data-pro-tab="profile" role="tab" aria-selected="false" onclick="setProMockTab('profile')">Profile</button>
+        </div>
+
+        <div id="pro-view-feed" class="pro-view">
+          <div class="pro-ring-row">
+            <div class="pro-ring">
+              <div class="pro-ring-circle" style="background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc);">
+                <div class="pro-ring-inner"><span style="width:20px;height:20px;background:#a855f7;-webkit-mask:url('social-app/star.png') no-repeat center/contain;mask:url('social-app/star.png') no-repeat center/contain;display:block;"></span></div>
+                <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              </div>
+              <span class="pro-ring-label">Most Hyped</span>
             </div>
-            <span class="pro-ring-label">Most Hyped</span>
+            <div class="pro-ring">
+              <div class="pro-ring-circle" style="background:linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff);">
+                <div class="pro-ring-inner"><img alt="" src="social-app/icons/icon-football.png" width="20" height="20" style="object-fit:contain;filter:brightness(0) invert(1);"></div>
+                <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              </div>
+              <span class="pro-ring-label">Football</span>
+            </div>
+            <div class="pro-ring">
+              <div class="pro-ring-circle" style="background:linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d);">
+                <div class="pro-ring-inner"><img alt="" src="social-app/icons/icons8-basketball-50.png" width="20" height="20" style="object-fit:contain;filter:brightness(0) invert(1);"></div>
+                <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              </div>
+              <span class="pro-ring-label">Basketball</span>
+            </div>
           </div>
-          <div class="pro-ring">
-            <div class="pro-ring-circle" style="background:linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff);">
-              <div class="pro-ring-inner"><img alt="" src="social-app/icons/icon-football.png" width="20" height="20" style="object-fit:contain;filter:brightness(0) invert(1);"></div>
-              <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+
+          <div class="pro-post">
+            <div class="pro-post-head">
+              <div class="pro-post-avatar">
+                <img src="feature-athlete.jpg" alt="Jordan Reyes">
+              </div>
+              <div>
+                <div class="pro-post-name">Jordan Reyes · #9</div>
+                <div class="pro-post-meta">Basketball · Class of 2027</div>
+              </div>
             </div>
-            <span class="pro-ring-label">Football</span>
-          </div>
-          <div class="pro-ring">
-            <div class="pro-ring-circle" style="background:linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d);">
-              <div class="pro-ring-inner"><img alt="" src="social-app/icons/icons8-basketball-50.png" width="20" height="20" style="object-fit:contain;filter:brightness(0) invert(1);"></div>
-              <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <div class="pro-post-media">
+              <div class="pro-lock-overlay">
+                <a href="social-app/login.html?tab=signup" class="pro-unlock-pill ripple-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Unlock Pro
+                </a>
+              </div>
             </div>
-            <span class="pro-ring-label">Basketball</span>
           </div>
         </div>
 
-        <div class="pro-post">
-          <div class="pro-post-head">
-            <div class="pro-post-avatar"></div>
-            <div>
-              <div class="pro-post-name">Jordan Reyes · #9</div>
-              <div class="pro-post-meta">Soccer · Class of 2027</div>
+        <div id="pro-view-profile" class="pro-view" style="display:none;">
+          <div class="pro-post">
+            <div class="pro-profile-cover"></div>
+            <div class="pro-profile-avatar">
+              <div class="pro-profile-avatar-inner">
+                <img src="feature-athlete.jpg" alt="Jordan Reyes">
+              </div>
             </div>
-          </div>
-          <div class="pro-post-media">
-            <div class="pro-lock-overlay">
-              <a href="social-app/login.html?tab=signup" class="pro-unlock-pill ripple-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Unlock Pro
-              </a>
+            <div style="padding:10px 16px 16px;">
+              <div style="display:flex; align-items:center; gap:7px;">
+                <h3 style="font-family:'Arial Narrow',Arial,sans-serif; font-size:18px; font-weight:800; letter-spacing:0.02em; color:#fff; line-height:1.1;">Jordan Reyes <span class="g-text">· #9</span></h3>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
+                <span class="pro-hype-total">
+                  <span class="pro-hype-total-icon"></span>
+                  <span class="pro-hype-total-num">1,250</span>
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(57,211,83,0.1); border:1px solid rgba(57,211,83,0.25); color:#39D353; font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:3px 8px; border-radius:6px;">
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  Verified
+                </span>
+              </div>
+              <p style="font-size:11px; color:rgba(255,255,255,0.45); margin-top:8px;">Basketball · Class of 2027 · Point Guard</p>
+
+              <div class="pro-stats-row">
+                <div class="pro-stat"><div class="pro-stat-num">18.4</div><div class="pro-stat-label">Points</div></div>
+                <div class="pro-stat"><div class="pro-stat-num">6.2</div><div class="pro-stat-label">Assists</div></div>
+                <div class="pro-stat"><div class="pro-stat-num">5.1</div><div class="pro-stat-label">Rebounds</div></div>
+              </div>
+
+              <div class="pro-mini-tabs">
+                <span class="pro-mini-tab active">Highlights</span>
+                <span class="pro-mini-tab">Stats</span>
+                <span class="pro-mini-tab">Info</span>
+              </div>
+
+              <div class="pro-photo-grid">
+                <div class="pro-photo-tile"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                <div class="pro-photo-tile"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                <div class="pro-photo-tile"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+              </div>
+
+              <a href="social-app/login.html?tab=signup" class="g-btn ripple-btn" style="display:block; text-align:center; margin-top:14px; font-family:'Arial Narrow',Arial,sans-serif; font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#fff; padding:12px; border-radius:10px; text-decoration:none;">View Full Profile</a>
             </div>
           </div>
         </div>
@@ -1357,6 +1489,24 @@
   function openRoleModal()   { goTo('social-app/login.html?tab=signup'); }
   function openSignInModal() { goTo('social-app/login.html?tab=login'); }
   function closeRoleModal()   {}
+
+  // ── Pro mockup: Feed / Profile tab switch ──
+  function setProMockTab(tab) {
+    document.querySelectorAll('.pro-tab').forEach(b => {
+      const active = b.dataset.proTab === tab;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    const feed = document.getElementById('pro-view-feed');
+    const profile = document.getElementById('pro-view-profile');
+    const show = tab === 'profile' ? profile : feed;
+    const hide = tab === 'profile' ? feed : profile;
+    hide.style.display = 'none';
+    show.style.display = '';
+    show.classList.remove('pro-view-in');
+    void show.offsetWidth;
+    show.classList.add('pro-view-in');
+  }
   function closeSignInModal() {}
 </script>
 
