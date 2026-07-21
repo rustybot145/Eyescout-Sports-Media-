@@ -378,7 +378,7 @@
       onApprove: async (data) => {
         // On localhost with no real login, create a temp session so testing works
         if (!session) {
-          session = { id: 'dev-' + Date.now(), firstName: 'Dev', lastName: 'Tester', sport: 'Basketball' };
+          session = { id: 'dev-' + Date.now(), firstName: 'Dev', lastName: 'Tester', sport: 'Boys Basketball' };
           localStorage.setItem('es_session', JSON.stringify(session));
         }
         await activateSubscription(data.subscriptionID);

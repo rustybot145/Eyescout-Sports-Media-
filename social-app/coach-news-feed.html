@@ -948,15 +948,19 @@
   function sportAccent(sport) {
     const s = (sport || '').toLowerCase();
     return {
-      'basketball':    { ring: 'linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d)', label: '#ff8a3d' },
-      'football':      { ring: 'linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff)', label: '#4aa8ff' },
-      'baseball':      { ring: 'linear-gradient(135deg,#1a7a2e,#39D353,#7be88f)', label: '#4ade6a' },
-      'softball':      { ring: 'linear-gradient(135deg,#b21e3c,#ff4d6d,#ff8fa3)', label: '#ff6b85' },
-      'soccer':        { ring: 'linear-gradient(135deg,#00806b,#00C9A7,#5fe6cf)', label: '#1fd6b4' },
-      'track & field': { ring: 'linear-gradient(135deg,#b39500,#ffd500,#ffe766)', label: '#ffd500' },
-      'volleyball':    { ring: 'linear-gradient(135deg,#3a1e6e,#7B2FBE,#c084fc)', label: '#c084fc' },
-      'wrestling':     { ring: 'linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d)', label: '#ff8a3d' },
-      'lacrosse':      { ring: 'linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff)', label: '#4aa8ff' },
+      'football':         { ring: 'linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff)', label: '#4aa8ff' },
+      'boys basketball':  { ring: 'linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d)', label: '#ff8a3d' },
+      'girls basketball': { ring: 'linear-gradient(135deg,#9d174d,#ec4899,#f9a8d4)', label: '#f472b6' },
+      'baseball':         { ring: 'linear-gradient(135deg,#1a7a2e,#39D353,#7be88f)', label: '#4ade6a' },
+      'softball':         { ring: 'linear-gradient(135deg,#b21e3c,#ff4d6d,#ff8fa3)', label: '#ff6b85' },
+      'boys soccer':      { ring: 'linear-gradient(135deg,#00806b,#00C9A7,#5fe6cf)', label: '#1fd6b4' },
+      'girls soccer':     { ring: 'linear-gradient(135deg,#831843,#db2777,#f472b6)', label: '#ec4899' },
+      'boys volleyball':  { ring: 'linear-gradient(135deg,#1e3a8a,#3b82f6,#93c5fd)', label: '#60a5fa' },
+      'girls volleyball': { ring: 'linear-gradient(135deg,#3a1e6e,#7B2FBE,#c084fc)', label: '#c084fc' },
+      'track & field':    { ring: 'linear-gradient(135deg,#b39500,#ffd500,#ffe766)', label: '#ffd500' },
+      'wrestling':        { ring: 'linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d)', label: '#ff8a3d' },
+      'boys lacrosse':    { ring: 'linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff)', label: '#4aa8ff' },
+      'girls lacrosse':   { ring: 'linear-gradient(135deg,#9d174d,#f472b6,#fbcfe8)', label: '#f9a8d4' },
     }[s] || null;
   }
 
@@ -964,15 +968,19 @@
   function sportIconMarkup(sport) {
     const s = (sport || '').toLowerCase();
     const iconFile = {
-      'basketball':    'icons8-basketball-50.png',
-      'baseball':      'icons8-baseball-50.png',
-      'soccer':        'icons8-soccer-ball-50.png',
-      'track & field': 'icons8-track-and-field-50.png',
-      'volleyball':    'icons8-volleyball-50.png',
-      'wrestling':     'icons8-wrestling-50.png',
-      'lacrosse':      'icons8-lacrosse-stick-50.png',
-      'football':      'icon-football.png',
-      'softball':      'icon-softball.png',
+      'boys basketball':  'icons8-basketball-50.png',
+      'girls basketball': 'icons8-basketball-50.png',
+      'baseball':         'icons8-baseball-50.png',
+      'softball':         'icon-softball.png',
+      'boys soccer':      'icons8-soccer-ball-50.png',
+      'girls soccer':     'icons8-soccer-ball-50.png',
+      'boys volleyball':  'icons8-volleyball-50.png',
+      'girls volleyball': 'icons8-volleyball-50.png',
+      'track & field':    'icons8-track-and-field-50.png',
+      'wrestling':        'icons8-wrestling-50.png',
+      'boys lacrosse':    'icons8-lacrosse-stick-50.png',
+      'girls lacrosse':   'icons8-lacrosse-stick-50.png',
+      'football':         'icon-football.png',
     }[s];
     return iconFile ? `<img alt="" src="icons/${iconFile}" width="30" height="30" style="object-fit:contain;filter:brightness(0) invert(1);">` : '';
   }

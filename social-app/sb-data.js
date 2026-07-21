@@ -14,8 +14,10 @@ const _SB = supabase.createClient(
 // The DB `sport` column still holds the PRIMARY sport (sports[0]) for backward
 // compatibility with everything that reads .sport (feeds, coach discovery, etc.).
 const ES_SPORTS = [
-  'Football', 'Basketball', 'Baseball', 'Softball', 'Soccer', 'Track & Field',
-  'Volleyball', 'Wrestling', 'Lacrosse', 'Tennis', 'Swimming', 'Cross Country', 'Other',
+  'Football', 'Boys Basketball', 'Girls Basketball', 'Baseball', 'Softball',
+  'Boys Soccer', 'Girls Soccer', 'Boys Volleyball', 'Girls Volleyball',
+  'Track & Field', 'Wrestling', 'Boys Lacrosse', 'Girls Lacrosse',
+  'Tennis', 'Swimming', 'Cross Country', 'Other',
 ];
 function _esSportsMap() { try { return JSON.parse(localStorage.getItem('es_player_sports') || '{}'); } catch (e) { return {}; } }
 // The list of sports for a player object. Prefers the durable local map, then an
