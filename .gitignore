@@ -1,3 +1,9 @@
+# Secrets. serve.mjs reads SUPABASE_SERVICE_ROLE_KEY / PAYPAL_* / MONDAY_* out of
+# a local .env, so one stray `git add` would publish them. Never track these.
+.env
+.env.*
+!.env.example
+
 # Client photo libraries — too large for Git and protected from public download
 images/
 
