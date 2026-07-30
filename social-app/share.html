@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>EyeScout Sports</title>
+<link rel="icon" type="image/png" href="../logo.png">
+
+<!-- Link-preview cards. These are static: the page is served as a plain file, so
+     there is no server-side render step to inject the actual post image here.
+     Scrapers (iMessage, Slack, X) don't run JS, so they see this brand card
+     rather than the shared photo. Making the preview show the real image needs a
+     server route that renders og:image per post — see the note in share.html's
+     README block at the bottom of this file. -->
+<meta property="og:site_name" content="EyeScout Sports">
+<meta property="og:title" content="A highlight on EyeScout Sports">
+<meta property="og:description" content="Someone shared a moment from their sports resume. See it on EyeScout.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="../logo.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0b0b0d; color: #fff; min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 18px 56px;
+  }
+  a { color: inherit; }
+  .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .cond { font-family: 'Arial Narrow', Arial, sans-serif; }
+
+  .brandbar { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .brandbar img { width: 34px; height: 34px; object-fit: contain; }
+  .brandbar span {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 19px; letter-spacing: 0.09em; text-transform: uppercase;
+  }
+
+  .card {
+    width: 100%; max-width: 470px;
+    background: #141416; border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  }
+
+  .card-head { display: flex; align-items: center; gap: 11px; padding: 14px 16px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #1a0828, #0e1528);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 17px;
+  }
+  .who { font-size: 15px; font-weight: 700; line-height: 1.25; }
+  .who-meta { font-size: 12.5px; color: rgba(255,255,255,0.42); margin-top: 2px; }
+
+  .media { background: #000; line-height: 0; }
+  .media img, .media video { width: 100%; height: auto; display: block; }
+
+  /* Everything below the image is the wall. */
+  .gate { padding: 22px 20px 24px; border-top: 1px solid rgba(255,255,255,0.07); text-align: center; }
+  .gate h1 {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 25px; letter-spacing: 0.02em; text-transform: uppercase;
+    line-height: 1.1; margin-bottom: 9px;
+  }
+  .gate p { font-size: 14.5px; color: rgba(255,255,255,0.45); line-height: 1.55; margin-bottom: 18px; }
+
+  .btn {
+    display: block; width: 100%; padding: 14px 20px; border: none; border-radius: 9px;
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #fff; text-decoration: none; cursor: pointer; text-align: center;
+    background: var(--grad); background-size: 200%;
+    transition: background-position 0.4s ease, transform 0.18s, opacity 0.18s;
+  }
+  .btn:hover { background-position: right; transform: translateY(-1px); }
+  .btn.ghost {
+    background: none; border: 1px solid rgba(255,255,255,0.16);
+    color: rgba(255,255,255,0.75); margin-top: 10px;
+  }
+  .btn.ghost:hover { color: #fff; border-color: rgba(255,255,255,0.3); transform: none; }
+
+  .locknote {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.3);
+  }
+
+  .state { max-width: 470px; text-align: center; padding: 60px 20px; }
+  .state h1 { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 26px; text-transform: uppercase; margin-bottom: 10px; }
+  .state p { color: rgba(255,255,255,0.45); font-size: 15px; line-height: 1.6; margin-bottom: 22px; }
+
+  .skel { height: 300px; background: linear-gradient(100deg, #141416 30%, #1c1c1f 50%, #141416 70%); background-size: 220% 100%; animation: sweep 1.3s linear infinite; }
+  @keyframes sweep { to { background-position: -220% 0; } }
+  @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
+  .foot { margin-top: 26px; font-size: 12px; color: rgba(255,255,255,0.25); text-align: center; }
+  .foot a { color: rgba(255,255,255,0.45); }
+</style>
+</head>
+<body>
+
+<div class="brandbar">
+  <img src="../logo.png" alt="">
+  <span>Eye<span class="g-text">Scout</span></span>
+</div>
+
+<div id="root">
+  <div class="card"><div class="skel"></div></div>
+</div>
+
+<p class="foot">Shared from <a href="../index.html">EyeScout Sports</a></p>
+
+<script>
+(function () {
+  'use strict';
+
+  var root = document.getElementById('root');
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function state(title, body, actions) {
+    root.innerHTML =
+      '<div class="state"><h1>' + esc(title) + '</h1><p>' + esc(body) + '</p>' + (actions || '') + '</div>';
+  }
+
+  // ── Who is looking at this link? ────────────────────────────────────────────
+  // Mirrors feed.html: session in es_session, Pro flag in es_sub_<id>. This only
+  // decides which CALL TO ACTION to show. It is NOT what protects the app — the
+  // posts table is Pro-gated by RLS server-side, so editing localStorage here
+  // buys a viewer a different button and nothing else.
+  function viewer() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem('es_session') || 'null'); } catch (e) {}
+    if (!s || !s.id) return { in: false, pro: false };
+    var sub = null;
+    try { sub = JSON.parse(localStorage.getItem('es_sub_' + s.id) || 'null'); } catch (e) {}
+    var pro = typeof _subHasAccess === 'function' ? _subHasAccess(sub) : (sub && sub.status === 'active');
+    return { in: true, pro: !!pro };
+  }
+
+  function mediaHTML(post) {
+    if (!post.mediaData) {
+      return '<div class="media" style="height:220px;display:flex;align-items:center;justify-content:center;">' +
+             '<span style="color:rgba(255,255,255,0.2);font-size:13px;">Media unavailable</span></div>';
+    }
+    var src = esc(post.mediaData);
+    if (post.type === 'video') {
+      // Same protections the feed uses on other people's video: no download,
+      // no picture-in-picture, no context menu.
+      return '<div class="media"><video src="' + src + '" controls playsinline preload="metadata" ' +
+             'controlslist="nodownload noremoteplayback" disablepictureinpicture oncontextmenu="return false"></video></div>';
+    }
+    return '<div class="media"><img src="' + src + '" alt="Shared highlight"></div>';
+  }
+
+  function render(post) {
+    var v = viewer();
+    var name = post.authorName || 'An athlete';
+    var initial = (name.trim()[0] || '?').toUpperCase();
+    var meta = [post.sport, post.createdAt ? new Date(post.createdAt).toLocaleDateString() : '']
+                 .filter(Boolean).join(' · ');
+
+    var gate;
+    if (v.in && v.pro) {
+      // Full member — send them into the real thing.
+      gate =
+        '<h1>You\'re In</h1>' +
+        '<p>Open EyeScout to see the rest of this athlete\'s resume, their film, and the full feed.</p>' +
+        '<a class="btn" href="feed.html">Open EyeScout</a>';
+    } else if (v.in) {
+      // Signed in, no Pro.
+      gate =
+        '<h1>That\'s All You Get</h1>' +
+        '<p>This is a single shared moment. Go Pro to unlock the full feed, every athlete\'s resume, and their complete film.</p>' +
+        '<a class="btn" href="subscription.html">Upgrade to Pro</a>' +
+        '<a class="btn ghost" href="feed.html">Back to EyeScout</a>';
+    } else {
+      // Logged out — the case this feature exists for.
+      gate =
+        '<h1>See The Full Picture</h1>' +
+        '<p>You\'re seeing one shared moment. Create a free profile to build your own sports resume — highlights, stats, and film in one place.</p>' +
+        '<a class="btn" href="login.html?tab=signup">Create Your Profile</a>' +
+        '<a class="btn ghost" href="login.html?tab=login">I Already Have One</a>';
+    }
+
+    root.innerHTML =
+      '<div class="card">' +
+        '<div class="card-head">' +
+          '<div class="avatar"><span class="g-text">' + esc(initial) + '</span></div>' +
+          '<div><div class="who">' + esc(name) + '</div>' +
+          (meta ? '<div class="who-meta">' + esc(meta) + '</div>' : '') + '</div>' +
+        '</div>' +
+        mediaHTML(post) +
+        '<div class="gate">' + gate +
+          '<div class="locknote">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">' +
+            '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+            'Everything else is private' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ── Boot ────────────────────────────────────────────────────────────────────
+  var token = new URLSearchParams(window.location.search).get('s');
+
+  if (!token) {
+    state('Bad Link', 'This share link is missing its token. Ask whoever sent it to share again.',
+          '<a class="btn" href="../index.html">Go to EyeScout</a>');
+    return;
+  }
+
+  _sbSharedPost(token).then(function (post) {
+    if (post === 'not-deployed') {
+      // The SQL migration hasn't been run yet. Say so plainly rather than
+      // claiming the post doesn't exist — that would send people chasing a bug
+      // that is really just a pending deploy.
+      state('Sharing Not Live Yet',
+            'Share links need one database migration that has not been run yet (supabase-phase8-post-sharing.sql).',
+            '<a class="btn" href="../index.html">Go to EyeScout</a>');
+      return;
+    }
+    if (!post) {
+      state('Post Not Found', 'This post was removed, or the link is wrong.',
+            '<a class="btn" href="login.html?tab=signup">Create a Profile</a>');
+      return;
+    }
+    render(post);
+  });
+})();
+</script>
+
+<!--
+  ─────────────────────────────────────────────────────────────────────────────
+  NOT DONE HERE, ON PURPOSE:
+
+  Rich link previews (the shared photo showing up in iMessage/Slack/X) need
+  og:image to point at the post's real media. That can't happen in this static
+  file — link scrapers don't run JavaScript, so they only ever see the static
+  brand card above. Doing it properly means a server route that looks up the
+  post and renders the tags server-side (serve.mjs already proxies Supabase, so
+  a /s/:id route there is the natural home). Deliberately left out: it's a
+  separate change with its own caching and bot-detection concerns.
+  ─────────────────────────────────────────────────────────────────────────────
+-->
+</body>
+</html>

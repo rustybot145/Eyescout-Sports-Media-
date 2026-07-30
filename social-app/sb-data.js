@@ -791,6 +791,84 @@ async function _sbWeeklyHypeWinners() {
   }
 }
 
+// ── Post sharing ─────────────────────────────────────────────────────────────
+// Public share links (share.html?p=<id>). The posts table is Pro-gated by RLS
+// (phase 5), so a logged-out recipient can't select from it — this goes through
+// the shared_post() RPC (supabase-phase8-post-sharing.sql), which returns AT
+// MOST one row and only media + attribution: no author_id, no caption, nothing
+// that lets a viewer pivot into the app.
+//
+// Returns the post, null when the id doesn't exist, or the string 'not-deployed'
+// when the RPC is missing — callers MUST handle that third case so shipping the
+// client before running the SQL degrades to a clear message instead of a lie
+// ("post not found") about a post that is really there.
+function _sbRpcMissing(error) {
+  return !!error && (error.code === '42883' || error.code === 'PGRST202' ||
+         /does not exist|schema cache/i.test(error.message || ''));
+}
+
+async function _sbSharedPost(token) {
+  if (!token) return null;
+  try {
+    const { data, error } = await _SB.rpc('shared_post', { p_token: token });
+    if (error) return _sbRpcMissing(error) ? 'not-deployed' : null;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    return {
+      authorName: row.author_name || '',
+      sport:      row.sport || '',
+      type:       row.media_type || 'photo',
+      mediaData:  row.media_data || '',
+      createdAt:  row.created_at,
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Mint (or fetch) the random share token for a post. Signed-in users only —
+// that restriction is what keeps post ids, which are guessable timestamps, from
+// becoming an enumeration oracle over the whole posts table.
+//
+// Returns the token, 'not-deployed' when the SQL hasn't been run, 'auth' when
+// the caller isn't signed in, or null on any other failure. Callers MUST tell
+// these apart: showing "post not found" for a pending migration sends people
+// chasing a bug that doesn't exist.
+async function _sbCreateShareLink(postId) {
+  if (!postId) return null;
+  try {
+    const { data, error } = await _SB.rpc('create_share_link', { p_post_id: String(postId) });
+    if (error) {
+      if (_sbRpcMissing(error)) return 'not-deployed';
+      if (error.code === '42501' || /signed in/i.test(error.message || '')) return 'auth';
+      return null;
+    }
+    return (typeof data === 'string' && data) ? data : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// The host every share link points at. Pinned to production on purpose: a link
+// is shared OUTWARD, so it must resolve for the recipient. Deriving it from
+// window.location would mint localhost:3100 links while testing locally and
+// preview-deploy links from a staging build — both dead for anyone who receives
+// them.
+const ES_SHARE_ORIGIN = 'https://eyescoutsports.com';
+
+// Absolute, production URL for a share TOKEN (not a post id — see
+// _sbCreateShareLink for why).
+function _sbShareUrl(token) {
+  return `${ES_SHARE_ORIGIN}/social-app/share.html?s=${encodeURIComponent(token)}`;
+}
+
+// What the link looks like printed on a story card. The full URL ends in a raw
+// uuid that nobody will ever read off a phone screen, so the card shows the
+// brand domain and the real URL rides along in the clipboard / link sticker.
+function _sbShareLabel() {
+  return ES_SHARE_ORIGIN.replace(/^https?:\/\//, '');
+}
+
 // Ask the local server to cancel the real PayPal subscription. The secret lives
 // only on the server, so this POSTs the PayPal subscription id there.
 // Returns { ok, notConfigured?, error? }. `notConfigured` means the PayPal keys
