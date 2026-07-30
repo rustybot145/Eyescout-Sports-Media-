@@ -667,6 +667,45 @@
     window.location.href = 'profile.html?id=' + data.user.id;
   }
 
+  // ── Cache the subscription at login ────────────────────────────────────────
+  // Pages read Pro state synchronously from localStorage es_sub_<uid> (coaches
+  // also es_coach_sub_<uid>). That key is normally only written by sb-data.js's
+  // background sync, which finishes AFTER the post-login redirect has already
+  // rendered — so the first page you land on showed "not Pro" and it only
+  // corrected itself once you navigated again. Fetching it here closes that gap.
+  //
+  // This duplicates _rowToSub() from sb-data.js on purpose: login.html does not
+  // load that file. Keep the two in step.
+  async function cacheSubscription(uid, isCoach) {
+    try {
+      const { data: r } = await sb.from('subscriptions')
+        .select('status, plan, price, started_at, expires_at, paypal_subscription_id')
+        .eq('user_id', uid).maybeSingle();
+
+      let sub = null;
+      if (r) {
+        const start = r.started_at ? new Date(r.started_at) : new Date();
+        const next  = r.expires_at ? new Date(r.expires_at)
+                                   : new Date(start.getFullYear(), start.getMonth() + 1, start.getDate());
+        sub = {
+          status:               r.status || 'active',
+          plan:                 r.plan   || 'pro',
+          price:                r.price  || 15,
+          startDate:            start.toISOString(),
+          nextBillingDate:      next.toISOString(),
+          accessUntil:          next.toISOString(),
+          paypalSubscriptionId: r.paypal_subscription_id || null,
+        };
+      }
+      // Written even when null, so the page reads a definite "no subscription"
+      // rather than a missing key it might mistake for "not loaded yet".
+      localStorage.setItem('es_sub_' + uid, JSON.stringify(sub));
+      if (isCoach) localStorage.setItem('es_coach_sub_' + uid, JSON.stringify(sub));
+    } catch (_) {
+      // Never block sign-in on this — the background sync still fills it in.
+    }
+  }
+
   // ── Log in ─────────────────────────────────────────────────────────────────
   async function handleLogin(e) {
     e.preventDefault();
@@ -739,6 +778,9 @@
         role:                  profile.role                    || 'player',
       }));
     }
+
+    // Before redirecting, so the profile page renders with the right Pro state.
+    await cacheSubscription(authData.user.id, false);
 
     // Always land players on their own profile first
     window.location.href = 'profile.html?id=' + authData.user.id;
@@ -870,6 +912,9 @@
         role:       'coach',
       }));
     }
+
+    // Before redirecting, so the coach profile renders with the right Pro state.
+    await cacheSubscription(authData.user.id, true);
 
     window.location.href = profile && !profile.verified ? 'coach-pending.html' : 'coach-profile.html';
   }
