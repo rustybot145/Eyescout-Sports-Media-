@@ -13,12 +13,26 @@
      rather than the shared photo. Making the preview show the real image needs a
      server route that renders og:image per post — see the note in share.html's
      README block at the bottom of this file. -->
+<!-- og:image and og:url MUST be absolute. A scraper fetches the page from its
+     own server with no page context, so a relative path like "../logo.png" is
+     unresolvable — X silently renders no card at all, which reads as "the link
+     doesn't work". Same reason og:url is spelled out in full. -->
 <meta property="og:site_name" content="EyeScout Sports">
 <meta property="og:title" content="A highlight on EyeScout Sports">
 <meta property="og:description" content="Someone shared a moment from their sports resume. See it on EyeScout.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="../logo.png">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:url" content="https://eyescoutsports.com/social-app/share.html">
+<meta property="og:image" content="https://eyescoutsports.com/logo.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
+<meta property="og:image:alt" content="EyeScout Sports">
+<!-- summary_large_image needs a wide (≥300px, 2:1-ish) image to render large.
+     The logo is square, so `summary` is what X will actually honour — asking for
+     large with a square image is a common reason the card silently drops. -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A highlight on EyeScout Sports">
+<meta name="twitter:description" content="Someone shared a moment from their sports resume. See it on EyeScout.">
+<meta name="twitter:image" content="https://eyescoutsports.com/logo.png">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sb-data.js"></script>

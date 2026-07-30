@@ -2227,10 +2227,15 @@
   }
 
   function sharePost(postId, btn, presetUrl) {
-    // The link isn't known until the server mints a token, so the sheet opens
-    // immediately in a pending state and every target stays inert until it
-    // lands. Firing a target with a null url would share a broken link.
-    let url = presetUrl || null;
+    // Ben's call (2026-07-30): share the plain site URL, not a per-post link. So
+    // the URL is known up front — no token to mint, no pending state, and every
+    // target is live the moment the sheet opens.
+    //
+    // The per-post path still exists server-side and is fully deployed
+    // (create_share_link / shared_post + share.html). To switch back, drop the
+    // `|| _sbShareUrl()` default below and restore the _sbCreateShareLink()
+    // call further down.
+    let url = presetUrl || _sbShareUrl();
     let shareErr = null;
 
     // Pull the media straight off the rendered card — avoids threading a long
@@ -2301,22 +2306,9 @@
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     overlay.querySelectorAll('[data-sh-close]').forEach(b => b.addEventListener('click', close));
 
-    // Mint the token, then unlock the sheet. Until it resolves every target is
-    // inert — see the pending guard in the click handler below.
-    const setPending = (msg) => {
-      const input = overlay.querySelector('[data-sh-url]');
-      if (input) input.value = msg;
-    };
-    if (!url) {
-      _sbCreateShareLink(postId).then(tok => {
-        if (!overlay.isConnected) return;
-        if (tok === 'not-deployed') { setPending('Sharing not enabled yet'); shareErr = 'The sharing migration has not been run on the database yet.'; return; }
-        if (tok === 'auth')         { setPending('Sign in to share');        shareErr = 'You need to be signed in to create a share link.'; return; }
-        if (!tok)                   { setPending('Could not create link');   shareErr = 'Could not create a share link. Check your connection and try again.'; return; }
-        url = _sbShareUrl(tok);
-        setPending(url);
-      });
-    }
+    // No token to mint any more (see the note at the top of sharePost), so the
+    // sheet needs no pending state — `url` is already set and every target below
+    // is live immediately.
 
     overlay.querySelectorAll('[data-sh-target]').forEach(el => {
       el.addEventListener('click', async () => {

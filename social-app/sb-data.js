@@ -856,9 +856,17 @@ async function _sbCreateShareLink(postId) {
 // them.
 const ES_SHARE_ORIGIN = 'https://eyescoutsports.com';
 
-// Absolute, production URL for a share TOKEN (not a post id — see
-// _sbCreateShareLink for why).
+// The URL every share sends out.
+//
+// Ben's call (2026-07-30): send the plain site URL rather than a per-post link,
+// so a share is always a working eyescoutsports.com link.
+//
+// Called with no argument. Passing a token still produces the per-post URL, so
+// restoring that behaviour is a one-line change at the call site rather than a
+// rewrite — the create_share_link / shared_post RPCs and share.html are all
+// still deployed.
 function _sbShareUrl(token) {
+  if (!token) return ES_SHARE_ORIGIN;
   return `${ES_SHARE_ORIGIN}/social-app/share.html?s=${encodeURIComponent(token)}`;
 }
 
