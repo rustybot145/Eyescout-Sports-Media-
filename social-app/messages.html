@@ -685,11 +685,7 @@
     t.messages.push({ from: 'player', text, timestamp: new Date().toISOString(), read: true });
     saveThreads(threads);
     if (typeof _sbSaveThread === 'function') _sbSaveThread(t);
-    // Durable row for the email webhook — see the matching block in coach-messages.html.
-    if (session && t.coachId && typeof _sbAddNotification === 'function') _sbAddNotification({
-      id: `msg_${t.id}_${Date.now()}`,
-      targetId: t.coachId, actorId: session.id, type: 'message',
-    });
+    if (session && typeof _notifyNewMessage === 'function') _notifyNewMessage(t.id, t.coachId, session.id);
     input.value = '';
     renderChatWindow(t);
     renderConvoList();

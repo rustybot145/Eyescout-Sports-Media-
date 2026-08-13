@@ -2445,6 +2445,10 @@
     }
     thread.messages.push({ from: 'coach', text, timestamp: new Date().toISOString(), read: false });
     localStorage.setItem('es_messages', JSON.stringify(allMessages));
+    // This page used to stop at localStorage, so a message sent from a player's
+    // profile never left the sender's browser at send time. Sync it, then notify.
+    if (typeof _sbSaveThread === 'function') _sbSaveThread(thread);
+    if (typeof _notifyNewMessage === 'function') _notifyNewMessage(thread.id, playerId, coachSession.id);
     document.getElementById('coach-msg-overlay')?.remove();
     const t = document.createElement('div');
     t.textContent = 'Message sent!';

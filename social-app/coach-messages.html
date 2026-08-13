@@ -526,13 +526,7 @@
     t.messages.push({ from: 'coach', text, timestamp: new Date().toISOString(), read: false });
     localStorage.setItem('es_messages', JSON.stringify(all));
     if (typeof _sbSaveThread === 'function') _sbSaveThread(t);
-    // Durable row so the email webhook has something to fire on — activity.html
-    // only synthesizes message notifications in memory, which a webhook can't see.
-    // Deliberately carries no message text; the email never quotes it.
-    if (coach && t.playerId && typeof _sbAddNotification === 'function') _sbAddNotification({
-      id: `msg_${t.id}_${Date.now()}`,
-      targetId: t.playerId, actorId: coach.id, type: 'message',
-    });
+    if (coach && typeof _notifyNewMessage === 'function') _notifyNewMessage(t.id, t.playerId, coach.id);
     input.value = '';
     renderChatWindow(t);
     renderConvoList();

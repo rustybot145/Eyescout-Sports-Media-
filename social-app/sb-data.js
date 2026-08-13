@@ -996,6 +996,26 @@ function _sbSaveThread(thread) {
   _SB.from('messages').upsert(_threadToRow(thread)).then(undefined, () => {});
 }
 
+// Durable notification row for a newly sent message.
+//
+// EVERY place that sends a message must call this. There are four:
+// messages.html, coach-messages.html, coach-feed.html, profile.html. The email
+// pipeline keys off this row — activity.html only synthesizes message
+// notifications in memory, and a database webhook cannot see those.
+//
+// Carries no message text on purpose: the notification is readable by anyone who
+// can read the row, and the email deliberately never quotes the message.
+function _notifyNewMessage(threadId, targetId, actorId) {
+  if (!threadId || !targetId || !actorId || targetId === actorId) return;
+  if (typeof _sbAddNotification !== 'function') return;
+  _sbAddNotification({
+    id:       'msg_' + threadId + '_' + Date.now(),
+    targetId: targetId,
+    actorId:  actorId,
+    type:     'message',
+  });
+}
+
 // Batch version — one upsert request for many threads instead of one per thread
 // (e.g. "mark all read" touching several conversations at once).
 function _sbSaveThreads(threads) {

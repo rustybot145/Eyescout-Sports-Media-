@@ -904,6 +904,7 @@
     thread.messages.push({ from: 'coach', text, timestamp: new Date().toISOString(), read: false });
     localStorage.setItem('es_messages', JSON.stringify(allMessages));
     if (typeof _sbSaveThread === 'function') _sbSaveThread(thread);
+    if (typeof _notifyNewMessage === 'function') _notifyNewMessage(thread.id, msgTargetId, coach.id);
 
     document.getElementById('msg-modal').classList.remove('open');
     msgTargetId = null;
