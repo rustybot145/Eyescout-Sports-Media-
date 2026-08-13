@@ -472,6 +472,87 @@
     'sb_publishable_7qKzHagsIYotquLIiARBqg_cbTSv9C5'
   );
 
+  // ── Email confirmation ─────────────────────────────────────────────────────
+  // Only reachable when "Confirm email" is ON in Supabase. With it OFF, signUp
+  // returns a session, none of this runs, and signup behaves exactly as before.
+
+  // Reuses the existing .err-msg element rather than adding markup; recoloured
+  // per call because it carries both success and failure text.
+  function _showConfirmNotice(elId, msg, isError) {
+    // The login-error slot lives in the log-in form, which isn't the visible tab
+    // for someone arriving straight from an email link.
+    if (elId === 'login-error' && typeof switchTab === 'function') switchTab('login');
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.style.color = isError ? '#ff5555' : '#1E90FF';
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // Runs on every load. The confirmation email points straight at this page
+  // carrying ?token_hash=…&type=signup, so the destination is pinned in the email
+  // template — it does NOT depend on Supabase's Site URL being right.
+  (async () => {
+    const qs = new URLSearchParams(location.search);
+    const tokenHash = qs.get('token_hash');
+    if (!tokenHash) return;
+
+    const { error: otpErr } = await sb.auth.verifyOtp({
+      token_hash: tokenHash, type: qs.get('type') || 'signup',
+    });
+    // Strip the token from the address bar either way — it shouldn't sit in
+    // history, and a reload must not re-run a spent token.
+    history.replaceState(null, '', location.pathname);
+    if (otpErr) {
+      _showConfirmNotice('login-error', 'That confirmation link has expired or was already used. Log in, or sign up again.', true);
+      return;
+    }
+
+    const { data: { session } } = await sb.auth.getSession();
+    const pending = session && session.user && session.user.user_metadata
+      && session.user.user_metadata.es_signup;
+    if (!session) return;
+    if (!pending || !pending.profileRow) {
+      // Confirmed, but nothing to create (already set up, or an older account).
+      _showConfirmNotice('login-error', 'Email confirmed. Log in to continue.', false);
+      return;
+    }
+
+    const profileRow   = { ...pending.profileRow,   id: session.user.id };
+    const localSession = { ...pending.localSession, id: session.user.id };
+
+    const { error } = await sb.from('profiles').insert(profileRow);
+    // 23505 = row already there, e.g. the link was opened twice. Not a failure.
+    if (error && error.code !== '23505') {
+      console.error('[signup] profile insert failed after confirmation:', error.message);
+      _showConfirmNotice('login-error', 'Email confirmed, but we could not finish your profile. Log in and we will retry.', true);
+      return;
+    }
+
+    // profiles now holds this, so drop the copy. It carries a minor's phone,
+    // zip and parent contact details, and user_metadata is embedded in the JWT
+    // and kept in auth.users forever — no reason to leave it there.
+    // Wrapped: this is cleanup, and must never stop someone getting into the app.
+    try { sb.auth.updateUser({ data: { es_signup: null } }).then(undefined, () => {}); } catch (e) {}
+
+    if (pending.kind === 'coach') {
+      localStorage.removeItem('es_session');
+      localStorage.setItem('es_coach_session', JSON.stringify(localSession));
+      const all = JSON.parse(localStorage.getItem('es_coaches') || '[]');
+      all.unshift(localSession);
+      localStorage.setItem('es_coaches', JSON.stringify(all));
+      window.location.href = 'coach-pending.html';
+    } else {
+      localStorage.removeItem('es_coach_session');
+      localStorage.setItem('es_session', JSON.stringify(localSession));
+      if (typeof setPlayerSports === 'function') setPlayerSports(localSession.id, pending.sports || []);
+      const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+      all.unshift(localSession);
+      localStorage.setItem('es_players', JSON.stringify(all));
+      window.location.href = 'profile.html?id=' + localSession.id;
+    }
+  })();
+
   // ── Multi-sport dropdown (checkbox multi-select, player signup) ─────────────
   function toggleSportDropdown(e) {
     if (e) e.stopPropagation();
@@ -600,21 +681,11 @@
     btn.disabled = true;
     btn.textContent = 'Creating Profile…';
 
-    const { data, error } = await sb.auth.signUp({ email, password: pw });
-
-    if (error) {
-      btn.disabled = false;
-      btn.textContent = 'Create Profile';
-      const el = document.getElementById('email-taken');
-      el.textContent = error.message.includes('already registered')
-        ? 'An account with this email already exists.'
-        : error.message;
-      el.style.display = 'block';
-      return;
-    }
-
-    const { error: insertError } = await sb.from('profiles').insert({
-      id:            data.user.id,
+    // Built BEFORE signUp so it can ride along in user_metadata. The confirmation
+    // link is very often opened on a different device than the one that signed up
+    // (sign up on a laptop, check mail on a phone), so localStorage is the wrong
+    // place to park this. `id` is filled in from the session once confirmed.
+    const profileRow = {
       email,
       athlete_first: f.athlete_first.value.trim(),
       athlete_last:  f.athlete_last.value.trim(),
@@ -630,11 +701,9 @@
       parent_phone:  f.parent_phone.value.trim(),
       zip:           f.zip.value.trim(),
       role:          'player',
-    });
-    if (insertError) console.error('[signup] profile insert failed:', insertError.message);
+    };
 
     const newPlayer = {
-      id:           data.user.id,
       email,
       athleteFirst: f.athlete_first.value.trim(),
       athleteLast:  f.athlete_last.value.trim(),
@@ -653,6 +722,38 @@
       createdAt:    new Date().toISOString(),
       role:         'player',
     };
+
+    const { data, error } = await sb.auth.signUp({
+      email, password: pw,
+      options: { data: { es_signup: { kind: 'player', profileRow, localSession: newPlayer, sports: signupSports } } },
+    });
+
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = 'Create Profile';
+      const el = document.getElementById('email-taken');
+      el.textContent = error.message.includes('already registered')
+        ? 'An account with this email already exists.'
+        : error.message;
+      el.style.display = 'block';
+      return;
+    }
+
+    // With email confirmation ON, signUp returns a user but NO session. Inserting
+    // the profile now would run as anon and be rejected by RLS, and setting
+    // es_session would drop them into a UI backed by no auth session at all.
+    // _finishConfirmedSignup() picks it up from user_metadata after they click.
+    if (!data.session) {
+      btn.disabled = false;
+      btn.textContent = 'Create Profile';
+      _showConfirmNotice('email-taken', 'Almost there — check your email and click the confirmation link to finish.');
+      return;
+    }
+
+    profileRow.id = data.user.id;
+    newPlayer.id  = data.user.id;
+    const { error: insertError } = await sb.from('profiles').insert(profileRow);
+    if (insertError) console.error('[signup] profile insert failed:', insertError.message);
 
     localStorage.removeItem('es_coach_session');
     localStorage.setItem('es_session', JSON.stringify(newPlayer));
@@ -805,21 +906,8 @@
     btn.disabled = true;
     btn.textContent = 'Creating Account…';
 
-    const { data, error } = await sb.auth.signUp({ email, password: pw });
-
-    if (error) {
-      btn.disabled = false;
-      btn.textContent = 'Create Coach Account';
-      const el = document.getElementById('coach-email-taken');
-      el.textContent = error.message.includes('already registered')
-        ? 'An account with this email already exists.'
-        : error.message;
-      el.style.display = 'block';
-      return;
-    }
-
-    await sb.from('profiles').insert({
-      id:            data.user.id,
+    // See the note in the player signup — carried in user_metadata, not localStorage.
+    const profileRow = {
       email,
       athlete_first: f.first.value.trim(),
       athlete_last:  f.last.value.trim(),
@@ -828,10 +916,9 @@
       title:         f.title.value,
       division:      f.division.value,
       role:          'coach',
-    });
+    };
 
     const newCoach = {
-      id:         data.user.id,
       email,
       firstName:  f.first.value.trim(),
       lastName:   f.last.value.trim(),
@@ -844,6 +931,33 @@
       createdAt:  new Date().toISOString(),
       role:       'coach',
     };
+
+    const { data, error } = await sb.auth.signUp({
+      email, password: pw,
+      options: { data: { es_signup: { kind: 'coach', profileRow, localSession: newCoach } } },
+    });
+
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = 'Create Coach Account';
+      const el = document.getElementById('coach-email-taken');
+      el.textContent = error.message.includes('already registered')
+        ? 'An account with this email already exists.'
+        : error.message;
+      el.style.display = 'block';
+      return;
+    }
+
+    if (!data.session) {
+      btn.disabled = false;
+      btn.textContent = 'Create Coach Account';
+      _showConfirmNotice('coach-email-taken', 'Almost there — check your email and click the confirmation link to finish.');
+      return;
+    }
+
+    profileRow.id = data.user.id;
+    newCoach.id   = data.user.id;
+    await sb.from('profiles').insert(profileRow);
 
     localStorage.removeItem('es_session');
     localStorage.setItem('es_coach_session', JSON.stringify(newCoach));
