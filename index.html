@@ -320,7 +320,7 @@
     }
     @media (max-width: 768px) { .sport-grid { grid-template-columns: repeat(2, 1fr); } }
 
-    /* ── GO PRO MOCKUP CARD ── */
+    /* ── FREE-ACCOUNT MOCKUP CARD ── */
     .pro-mock-wrap { position: relative; }
     .pro-mock-glow {
       position: absolute; inset: -40px; z-index: 0; pointer-events: none;
@@ -424,12 +424,6 @@
     }
     .pro-ring-inner {
       width: 100%; height: 100%; border-radius: 50%; background: #161616;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .pro-ring-lock {
-      position: absolute; bottom: -2px; right: -2px;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #1e1e1e; border: 2px solid #161616;
       display: flex; align-items: center; justify-content: center;
     }
     .pro-ring-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-align: center; line-height: 1.2; }
@@ -548,7 +542,7 @@
   <a href="gallery.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Gallery</a>
   <a href="services.html" class="cond text-3xl font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">Services</a>
   <button onclick="openSignInModal()" class="ghost cond text-xl font-bold tracking-widest uppercase text-white/70 px-10 py-4 rounded-sm" style="border:1px solid rgba(255,255,255,0.2);background:transparent;">Sign In</button>
-  <button onclick="openRoleModal()" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Create an Account</button>
+  <button onclick="openRoleModal()" class="g-btn cond text-xl font-bold tracking-widest uppercase text-white px-10 py-4 rounded-sm">Create Free Account</button>
 </div>
 
 <!-- ═══ NAV ═══ -->
@@ -568,7 +562,7 @@
       <a href="gallery.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Gallery</a>
       <a href="services.html" class="cond text-sm font-600 tracking-[0.15em] uppercase text-white/50 hover:text-white transition-colors">Services</a>
       <button onclick="openSignInModal()" class="ghost cond text-sm font-700 tracking-[0.15em] uppercase text-white/70 hover:text-white px-5 py-2.5 rounded-sm" style="border:1px solid rgba(255,255,255,0.15);background:transparent;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">Sign In</button>
-      <button onclick="openRoleModal()" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Create an Account</button>
+      <button onclick="openRoleModal()" class="g-btn cond text-sm font-700 tracking-[0.15em] uppercase text-white px-6 py-2.5 rounded-sm">Create Free Account</button>
     </div>
     <!-- Hamburger -->
     <button id="mob-open" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav" class="md:hidden text-white/60 hover:text-white transition-colors">
@@ -605,9 +599,9 @@
         We build the player's sports resume — highlights, stats, and game photos in one profile, showcased for maximum exposure. Film that carries itself, so the right coaches find you instead of the other way around.
       </p>
       <div class="flex flex-wrap gap-4 fade fade-d3">
-        <a href="booking.html" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Book a Session</a>
+        <button onclick="openRoleModal()" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Make Your Free Account</button>
+        <a href="booking.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Book a Session</a>
         <a href="gallery.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Browse the Gallery</a>
-        <button onclick="openRoleModal()" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Create a Profile</button>
       </div>
     </div>
   </div>
@@ -642,17 +636,20 @@
   </div>
 </section>
 
-<!-- ═══ GO PRO ═══ -->
+<!-- ═══ FREE ACCOUNT ═══ -->
+<!-- Was the "Go Pro" upsell until 2026-08-15. Same four features, same mockup —
+     they are simply free now, so the section sells the account instead of the
+     subscription. See RESTORING-PRO.md before putting the upsell back. -->
 <section class="py-24 bg-[#111111] relative overflow-hidden">
   <div class="max-w-7xl mx-auto px-6 md:px-12 grid lg:grid-cols-2 gap-16 items-center relative z-10">
     <div class="fade">
-      <div class="s-label mb-3" style="color:#c084fc;">EyeScout Pro</div>
+      <div class="s-label mb-3" style="color:#c084fc;">Free Account</div>
       <h2 class="cond text-5xl md:text-6xl font-800 uppercase tracking-[0.04em] mb-5">See The<br><span class="g-text">Full Picture.</span></h2>
-      <p class="text-white/40 text-lg font-300 leading-relaxed mb-8 max-w-lg">Your profile is your resume. Pro is how far it travels — an unlocked feed, a Most Hyped ring for every sport you play, and stat cards built to pull eyes onto your film.</p>
+      <p class="text-white/40 text-lg font-300 leading-relaxed mb-8 max-w-lg">Your profile is your resume. Every part of it is free — the full feed, a Most Hyped ring for every sport you play, and stat cards built to pull eyes onto your film. No plan to pick, no card to enter.</p>
       <ul class="flex flex-col gap-4 mb-10">
         <li class="flex items-start gap-3">
           <span class="pro-check">✓</span>
-          <span class="text-white/70 text-sm font-300 leading-relaxed">Full feed access — no lock after your first couple posts</span>
+          <span class="text-white/70 text-sm font-300 leading-relaxed">The full feed, wide open — every athlete, every post</span>
         </li>
         <li class="flex items-start gap-3">
           <span class="pro-check">✓</span>
@@ -668,7 +665,7 @@
         </li>
       </ul>
       <div class="flex flex-wrap items-center gap-4 fade fade-d1">
-        <a href="social-app/login.html?tab=signup" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Unlock Pro</a>
+        <a href="social-app/login.html?tab=signup" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Make Your Free Account</a>
         <a href="social-app/login.html?tab=login" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-8 py-4 rounded-sm inline-block">Already Have an Account?</a>
       </div>
     </div>
@@ -677,8 +674,8 @@
       <div class="pro-mock-glow"></div>
       <div class="pro-mock">
         <span class="pro-badge">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Pro Feature
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Free
         </span>
 
         <div class="pro-tabs" role="tablist" aria-label="Preview switch">
@@ -691,21 +688,18 @@
             <div class="pro-ring">
               <div class="pro-ring-circle" style="background:linear-gradient(135deg,#4c1d95,#a855f7,#c084fc);">
                 <div class="pro-ring-inner"><span style="width:20px;height:20px;background:#a855f7;-webkit-mask:url('social-app/star.png') no-repeat center/contain;mask:url('social-app/star.png') no-repeat center/contain;display:block;"></span></div>
-                <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
               </div>
               <span class="pro-ring-label">Most Hyped</span>
             </div>
             <div class="pro-ring">
               <div class="pro-ring-circle" style="background:linear-gradient(135deg,#0a4a8f,#1E90FF,#5db4ff);">
                 <div class="pro-ring-inner"><img alt="" src="social-app/icons/icon-football.png" width="20" height="20" style="object-fit:contain;filter:brightness(0) invert(1);"></div>
-                <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
               </div>
               <span class="pro-ring-label">Football</span>
             </div>
             <div class="pro-ring">
               <div class="pro-ring-circle" style="background:linear-gradient(135deg,#b23e00,#ff6b00,#ffa14d);">
                 <div class="pro-ring-inner"><img alt="" src="social-app/icons/icons8-basketball-50.png" width="20" height="20" style="object-fit:contain;filter:brightness(0) invert(1);"></div>
-                <div class="pro-ring-lock"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
               </div>
               <span class="pro-ring-label">Basketball</span>
             </div>
@@ -724,8 +718,8 @@
             <div class="pro-post-media">
               <div class="pro-lock-overlay">
                 <a href="social-app/login.html?tab=signup" class="pro-unlock-pill ripple-btn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  Unlock Pro
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="6" x2="19" y2="12"/><line x1="22" y1="9" x2="16" y2="9"/></svg>
+                  Make Your Free Account
                 </a>
               </div>
             </div>
@@ -975,9 +969,9 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-4 fade fade-d3">
-      <a href="social-app/coach-login.html?tab=signup" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Create a Coach Account</a>
+      <a href="social-app/coach-login.html?tab=signup" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Create a Free Coach Account</a>
       <a href="social-app/coach-login.html?tab=login" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-8 py-4 rounded-sm inline-block">Coach Sign In</a>
-      <span class="s-label">Free to Browse — No Pitch, No Pressure</span>
+      <span class="s-label">Free to Join — No Pitch, No Pressure</span>
     </div>
   </div>
 </section>
@@ -991,10 +985,10 @@
     </h2>
     <p class="text-white/40 text-lg font-300 max-w-lg mx-auto mb-10 fade fade-d2">Build your resume, post your highlights, and let the film do the recruiting for you.</p>
     <div class="flex flex-wrap justify-center gap-4 fade fade-d3">
-      <button onclick="openRoleModal()" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-10 py-4 rounded-sm inline-block">Create a Profile</button>
+      <button onclick="openRoleModal()" class="g-btn ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white px-10 py-4 rounded-sm inline-block">Make Your Free Account</button>
       <a href="booking.html" class="ghost ripple-btn mag-btn cond text-base font-700 tracking-[0.12em] uppercase text-white/70 hover:text-white px-10 py-4 rounded-sm inline-block">Book a Session</a>
     </div>
-    <p class="s-label mt-6 fade fade-d3">Takes Less Than 2 Minutes</p>
+    <p class="s-label mt-6 fade fade-d3">Always Free — Takes Less Than 2 Minutes</p>
   </div>
 </section>
 
@@ -1018,7 +1012,7 @@
           <a href="gallery.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Gallery</a>
           <a href="services.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Services</a>
           <a href="booking.html" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Book a Session</a>
-          <a href="javascript:void(0)" onclick="openRoleModal()" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Create an Account</a>
+          <a href="javascript:void(0)" onclick="openRoleModal()" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Create Free Account</a>
           <a href="javascript:void(0)" onclick="openSignInModal()" class="cond text-sm tracking-[0.1em] uppercase text-white/40 hover:text-white transition-colors">Sign In</a>
         </div>
       </div>

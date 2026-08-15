@@ -93,50 +93,6 @@
   .section-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
   .section-body { padding: 20px 22px; }
 
-  /* ── Subscription card ── */
-  .sub-card {
-    border-radius: 12px; padding: 18px 20px;
-    background: rgba(30,144,255,0.05); border: 1px solid rgba(30,144,255,0.15);
-    margin-bottom: 14px;
-  }
-  .sub-card.inactive {
-    background: rgba(255,255,255,0.02); border-color: var(--border);
-  }
-  .sub-label { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
-  .sub-status {
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-  }
-  .sub-plan { font-size: 18px; font-weight: 800; color: #fff; }
-  .sub-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px;
-    background: rgba(57,211,83,0.1); border: 1px solid rgba(57,211,83,0.25);
-    font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #39D353;
-  }
-  .sub-badge.inactive { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
-  .sub-meta { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 6px; }
-  .sub-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-  .sub-upgrade-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 11px 22px; border-radius: 10px;
-    background: var(--grad); border: none; color: #fff;
-    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
-    transition: opacity 0.15s, transform 0.15s;
-  }
-  .sub-upgrade-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-  .sub-cancel-btn {
-    padding: 11px 18px; border-radius: 10px;
-    background: rgba(255,77,109,0.07); border: 1px solid rgba(255,77,109,0.18);
-    color: rgba(255,77,109,0.6); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
-    transition: all 0.15s;
-  }
-  .sub-cancel-btn:hover { background: rgba(255,77,109,0.14); color: #ff4d6d; }
-
-  /* ── Feature list ── */
-  .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .feat-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.7); }
-  .feat-check { width: 16px; height: 16px; border-radius: 50%; background: rgba(57,211,83,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
   /* ── Toggles ── */
   .toggle-row {
     display: flex; align-items: center; justify-content: space-between;
@@ -256,10 +212,6 @@
       <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       Settings
     </a>
-    <a class="nav-link" id="nav-upgrade" href="coach-checkout.html" style="display:none;color:#fff;font-weight:700;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);margin-top:6px;">
-      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-      Upgrade to Pro
-    </a>
     <a class="nav-link" href="#" onclick="logout();return false;">
       <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       Sign Out
@@ -290,20 +242,6 @@
         <p class="page-title">Settings</p>
         <p class="page-sub">Coach account preferences</p>
       </div>
-    </div>
-
-    <!-- ── Subscription ── -->
-    <div class="settings-section">
-      <div class="section-header">
-        <div class="section-icon" style="background:rgba(57,211,83,0.08);">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div>
-          <p class="section-title">Subscription</p>
-          <p class="section-sub">Manage your EyeScout Pro plan</p>
-        </div>
-      </div>
-      <div class="section-body" id="sub-section"></div>
     </div>
 
     <!-- ── Notifications ── -->
@@ -371,21 +309,6 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Cancel modal -->
-<div class="cancel-overlay" id="cancel-overlay">
-  <div class="cancel-modal">
-    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-    </div>
-    <p style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;">Cancel Subscription?</p>
-    <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.65;margin-bottom:24px;">You'll lose access to Pro scouting features at the end of your current billing period.</p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button id="confirm-cancel-btn" onclick="confirmCancel()" style="padding:13px;border-radius:10px;background:rgba(255,77,109,0.09);border:1px solid rgba(255,77,109,0.22);color:rgba(255,77,109,0.8);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,77,109,0.18)';this.style.color='#ff4d6d'" onmouseout="this.style.background='rgba(255,77,109,0.09)';this.style.color='rgba(255,77,109,0.8)'">Yes, Cancel Subscription</button>
-      <button onclick="closeCancelModal()" style="padding:13px;border-radius:10px;background:var(--grad);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.95;transition:opacity 0.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.95'">Keep My Subscription</button>
-    </div>
-  </div>
-</div>
-
 <!-- Delete account confirmation -->
 <div class="cancel-overlay" id="delete-overlay" onclick="if(event.target===this)closeDeleteModal()">
   <div class="cancel-modal" role="alertdialog" aria-labelledby="coach-delete-title" style="text-align:center;">
@@ -439,110 +362,6 @@
     if (saved.profilePhoto) {
       document.getElementById('sb-avatar').innerHTML = `<img alt="" src="${saved.profilePhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     }
-  }
-
-  // ── Subscription ─────────────────────────────────────────────────────────────
-  function getSubKey() { return 'es_coach_sub_' + coach.id; }
-  function isCoachPro() {
-    const sub = JSON.parse(localStorage.getItem(getSubKey()) || 'null');
-    return typeof _subHasAccess === 'function' ? _subHasAccess(sub) : !!(sub && sub.status === 'active');
-  }
-  // Persistent sidebar reminder — visible on every coach page.
-  function applyUpgradeNavLink() {
-    const el = document.getElementById('nav-upgrade');
-    if (el) el.style.display = isCoachPro() ? 'none' : 'flex';
-  }
-
-  function renderSubSection() {
-    applyUpgradeNavLink();
-    const sub = JSON.parse(localStorage.getItem(getSubKey()) || 'null');
-    const el = document.getElementById('sub-section');
-
-    if (typeof _subHasAccess === 'function' ? _subHasAccess(sub) : sub?.status === 'active') {
-      const price = sub.price || 15;
-      const isCancelled = sub.status === 'cancelled';
-      const start = new Date(sub.startDate || sub.started_at || Date.now());
-      const next  = new Date(sub.accessUntil || sub.nextBillingDate || (function () {
-        const s = new Date(sub.startDate || sub.started_at || Date.now());
-        return new Date(s.getFullYear(), s.getMonth() + 1, s.getDate());
-      })());
-      const fmt   = d => isNaN(d) ? '—' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      el.innerHTML = `
-        <div class="sub-card">
-          <p class="sub-label">Current Plan</p>
-          <div class="sub-status">
-            <span class="sub-plan">Pro — $${price}/mo</span>
-            <span class="sub-badge"${isCancelled ? ' style="background:rgba(255,77,109,0.12);color:#ff4d6d;border-color:rgba(255,77,109,0.3);"' : ''}>${isCancelled ? 'Cancelled' : 'Active'}</span>
-          </div>
-          <p class="sub-meta">${isCancelled ? 'Cancelled · Pro access until ' + fmt(next) : 'Started ' + fmt(start) + ' · Renews ' + fmt(next)}</p>
-          <div class="feat-grid">
-            <div class="feat-item"><div class="feat-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Full player scouting</div>
-            <div class="feat-item"><div class="feat-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited messaging</div>
-            <div class="feat-item"><div class="feat-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Save player lists</div>
-            <div class="feat-item"><div class="feat-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Highlight reel access</div>
-          </div>
-          <div class="sub-actions">
-            ${isCancelled
-              ? `<p style="font-size:12px;color:rgba(255,255,255,0.7);">Your Pro access ends ${fmt(next)}. You won't be charged again.</p>`
-              : `<button class="sub-cancel-btn" onclick="showCancelModal()">Cancel Subscription</button>`}
-          </div>
-        </div>`;
-    } else {
-      el.innerHTML = `
-        <div class="sub-card inactive">
-          <p class="sub-label">Current Plan</p>
-          <div class="sub-status">
-            <span class="sub-plan">Free</span>
-            <span class="sub-badge inactive">No Subscription</span>
-          </div>
-          <p class="sub-meta">Upgrade to Pro to unlock the full scouting platform.</p>
-          <div class="feat-grid" style="margin-top:14px;">
-            <div class="feat-item"><div class="feat-check" style="background:rgba(30,144,255,0.1);"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Full player scouting</div>
-            <div class="feat-item"><div class="feat-check" style="background:rgba(30,144,255,0.1);"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited messaging</div>
-            <div class="feat-item"><div class="feat-check" style="background:rgba(30,144,255,0.1);"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Save player lists</div>
-            <div class="feat-item"><div class="feat-check" style="background:rgba(30,144,255,0.1);"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#1E90FF" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Highlight reel access</div>
-          </div>
-          <div class="sub-actions">
-            <button class="sub-upgrade-btn" onclick="window.location.href='coach-checkout.html'">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              Upgrade to Pro — $15/mo
-            </button>
-          </div>
-        </div>`;
-    }
-  }
-
-  // ── Cancel flow ──────────────────────────────────────────────────────────────
-  function showCancelModal() { document.getElementById('cancel-overlay').classList.add('open'); }
-  function closeCancelModal() { document.getElementById('cancel-overlay').classList.remove('open'); }
-
-  async function confirmCancel() {
-    const btn = document.getElementById('confirm-cancel-btn');
-    btn.disabled = true;
-    btn.textContent = 'Cancelling…';
-    const sub = JSON.parse(localStorage.getItem(getSubKey()) || '{}');
-
-    // Cancel the real PayPal subscription first. If it genuinely fails, don't mark
-    // it cancelled locally — otherwise PayPal would keep billing while the app hides it.
-    if (sub.paypalSubscriptionId && typeof _cancelPayPalSubscription === 'function') {
-      const result = await _cancelPayPalSubscription(sub.paypalSubscriptionId);
-      if (!result.ok && !result.notConfigured) {
-        btn.disabled = false;
-        btn.textContent = 'Yes, Cancel Subscription';
-        alert('We couldn\'t cancel your PayPal subscription automatically: ' + (result.error || 'unknown error') + '\n\nPlease try again, or cancel it from your PayPal account.');
-        return;
-      }
-    }
-
-    sub.status = 'cancelled';
-    sub.cancelledAt = new Date().toISOString();
-    // Keep Pro access until the end of the period already paid for.
-    sub.accessUntil = sub.nextBillingDate || sub.accessUntil || null;
-    localStorage.setItem(getSubKey(), JSON.stringify(sub));
-    if (typeof _sbSaveSubscription === 'function') _sbSaveSubscription(coach.id, 'cancelled', sub.paypalSubscriptionId, sub.accessUntil);
-    closeCancelModal();
-    renderSubSection();
-    showToast('Subscription cancelled');
   }
 
   // ── Notification prefs ────────────────────────────────────────────────────────
@@ -637,7 +456,6 @@
   }
 
   // ── Init ─────────────────────────────────────────────────────────────────────
-  renderSubSection();
   loadPrefs();
 </script>
 </body>

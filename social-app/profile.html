@@ -2102,20 +2102,6 @@
     }
   }
 
-  async function uploadToDropbox(file, folder) {
-    const res = await fetch('/api/dropbox-upload', {
-      method: 'POST',
-      headers: {
-        'X-Filename': encodeURIComponent(file.name || 'photo.jpg'),
-        'X-Folder': folder,
-        'Content-Type': 'application/octet-stream',
-      },
-      body: file,
-    });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || res.status); }
-    const { url } = await res.json();
-    return url;
-  }
 
   function saveProfile() {
     const p = getLatestPlayer();
@@ -2445,6 +2431,10 @@
     }
     thread.messages.push({ from: 'coach', text, timestamp: new Date().toISOString(), read: false });
     localStorage.setItem('es_messages', JSON.stringify(allMessages));
+    // This page used to stop at localStorage, so a message sent from a player's
+    // profile never left the sender's browser at send time. Sync it, then notify.
+    if (typeof _sbSaveThread === 'function') _sbSaveThread(thread);
+    if (typeof _notifyNewMessage === 'function') _notifyNewMessage(thread.id, playerId, coachSession.id);
     document.getElementById('coach-msg-overlay')?.remove();
     const t = document.createElement('div');
     t.textContent = 'Message sent!';

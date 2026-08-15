@@ -732,181 +732,64 @@ function handlePayPalCancel(req, res) {
   });
 }
 
-// ── PayPal subscription renewal check ───────────────────────────────────────
-// When a subscription is active and the billing date has passed, check PayPal
-// to see if it's still active (and thus should be renewed). If so, bump the
-// expires_at in Supabase to extend access for another month.
-function handleSubscriptionCheck(req, res) {
-  const cors = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
-  const chunks = [];
-  req.on('data', c => chunks.push(c));
-  req.on('end', async () => {
-    try {
-      if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET || !SUPABASE_SERVICE_ROLE_KEY) {
-        res.writeHead(200, cors);
-        res.end(JSON.stringify({ ok: false, notConfigured: true }));
-        return;
-      }
-      const { paypalSubscriptionId, userId } = JSON.parse(Buffer.concat(chunks).toString() || '{}');
-      if (!paypalSubscriptionId || !userId) throw new Error('Missing paypalSubscriptionId or userId');
-
-      // Query PayPal for the subscription status
-      const ppSub = await paypalGetSubscription(paypalSubscriptionId);
-
-      // If it's still active in PayPal, extend the expires_at in Supabase
-      if (ppSub.status === 'ACTIVE') {
-        const newExpiresAt = new Date(Date.now() + 30 * 86400000).toISOString(); // +30 days
-        const host = SUPABASE_URL.replace(/^https?:\/\//, '');
-        await new Promise((resolve, reject) => {
-          const sbReq = https.request({
-            hostname: host,
-            path: `/rest/v1/subscriptions?user_id=eq.${encodeURIComponent(userId)}`,
-            method: 'PATCH',
-            headers: {
-              apikey: SUPABASE_SERVICE_ROLE_KEY,
-              Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-              'Content-Type': 'application/json',
-            },
-          }, sbResp => {
-            const body = [];
-            sbResp.on('data', d => body.push(d));
-            sbResp.on('end', () => {
-              if (sbResp.statusCode >= 200 && sbResp.statusCode < 300) resolve();
-              else reject(new Error(`Supabase update failed: ${sbResp.statusCode}`));
-            });
-          });
-          sbReq.on('error', reject);
-          sbReq.write(JSON.stringify({ expires_at: newExpiresAt }));
-          sbReq.end();
-        });
-        res.writeHead(200, cors);
-        res.end(JSON.stringify({ ok: true, renewed: true, expiresAt: newExpiresAt }));
-      } else {
-        // Subscription is not active in PayPal (cancelled, etc)
-        res.writeHead(200, cors);
-        res.end(JSON.stringify({ ok: true, renewed: false, ppStatus: ppSub.status }));
-      }
-    } catch (err) {
-      res.writeHead(500, cors);
-      res.end(JSON.stringify({ ok: false, error: err.message }));
-    }
-  });
-}
-
-// Activate a Pro subscription AFTER verifying with PayPal that the subscription
-// is real and active. The browser can no longer grant Pro itself — RLS blocks
-// client writes to `subscriptions`, so this service-role path is the only writer.
-// Flow: client passes the PayPal subscription id from onApprove → we confirm it
-// with PayPal → we upsert the row with the service-role key.
-function handleSubscriptionActivate(req, res) {
-  const cors = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
-  const chunks = [];
-  req.on('data', c => chunks.push(c));
-  req.on('end', async () => {
-    try {
-      if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET || !SUPABASE_SERVICE_ROLE_KEY) {
-        res.writeHead(200, cors);
-        res.end(JSON.stringify({ ok: false, notConfigured: true, error: 'PayPal or Supabase service key not set on the server.' }));
-        return;
-      }
-      const { paypalSubscriptionId, userId, plan } = JSON.parse(Buffer.concat(chunks).toString() || '{}');
-      if (!paypalSubscriptionId || !userId) throw new Error('Missing paypalSubscriptionId or userId');
-
-      // 1) Confirm the subscription is genuinely active/approved in PayPal.
-      const ppSub = await paypalGetSubscription(paypalSubscriptionId);
-      if (ppSub.status !== 'ACTIVE' && ppSub.status !== 'APPROVED') {
-        res.writeHead(402, cors);
-        res.end(JSON.stringify({ ok: false, error: `PayPal subscription is not active (status: ${ppSub.status || 'unknown'})` }));
-        return;
-      }
-
-      // 2) Write the row with the service-role key (bypasses RLS). Upsert on user_id.
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + 30 * 86400000).toISOString(); // +30 days
-      const row = {
-        user_id: userId, status: 'active', plan: plan || 'pro', price: 15,
-        started_at: now.toISOString(), expires_at: expiresAt,
-        paypal_subscription_id: paypalSubscriptionId,
-      };
-      const host = SUPABASE_URL.replace(/^https?:\/\//, '');
-      await new Promise((resolve, reject) => {
-        const sbReq = https.request({
-          hostname: host,
-          path: `/rest/v1/subscriptions?on_conflict=user_id`,
-          method: 'POST',
-          headers: {
-            apikey: SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-            Prefer: 'resolution=merge-duplicates',
-          },
-        }, sbResp => {
-          const body = [];
-          sbResp.on('data', d => body.push(d));
-          sbResp.on('end', () => {
-            if (sbResp.statusCode >= 200 && sbResp.statusCode < 300) resolve();
-            else reject(new Error(`Supabase upsert failed (${sbResp.statusCode}): ${Buffer.concat(body).toString().slice(0, 200)}`));
-          });
-        });
-        sbReq.on('error', reject);
-        sbReq.write(JSON.stringify(row));
-        sbReq.end();
-      });
-
-      res.writeHead(200, cors);
-      res.end(JSON.stringify({ ok: true, expiresAt }));
-    } catch (err) {
-      res.writeHead(500, cors);
-      res.end(JSON.stringify({ ok: false, error: err.message }));
-    }
-  });
-}
-
 // Delete a Supabase Auth user by id. Requires the service-role key (admin API),
 // which is why this must run on the server and never in the browser.
-function handleDeleteAuthUser(req, res) {
+// AUTHORIZATION (added 2026-08-15 — this endpoint previously had NONE).
+//
+// It deletes a Supabase Auth user with the SERVICE-ROLE key, and it used to take
+// the target `userId` straight from the request body with no check at all. Any
+// caller who knew a user id could delete that account, and ids are not secret —
+// they are returned by public RPCs and embedded in feed payloads. Combined with
+// the wide-open CORS header below, any web page could have fired it.
+//
+// The Vercel twin (api/delete-user.js) already required the caller to prove
+// ownership; this copy is what `npm start` runs, so it is the one that actually
+// serves production, and it had drifted. Both now enforce the same rule:
+// validate the caller's own access token and require it to belong to `userId`.
+async function handleDeleteAuthUser(req, res) {
   const cors = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
+  const send = (code, obj) => { res.writeHead(code, cors); res.end(JSON.stringify(obj)); };
   const chunks = [];
   req.on('data', c => chunks.push(c));
-  req.on('end', () => {
+  req.on('end', async () => {
     try {
       if (!SUPABASE_SERVICE_ROLE_KEY) {
         // Key not set yet → tell the client so it can still finish the local delete.
-        res.writeHead(200, cors);
-        res.end(JSON.stringify({ ok: false, notConfigured: true, error: 'SUPABASE_SERVICE_ROLE_KEY not set on the server.' }));
-        return;
+        return send(200, { ok: false, notConfigured: true, error: 'SUPABASE_SERVICE_ROLE_KEY not set on the server.' });
       }
       const { userId } = JSON.parse(Buffer.concat(chunks).toString() || '{}');
-      if (!userId) throw new Error('No userId provided');
+      if (!userId) return send(400, { ok: false, error: 'No userId provided' });
 
-      const host = SUPABASE_URL.replace(/^https?:\/\//, '');
-      const areq = https.request({
-        hostname: host,
-        path: `/auth/v1/admin/users/${encodeURIComponent(userId)}`,
+      // The caller must present their own Supabase session token.
+      const authHeader = req.headers.authorization || req.headers.Authorization || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+      if (!token) return send(401, { ok: false, error: 'Not authorized (missing session token)' });
+
+      // Resolve who that token actually belongs to, and require it to be the
+      // account being deleted. This is the whole check — without it the service
+      // -role key below will delete anyone.
+      const who = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` },
+      });
+      if (!who.ok) return send(401, { ok: false, error: 'Invalid or expired session' });
+      const me = await who.json().catch(() => ({}));
+      if (!me || !me.id || me.id !== userId) {
+        return send(403, { ok: false, error: 'You can only delete your own account' });
+      }
+
+      // Ownership confirmed → delete.
+      const del = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${encodeURIComponent(userId)}`, {
         method: 'DELETE',
         headers: {
           apikey: SUPABASE_SERVICE_ROLE_KEY,
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
         },
-      }, ar => {
-        const body = [];
-        ar.on('data', c => body.push(c));
-        ar.on('end', () => {
-          const text = Buffer.concat(body).toString();
-          if (ar.statusCode >= 200 && ar.statusCode < 300) {
-            res.writeHead(200, cors);
-            res.end(JSON.stringify({ ok: true }));
-          } else {
-            res.writeHead(200, cors);
-            res.end(JSON.stringify({ ok: false, error: `Supabase returned ${ar.statusCode}: ${text}` }));
-          }
-        });
       });
-      areq.on('error', err => { res.writeHead(200, cors); res.end(JSON.stringify({ ok: false, error: err.message })); });
-      areq.end();
+      if (del.ok) return send(200, { ok: true });
+      const text = await del.text().catch(() => '');
+      return send(200, { ok: false, error: `Supabase returned ${del.status}: ${text}` });
     } catch (err) {
-      res.writeHead(200, cors);
-      res.end(JSON.stringify({ ok: false, error: err.message }));
+      return send(200, { ok: false, error: err.message });
     }
   });
 }
@@ -990,19 +873,6 @@ http.createServer((req, res) => {
   // PayPal — cancel a subscription for real (needs PAYPAL_CLIENT_ID/SECRET in .env)
   if (req.method === 'POST' && urlPath === '/api/paypal-cancel') {
     handlePayPalCancel(req, res);
-    return;
-  }
-
-  // Subscription check — if active and past billing date, check PayPal for renewal
-  if (req.method === 'POST' && urlPath === '/api/subscription-check') {
-    handleSubscriptionCheck(req, res);
-    return;
-  }
-
-  // Subscription activate — verify the PayPal subscription, then grant Pro
-  // server-side (the browser can no longer self-grant; RLS blocks client writes).
-  if (req.method === 'POST' && urlPath === '/api/subscription-activate') {
-    handleSubscriptionActivate(req, res);
     return;
   }
 

@@ -402,8 +402,9 @@ async function _sbSync(opts = {}) {
           // Coaches read their subscription under a different key — mirror it so an
           // active plan restores on a new device / browser.
           if (coachSession?.id === uid) localStorage.setItem('es_coach_sub_' + uid, JSON.stringify(subObj));
-          // Check if past billing date and should renew (fire-and-forget)
-          if (typeof _checkSubscriptionRenewal === 'function') _checkSubscriptionRenewal(subObj, uid);
+          // The auto-renew check used to fire here. It is gone deliberately: with
+          // Pro switched off, asking PayPal to extend a legacy subscriber's
+          // billing date is the one thing this code must never do.
         }
         break;
       case 'msgs': {
@@ -720,36 +721,50 @@ function _sbSaveSubscription(userId, status, paypalSubscriptionId, expiresAt) {
   _SB.from('subscriptions').upsert(row).then(undefined, () => {});
 }
 
-// Does this subscription currently grant Pro access?
-// An active plan always does. A cancelled plan still does until the end of the
-// period the user already paid for (accessUntil / nextBillingDate).
+// Does this viewer have full access? Yes — EyeScout is free.
+//
+// Ben's call (2026-08-15): Pro is switched off until there are enough users to
+// charge. Everything is unlocked on login alone.
+//
+// This is THE gate. Every isSubscribed() / isPro() / isCoachPro() on every page
+// delegates here, so returning true opens the feed, search, stories, posting,
+// messaging and coach discovery at once. The old paywall UI still exists behind
+// `if (!isSubscribed())` branches that can no longer run; the pages that were
+// nothing BUT paywall (subscription / checkout / coach-checkout) are gone.
+//
+// TO START CHARGING AGAIN: restore the body below and put back the entry points
+// listed in RESTORING-PRO.md. Do not forget the database — the posts table is
+// paywalled by RLS, so the SQL half has to come back too.
+//
+//   if (!sub) return false;
+//   if (sub.status === 'active') return true;
+//   if (sub.status === 'cancelled') {
+//     const until = sub.accessUntil || sub.nextBillingDate;
+//     return !!(until && Date.now() < new Date(until).getTime());
+//   }
+//   return false;
 function _subHasAccess(sub) {
-  if (!sub) return false;
-  if (sub.status === 'active') return true;
-  if (sub.status === 'cancelled') {
-    const until = sub.accessUntil || sub.nextBillingDate;
-    return !!(until && Date.now() < new Date(until).getTime());
-  }
-  return false;
+  return true;
 }
 
-// Set of player ids that currently have Pro access — used to gate coach
-// discovery (search + follow) to Pro players only. Backed by the
-// active_pro_player_ids() RPC (supabase-phase4-pro-discovery.sql), which is the
-// only path allowed to reveal other users' Pro status (RLS otherwise limits
-// subscription reads to your own row). Returns null on error OR when the RPC
-// isn't deployed yet, and callers MUST treat null as "unknown → don't filter"
-// (fail open) so the coach experience never breaks before the migration is run.
+// The SECOND gate, and the one that is easy to miss: coach discovery filtered
+// search + follow down to Pro players only, and it never went through
+// _subHasAccess(). Leaving it alone would have meant a free-for-everyone site
+// where coaches could still only find the handful of legacy Pro accounts.
+//
+// Returning null is the documented "unknown → don't filter" signal that both
+// callers (coach-feed refreshProIds, profile's coach view) already fail open on,
+// so every athlete is discoverable and followable.
+//
+// The active_pro_player_ids() RPC is still deployed and untouched; restoring the
+// body below is all that is needed to re-gate discovery.
+//
+//   const { data, error } = await _SB.rpc('active_pro_player_ids');
+//   if (error || !Array.isArray(data)) return null;
+//   const ids = data.map(row => typeof row === 'string' ? row : (row && (row.active_pro_player_ids ?? Object.values(row)[0])));
+//   return new Set(ids.filter(Boolean));
 async function _sbActiveProIds() {
-  try {
-    const { data, error } = await _SB.rpc('active_pro_player_ids');
-    if (error || !Array.isArray(data)) return null;
-    // SETOF uuid comes back as an array of strings (or 1-key objects, defensively).
-    const ids = data.map(row => typeof row === 'string' ? row : (row && (row.active_pro_player_ids ?? Object.values(row)[0])));
-    return new Set(ids.filter(Boolean));
-  } catch (e) {
-    return null;
-  }
+  return null;
 }
 
 // The 2-post feed teaser for non-Pro players. With the server-side paywall
@@ -941,24 +956,6 @@ async function _esSendToEditors(playerId) {
   return data;
 }
 
-// Check if an active subscription is past its billing date and should be renewed.
-// If so, ask the server to check PayPal and extend the renewal date. Fire-and-forget.
-async function _checkSubscriptionRenewal(sub, userId) {
-  if (!sub || sub.status !== 'active' || !sub.paypalSubscriptionId) return;
-  const nextBilling = new Date(sub.nextBillingDate || sub.accessUntil || Date.now());
-  if (Date.now() < nextBilling.getTime()) return; // Not yet time to renew
-  // Past billing date — check PayPal to see if it auto-renewed
-  try {
-    await fetch('/api/subscription-check', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paypalSubscriptionId: sub.paypalSubscriptionId, userId }),
-    });
-  } catch (e) {
-    // Silently fail — the check is nice-to-have, not critical. Access logic still works.
-  }
-}
-
 // Map a Supabase subscriptions row into the shape the settings pages render.
 // The DB stores only status/plan/started_at/expires_at, so we fill in the
 // price ($15/mo) and a next-billing date (started_at + 1 month) the UI expects.
@@ -994,6 +991,26 @@ function _threadToRow(thread) {
 
 function _sbSaveThread(thread) {
   _SB.from('messages').upsert(_threadToRow(thread)).then(undefined, () => {});
+}
+
+// Durable notification row for a newly sent message.
+//
+// EVERY place that sends a message must call this. There are four:
+// messages.html, coach-messages.html, coach-feed.html, profile.html. The email
+// pipeline keys off this row — activity.html only synthesizes message
+// notifications in memory, and a database webhook cannot see those.
+//
+// Carries no message text on purpose: the notification is readable by anyone who
+// can read the row, and the email deliberately never quotes the message.
+function _notifyNewMessage(threadId, targetId, actorId) {
+  if (!threadId || !targetId || !actorId || targetId === actorId) return;
+  if (typeof _sbAddNotification !== 'function') return;
+  _sbAddNotification({
+    id:       'msg_' + threadId + '_' + Date.now(),
+    targetId: targetId,
+    actorId:  actorId,
+    type:     'message',
+  });
 }
 
 // Batch version — one upsert request for many threads instead of one per thread

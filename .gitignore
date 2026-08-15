@@ -4,6 +4,9 @@
 .env.*
 !.env.example
 
+# macOS Finder junk — untracked but not ignored, so one `git add -A` commits it.
+.DS_Store
+
 # Client photo libraries — too large for Git and protected from public download
 images/
 

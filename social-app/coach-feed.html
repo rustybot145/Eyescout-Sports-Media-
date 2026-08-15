@@ -401,10 +401,6 @@
       <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       Settings
     </a>
-    <a class="nav-link" id="nav-upgrade" href="coach-checkout.html" style="display:none;color:#fff;font-weight:700;background:linear-gradient(90deg,#1E90FF 0%,#00C9A7 60%,#39D353 100%);margin-top:6px;">
-      <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-      Upgrade to Pro
-    </a>
     <a class="nav-link" href="#" onclick="logout();return false;">
       <span class="nav-link-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       Sign Out
@@ -540,10 +536,6 @@
     document.getElementById('pending-notice').style.display = (coach && !verified) ? 'flex' : 'none';
     document.getElementById('content-lock').style.display   = (coach && !verified) ? 'flex' : 'none';
     document.getElementById('sub-gate').style.display       = (coach && verified && !isCoachPro()) ? 'flex' : 'none';
-    // Persistent sidebar reminder — visible on every coach page, regardless of
-    // verification, so a non-Pro coach always has a way to upgrade.
-    const navUpgrade = document.getElementById('nav-upgrade');
-    if (navUpgrade) navUpgrade.style.display = isCoachPro() ? 'none' : 'flex';
   }
   applyCoachGates();
 
@@ -904,6 +896,7 @@
     thread.messages.push({ from: 'coach', text, timestamp: new Date().toISOString(), read: false });
     localStorage.setItem('es_messages', JSON.stringify(allMessages));
     if (typeof _sbSaveThread === 'function') _sbSaveThread(thread);
+    if (typeof _notifyNewMessage === 'function') _notifyNewMessage(thread.id, msgTargetId, coach.id);
 
     document.getElementById('msg-modal').classList.remove('open');
     msgTargetId = null;
