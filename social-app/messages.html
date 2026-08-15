@@ -685,6 +685,7 @@
     t.messages.push({ from: 'player', text, timestamp: new Date().toISOString(), read: true });
     saveThreads(threads);
     if (typeof _sbSaveThread === 'function') _sbSaveThread(t);
+    if (session && typeof _notifyNewMessage === 'function') _notifyNewMessage(t.id, t.coachId, session.id);
     input.value = '';
     renderChatWindow(t);
     renderConvoList();

@@ -456,7 +456,10 @@
 
   function render() {
     const list = document.getElementById('notif-list');
-    const followNotifs   = getNotifs().filter(n => n.type === 'follow');
+    // coach_follow is what profile.html writes when a COACH follows a player.
+    // It was never included here, so those follows — and the "See who's
+    // watching" link in the notification email — landed on an empty page.
+    const followNotifs   = getNotifs().filter(n => n.type === 'follow' || n.type === 'coach_follow');
     const removedNotifs   = getNotifs().filter(n => n.type === 'post_removed');
     const hypeNotifs      = getNotifs().filter(n => n.type === 'hype_milestone');
     const msgNotifs       = getMsgNotifs();
@@ -478,7 +481,7 @@
     }
 
     list.innerHTML = items.map((n, i) => {
-      if (n.type === 'follow') {
+      if (n.type === 'follow' || n.type === 'coach_follow') {
         const actor = getActorById(n.actorId);
         const alreadyFollowing = isFollowingBack(n.actorId);
         return `

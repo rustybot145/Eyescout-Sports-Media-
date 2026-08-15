@@ -1105,6 +1105,17 @@
   const isCoach = !session && !!coachSession;
   if (!session && !coachSession) window.location.href = 'login.html';
 
+  // Heartbeat for notify-email: it skips emailing anyone seen in-app in the last
+  // 10 min, since they already saw the notification here. Without this write the
+  // column stays null and every notification emails. Throttled to one write / 5 min.
+  const _seenId = (session || coachSession || {}).id;
+  const _seenPing = +(localStorage.getItem('es_seen_ping') || 0);
+  if (_seenId && Date.now() - _seenPing > 300000 && typeof _SB !== 'undefined') {
+    localStorage.setItem('es_seen_ping', String(Date.now()));
+    _SB.from('profiles').update({ last_seen_at: new Date().toISOString() })
+       .eq('id', _seenId).then(undefined, () => {});
+  }
+
   // Skeleton loaders: hide instantly if we already have cached data to paint
   // (returning visit), otherwise leave visible until the first sync resolves.
   function revealFeedContent() {
