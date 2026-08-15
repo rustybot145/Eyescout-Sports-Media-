@@ -441,7 +441,7 @@
     localStorage.setItem('es_messages', JSON.stringify(msgs));
     localStorage.removeItem('es_coach_session');
     localStorage.removeItem('es_coach_profile_' + coach.id);
-    localStorage.removeItem(getSubKey());
+    localStorage.removeItem('es_coach_sub_' + coach.id);
     window.location.href = 'coach-login.html';
   }
 
