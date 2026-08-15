@@ -548,19 +548,29 @@
         <p class="section-sub">Control what updates you receive</p>
       </div>
     </div>
+    <!-- One row per email the notify-email edge function actually sends
+         (ENABLED = message | coach_follow | admin_message). The element id IS
+         the prefs key, and an absent key means ON — see prefDefaults below. -->
     <div class="toggle-row">
       <div class="toggle-info">
-        <p class="toggle-label">Photos Ready</p>
-        <p class="toggle-desc">When your tournament photos are delivered</p>
+        <p class="toggle-label">New messages</p>
+        <p class="toggle-desc">Email me when someone sends me a message</p>
       </div>
-      <button class="toggle on" id="notif-photos" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Photos Ready"></button>
+      <button class="toggle on" id="notif_message" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="New messages"></button>
     </div>
     <div class="toggle-row">
       <div class="toggle-info">
-        <p class="toggle-label">Messages</p>
-        <p class="toggle-desc">When you receive a new direct message</p>
+        <p class="toggle-label">When a coach follows you</p>
+        <p class="toggle-desc">Email me when a college coach starts following me</p>
       </div>
-      <button class="toggle on" id="notif-messages" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Messages"></button>
+      <button class="toggle on" id="notif_coach_follow" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="When a coach follows you"></button>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <p class="toggle-label">Messages from EyeScout</p>
+        <p class="toggle-desc">Email me when the EyeScout team writes to me</p>
+      </div>
+      <button class="toggle on" id="notif_admin_message" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Messages from EyeScout"></button>
     </div>
   </div>
 
@@ -585,7 +595,7 @@
     <div class="toggle-row">
       <div class="toggle-info">
         <p class="toggle-label">Show Contact Info</p>
-        <p class="toggle-desc">Allow verified coaches to see your email and phone</p>
+        <p class="toggle-desc">Allow verified coaches to see your email</p>
       </div>
       <button class="toggle" id="priv-contact" onclick="togglePref(this)" role="switch" aria-checked="false" aria-label="Show Contact Info"></button>
     </div>
@@ -711,13 +721,20 @@
   const prefs = (_plPrefs && _plPrefs.prefs && Object.keys(_plPrefs.prefs).length)
     ? _plPrefs.prefs
     : JSON.parse(localStorage.getItem('es_prefs_' + session.id) || '{}');
-  const prefDefaults = { 'notif-photos': true, 'notif-messages': true, 'priv-stats': true, 'priv-contact': false };
-  Object.entries(prefDefaults).forEach(([id, def]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const val = prefs[id] !== undefined ? prefs[id] : def;
-    el.classList.toggle('on', val);
-  });
+  // Notification keys default to TRUE and are read back as "anything but an
+  // explicit false is on" — the edge function applies the same rule, so the
+  // millions of existing rows with no notif_* keys keep getting their mail.
+  const prefDefaults = { notif_message: true, notif_coach_follow: true, notif_admin_message: true, 'priv-stats': true, 'priv-contact': false };
+  function paintPrefs(src) {
+    Object.entries(prefDefaults).forEach(([id, def]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const val = src[id] !== undefined ? src[id] : def;
+      el.classList.toggle('on', !!val);
+      el.setAttribute('aria-checked', val ? 'true' : 'false');
+    });
+  }
+  paintPrefs(prefs);
 
   function togglePref(btn) {
     btn.classList.toggle('on');
@@ -818,9 +835,11 @@
     if (pendingPhoto)   patch.profilePhoto = pendingPhoto;
     if (removePhotoFlag) patch.profilePhoto = null;
 
-    // Save prefs
-    const prefIds = ['notif-photos','notif-messages','priv-stats','priv-contact'];
-    const newPrefs = {};
+    // Save prefs. Spread the loaded prefs first: this page doesn't own every key
+    // in the blob (priv-public is set elsewhere), and building newPrefs from
+    // scratch silently deleted the ones it doesn't render.
+    const prefIds = ['notif_message','notif_coach_follow','notif_admin_message','priv-stats','priv-contact'];
+    const newPrefs = { ...prefs };
     prefIds.forEach(id => { const el = document.getElementById(id); if (el) newPrefs[id] = el.classList.contains('on'); });
     localStorage.setItem('es_prefs_' + session.id, JSON.stringify(newPrefs));
     patch.prefs = newPrefs;
@@ -943,6 +962,10 @@
       }
       statRows = Array.isArray(fresh.sportStats) ? [...fresh.sportStats] : statRows;
       renderStatRows();
+      // Repaint the toggles from the SERVER copy — without this a change made on
+      // the phone (or the coach portal) never showed up here, because the first
+      // paint above ran off whatever localStorage happened to hold.
+      if (fresh.prefs) paintPrefs(fresh.prefs);
     } catch(e) { console.warn('[settings] Supabase sync error:', e.message); }
   })();
 </script>

@@ -490,12 +490,19 @@ async function _sbSync(opts = {}) {
   if (typeof showPostRemovedPopup === 'function') showPostRemovedPopup();
 }
 
-// Fetch one player's contact (email/phone/parent/zip) on demand. The DB only
-// returns it if that player opted in (prefs.priv-contact = 'true') or it's you;
-// otherwise every field comes back empty. Returns a legacy-shaped object so the
-// caller can merge it straight onto a player object. Used by the profile info tab.
+// Fetch one player's contact on demand. The DB only returns it if that player
+// opted in (prefs.priv-contact = 'true') or it's you; otherwise every field comes
+// back empty. Returns a legacy-shaped object so the caller can merge it straight
+// onto a player object. Used by the profile info tab.
+//
+// NO PHONE. phone and parent_phone are deliberately absent from both the blank
+// and the mapping, and phase 11 drops them from the player_contact() return type
+// so they aren't in the response at all — hiding the row in the UI while still
+// shipping a minor's phone number down the wire is not hiding it. `.rpc()` also
+// resolves without throwing on an error response, so the c-is-falsy check is what
+// keeps a failed call from returning a half-built object.
 async function _sbPlayerContact(playerId) {
-  const blank = { email: '', phone: '', parentFirst: '', parentLast: '', parentEmail: '', parentPhone: '', zip: '' };
+  const blank = { email: '', parentFirst: '', parentLast: '', parentEmail: '', zip: '' };
   if (!playerId) return blank;
   try {
     const { data } = await _SB.rpc('player_contact', { p_id: playerId });
@@ -503,11 +510,9 @@ async function _sbPlayerContact(playerId) {
     if (!c) return blank;
     return {
       email:       c.email        || '',
-      phone:       c.phone        || '',
       parentFirst: c.parent_first || '',
       parentLast:  c.parent_last  || '',
       parentEmail: c.parent_email || '',
-      parentPhone: c.parent_phone || '',
       zip:         c.zip          || '',
     };
   } catch (e) { return blank; }

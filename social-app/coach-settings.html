@@ -255,19 +255,21 @@
           <p class="section-sub">Control what updates you receive</p>
         </div>
       </div>
+      <!-- One row per email a COACH can actually receive. coach_follow is
+           player-facing only, so there's deliberately no toggle for it here. -->
       <div class="toggle-row">
         <div class="toggle-info">
-          <p class="toggle-label">New Messages</p>
-          <p class="toggle-desc">When a player replies to your message</p>
+          <p class="toggle-label">New messages</p>
+          <p class="toggle-desc">Email me when a player replies to my message</p>
         </div>
-        <button class="toggle on" id="notif-messages" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="New Messages"></button>
+        <button class="toggle on" id="notif_message" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="New messages"></button>
       </div>
       <div class="toggle-row">
         <div class="toggle-info">
-          <p class="toggle-label">Tournament Announcements</p>
-          <p class="toggle-desc">Event and photo drop alerts</p>
+          <p class="toggle-label">Messages from EyeScout</p>
+          <p class="toggle-desc">Email me when the EyeScout team writes to me</p>
         </div>
-        <button class="toggle on" id="notif-events" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Tournament Announcements"></button>
+        <button class="toggle on" id="notif_admin_message" onclick="togglePref(this)" role="switch" aria-checked="true" aria-label="Messages from EyeScout"></button>
       </div>
     </div>
 
@@ -365,26 +367,53 @@
   }
 
   // ── Notification prefs ────────────────────────────────────────────────────────
+  // These live in profiles.prefs (the same JSONB blob the player Settings page
+  // writes), NOT just localStorage — the notify-email edge function reads the row,
+  // so a pref only kept on this device would never reach the mailer. localStorage
+  // is kept as the offline/first-paint cache.
+  const PREF_IDS = ['notif_message', 'notif_admin_message'];
   function getPrefKey() { return 'es_coach_prefs_' + coach.id; }
 
-  function loadPrefs() {
-    const prefs = JSON.parse(localStorage.getItem(getPrefKey()) || '{}');
-    ['notif-messages', 'notif-events'].forEach(id => {
+  // Whole blob, so a write here can't drop keys this page doesn't render.
+  let _prefs = JSON.parse(localStorage.getItem(getPrefKey()) || '{}');
+
+  function paintPrefs() {
+    PREF_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      const val = prefs[id];
-      if (val === false) el.classList.remove('on');
-      else el.classList.add('on');
+      // Absent means ON. Only an explicit false turns an email off.
+      const on = _prefs[id] !== false;
+      el.classList.toggle('on', on);
+      el.setAttribute('aria-checked', on ? 'true' : 'false');
     });
   }
 
-  function togglePref(btn) {
+  async function loadPrefs() {
+    paintPrefs();                      // instant paint from cache
+    if (typeof _SB === 'undefined') return;
+    try {
+      const { data } = await _SB.from('profiles').select('prefs').eq('id', coach.id).single();
+      if (data && data.prefs) {
+        _prefs = data.prefs;
+        localStorage.setItem(getPrefKey(), JSON.stringify(_prefs));
+        paintPrefs();                  // server wins — keeps devices in sync
+      }
+    } catch (e) { /* offline / not deployed: the cached paint stands */ }
+  }
+
+  async function togglePref(btn) {
     btn.classList.toggle('on');
     btn.setAttribute('aria-checked', btn.classList.contains('on') ? 'true' : 'false');
-    const prefs = JSON.parse(localStorage.getItem(getPrefKey()) || '{}');
-    prefs[btn.id] = btn.classList.contains('on');
-    localStorage.setItem(getPrefKey(), JSON.stringify(prefs));
-    showToast('Preference saved');
+    _prefs = { ..._prefs, [btn.id]: btn.classList.contains('on') };
+    localStorage.setItem(getPrefKey(), JSON.stringify(_prefs));
+    if (typeof _SB === 'undefined') return;
+    // Same guard the player Settings save uses: without a restored token the
+    // write goes out as `anon` and RLS drops it silently.
+    try { await _SB.auth.getSession(); } catch (e) {}
+    const { error } = await _SB.from('profiles').update({ prefs: _prefs }).eq('id', coach.id);
+    // Don't claim "saved" when the server refused — the email pipeline reads the
+    // row, so a failed write means the toggle did nothing that matters.
+    showToast(error ? 'Couldn’t save: ' + (error.message || 'server error') : 'Preference saved');
   }
 
   function confirmDelete() {
