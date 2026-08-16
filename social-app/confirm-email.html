@@ -133,6 +133,16 @@
   // Poll interval backs off so a tab left open all day is not hammering Supabase.
   let done = false;
 
+  // Only a CHANGE counts as "they just confirmed".
+  //
+  // Reading the current state and treating it as success is wrong: anyone who is
+  // already signed in — which is everyone testing this, and anyone who signed up
+  // on a device they were already logged into — gets bounced into the app the
+  // instant the page loads, and never sees that it is waiting for anything.
+  // So snapshot what was true at load, and only react to it becoming true later.
+  const hadLocalSessionAtLoad = !!(localStorage.getItem('es_session') || localStorage.getItem('es_coach_session'));
+  let confirmedAtLoad = null;   // resolved once by the first getUser()
+
   function finish() {
     if (done) return;
     done = true;
@@ -161,13 +171,21 @@
   // 3. Ask the server. `getUser()` hits the network rather than reading the cached
   //    token, so a confirmation that happened on another device is visible here.
   async function checkConfirmed() {
-    if (done) return;
+    if (done) return false;
     try {
       const { data } = await sb.auth.getUser();
-      if (data && data.user && data.user.email_confirmed_at) { finish(); return true; }
+      const confirmed = !!(data && data.user && data.user.email_confirmed_at);
+      // First pass just records the baseline — it never redirects.
+      if (confirmedAtLoad === null) {
+        confirmedAtLoad = confirmed;
+      } else if (confirmed && !confirmedAtLoad) {
+        finish(); return true;                    // went unconfirmed → confirmed
+      }
     } catch (e) {}
-    // Local session written by login.html in another tab of this same browser.
-    if (localStorage.getItem('es_session') || localStorage.getItem('es_coach_session')) { finish(); return true; }
+    // A session written by login.html in another tab of this browser, that was
+    // not already sitting there when this page opened.
+    const hasLocal = !!(localStorage.getItem('es_session') || localStorage.getItem('es_coach_session'));
+    if (hasLocal && !hadLocalSessionAtLoad) { finish(); return true; }
     return false;
   }
 
