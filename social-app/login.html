@@ -744,9 +744,10 @@
     // es_session would drop them into a UI backed by no auth session at all.
     // _finishConfirmedSignup() picks it up from user_metadata after they click.
     if (!data.session) {
-      btn.disabled = false;
-      btn.textContent = 'Create Profile';
-      _showConfirmNotice('email-taken', 'Almost there — check your email and click the confirmation link to finish.');
+      // Hand off to the waiting page. It polls until the link is clicked — from
+      // any device — and then walks them straight into the app, so a confirmed
+      // signup never dead-ends on "now go log in".
+      window.location.href = 'confirm-email.html?role=player&email=' + encodeURIComponent(email);
       return;
     }
 
@@ -949,9 +950,7 @@
     }
 
     if (!data.session) {
-      btn.disabled = false;
-      btn.textContent = 'Create Coach Account';
-      _showConfirmNotice('coach-email-taken', 'Almost there — check your email and click the confirmation link to finish.');
+      window.location.href = 'confirm-email.html?role=coach&email=' + encodeURIComponent(email);
       return;
     }
 

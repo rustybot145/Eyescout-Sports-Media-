@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Confirm Your Email</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: #fff; min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 40px 34px; max-width: 460px; width: 100%; text-align: center;
+  }
+  .logo { width: 60px; height: 60px; border-radius: 50%; object-fit: contain; margin: 0 auto 22px; display: block; }
+  h1 {
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+    font-size: 27px; letter-spacing: 0.05em; text-transform: uppercase;
+    margin-bottom: 12px; line-height: 1.1;
+  }
+  .g-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  p { font-size: 14px; color: rgba(255,255,255,0.62); line-height: 1.65; }
+  .addr {
+    display: inline-block; margin: 16px 0 22px; padding: 9px 16px; border-radius: 9px;
+    background: rgba(30,144,255,0.08); border: 1px solid rgba(30,144,255,0.22);
+    font-size: 13.5px; font-weight: 700; color: #fff; word-break: break-all;
+  }
+  /* Waiting indicator — this page's whole job is to look alive while it polls. */
+  .waiting { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 24px 0 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #1E90FF; animation: pulse 1.4s ease-in-out infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
+  .waiting-text { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 700; }
+  .btn {
+    display: block; width: 100%; padding: 13px; border-radius: 11px; border: none;
+    background: var(--grad); color: #fff; font-size: 13.5px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    font-family: inherit; margin-top: 22px; transition: opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { opacity: 0.88; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .link {
+    display: inline-block; margin-top: 16px; font-size: 12.5px;
+    color: rgba(255,255,255,0.45); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .link:hover { color: rgba(255,255,255,0.8); }
+  .msg { font-size: 12.5px; margin-top: 14px; display: none; line-height: 1.6; }
+  .hint { font-size: 12px; color: rgba(255,255,255,0.32); margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border); line-height: 1.6; }
+  .success-icon {
+    width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px;
+    background: rgba(57,211,83,0.12); border: 1px solid rgba(57,211,83,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Waiting state -->
+  <div id="waiting-state">
+    <img src="../logo-transparent.png" alt="EyeScout" class="logo">
+    <h1>Check Your<br><span class="g-text">Email</span></h1>
+    <p>We sent a confirmation link to</p>
+    <div class="addr" id="addr">your email</div>
+    <p>Click the link in that email and this page will take you straight into EyeScout — no need to come back and log in.</p>
+
+    <div class="waiting">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+    <div class="waiting-text">Waiting for confirmation</div>
+
+    <button class="btn" id="resend-btn" onclick="resend()">Resend Email</button>
+    <div class="msg" id="msg"></div>
+
+    <a class="link" href="login.html">Wrong email? Start over</a>
+
+    <p class="hint">
+      Nothing after a minute? Check spam or promotions — it comes from
+      <strong style="color:rgba(255,255,255,0.55);">info@eyescoutsports.com</strong>.
+      You can also open the link on your phone; this page will still let you in here.
+    </p>
+  </div>
+
+  <!-- Confirmed state — shown for a beat before the redirect so it isn't a jarring flash -->
+  <div id="done-state" style="display:none;">
+    <div class="success-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h1>You're <span class="g-text">In.</span></h1>
+    <p>Email confirmed — taking you to your profile…</p>
+  </div>
+</div>
+
+<script>
+  const sb = _SB;
+  const qs = new URLSearchParams(location.search);
+  const email = qs.get('email') || '';
+  const role  = qs.get('role') === 'coach' ? 'coach' : 'player';
+  if (email) document.getElementById('addr').textContent = email;
+
+  const msgEl = document.getElementById('msg');
+  function say(text, isError) {
+    msgEl.textContent = text;
+    msgEl.style.color = isError ? '#ff5f5f' : '#39D353';
+    msgEl.style.display = 'block';
+  }
+
+  // ── Detecting confirmation ──────────────────────────────────────────────────
+  // The link in the email opens login.html, which runs verifyOtp, creates the
+  // profile row and writes es_session / es_coach_session. This page only has to
+  // notice that happened. Three routes, because the click can land anywhere:
+  //
+  //   1. storage event  — link opened in another TAB of this browser. Fires the
+  //                       instant login.html writes the session key. Free, instant.
+  //   2. onAuthStateChange — same browser, session established in this context.
+  //   3. polling        — the fallback that covers the common real case: they
+  //                       confirmed on their PHONE while this tab sits open on a
+  //                       laptop. Nothing local fires, so we ask the server.
+  //
+  // Poll interval backs off so a tab left open all day is not hammering Supabase.
+  let done = false;
+
+  function finish() {
+    if (done) return;
+    done = true;
+    document.getElementById('waiting-state').style.display = 'none';
+    document.getElementById('done-state').style.display = 'block';
+    const session = JSON.parse(localStorage.getItem('es_session') || 'null');
+    setTimeout(() => {
+      if (role === 'coach' || localStorage.getItem('es_coach_session')) {
+        window.location.href = 'coach-pending.html';
+      } else {
+        window.location.href = session && session.id ? ('profile.html?id=' + session.id) : 'feed.html';
+      }
+    }, 1100);
+  }
+
+  // 1. Another tab finished the job.
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'es_session' || e.key === 'es_coach_session') {
+      if (e.newValue) finish();
+    }
+  });
+
+  // 2. This browser context got a session.
+  sb.auth.onAuthStateChange((_event, session) => { if (session) checkConfirmed(); });
+
+  // 3. Ask the server. `getUser()` hits the network rather than reading the cached
+  //    token, so a confirmation that happened on another device is visible here.
+  async function checkConfirmed() {
+    if (done) return;
+    try {
+      const { data } = await sb.auth.getUser();
+      if (data && data.user && data.user.email_confirmed_at) { finish(); return true; }
+    } catch (e) {}
+    // Local session written by login.html in another tab of this same browser.
+    if (localStorage.getItem('es_session') || localStorage.getItem('es_coach_session')) { finish(); return true; }
+    return false;
+  }
+
+  let delay = 3000;
+  (function poll() {
+    if (done) return;
+    setTimeout(async () => {
+      const hit = await checkConfirmed();
+      if (!hit) {
+        delay = Math.min(delay * 1.35, 30000);  // 3s → 30s ceiling
+        poll();
+      }
+    }, delay);
+  })();
+  checkConfirmed();
+
+  // ── Resend ──────────────────────────────────────────────────────────────────
+  // Supabase rate-limits this server-side; the local cooldown stops people
+  // hammering it into an error they can do nothing about.
+  let cooling = false;
+  async function resend() {
+    if (cooling) return;
+    if (!email) { say('Go back and sign up again so we know where to send it.', true); return; }
+    const btn = document.getElementById('resend-btn');
+    cooling = true; btn.disabled = true;
+    try {
+      const { error } = await sb.auth.resend({ type: 'signup', email });
+      say(error ? (error.message || 'Could not resend — try again shortly.') : 'Sent. Check your inbox.', !!error);
+    } catch (e) {
+      say('Could not resend — check your connection.', true);
+    }
+    let left = 60;
+    btn.textContent = `Resend in ${left}s`;
+    const t = setInterval(() => {
+      left -= 1;
+      if (left <= 0) {
+        clearInterval(t); cooling = false;
+        btn.disabled = false; btn.textContent = 'Resend Email';
+      } else {
+        btn.textContent = `Resend in ${left}s`;
+      }
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
