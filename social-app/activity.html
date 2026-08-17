@@ -11,6 +11,11 @@
 <script>
   function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
   var escAttr = escHtml;
+  // Escape for JS string literals inside inline on*="..." handlers. HTML-escaping
+  // alone is NOT enough there: the parser decodes &#39; back to ' before the JS
+  // is compiled, so a quote in the value would still break out of the literal.
+  function escJs(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/</g,'\\x3C').replace(/\r/g,'\\r').replace(/\n/g,'\\n').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');}
+  function escJsAttr(s){return escAttr(escJs(s));}
 </script>
 <style>
   :root {
@@ -447,7 +452,7 @@
   function avatarContent(p) {
     if (!p) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     if (p.profilePhoto) return `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    if (p.jersey) return `<span style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:14px;color:#fff;">#${p.jersey}</span>`;
+    if (p.jersey) return `<span style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:14px;color:#fff;">#${escHtml(p.jersey)}</span>`;
     // Coach or no jersey → initials
     const name = p.firstName ? `${p.firstName} ${p.lastName || ''}` : `${p.athleteFirst || ''} ${p.athleteLast || ''}`;
     const initials = name.trim().split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2) || '?';
@@ -486,7 +491,7 @@
         const alreadyFollowing = isFollowingBack(n.actorId);
         return `
           <div class="notif-item ${n.read ? '' : 'unread'} fade-in" style="animation-delay:${i*0.03}s">
-            <a href="profile.html?id=${n.actorId}" style="text-decoration:none;flex-shrink:0;">
+            <a href="profile.html?id=${escAttr(n.actorId)}" style="text-decoration:none;flex-shrink:0;">
               <div class="notif-avatar" style="background:linear-gradient(135deg,rgba(123,47,190,0.15),rgba(30,144,255,0.1));border-color:rgba(123,47,190,0.25);">
                 ${avatarContent(actor)}
                 <div class="notif-type-icon" style="background:#7B2FBE;">
@@ -498,7 +503,7 @@
               <p class="notif-text"><strong>${escHtml(n.actorName)}</strong> started following you</p>
               <p class="notif-time">${formatTime(n.timestamp)}</p>
             </div>
-            ${isCoachActor(n.actorId) ? '' : `<button class="follow-back-btn ${alreadyFollowing ? 'following' : ''}" onclick="followBack('${n.actorId}', this)">
+            ${isCoachActor(n.actorId) ? '' : `<button class="follow-back-btn ${alreadyFollowing ? 'following' : ''}" onclick="followBack('${escJsAttr(n.actorId)}', this)">
               ${alreadyFollowing ? 'Following' : 'Follow Back'}
             </button>`}
             ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}
@@ -519,7 +524,7 @@
               </div>
             </div>
             <div class="notif-body">
-              <p class="notif-text"><strong>${escHtml(n.actorName)}</strong> ${n.actorTitle ? `(${n.actorTitle}${n.actorSchool ? `, ${n.actorSchool}` : ''})` : ''} sent you a message</p>
+              <p class="notif-text"><strong>${escHtml(n.actorName)}</strong> ${n.actorTitle ? `(${escHtml(n.actorTitle)}${n.actorSchool ? `, ${escHtml(n.actorSchool)}` : ''})` : ''} sent you a message</p>
               <p class="notif-time" style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">"${escHtml(n.text)}"</p>
               <p class="notif-time" style="margin-top:4px;">${formatTime(n.timestamp)}</p>
             </div>
@@ -528,7 +533,7 @@
       }
 
       if (n.type === 'hype_milestone') {
-        const milestone = n.actorName || n.milestone || '';
+        const milestone = escHtml(n.actorName || n.milestone || '');
         return `
           <div class="notif-item ${n.read ? '' : 'unread'} fade-in" style="animation-delay:${i*0.03}s;cursor:default;">
             <div class="notif-avatar" style="background:rgba(168,85,247,0.14);border-color:rgba(168,85,247,0.3);">

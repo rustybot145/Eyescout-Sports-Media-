@@ -352,6 +352,15 @@
   const session = JSON.parse(localStorage.getItem('es_session') || 'null');
   if (!session) window.location.href = 'login.html';
 
+  // Escape user-supplied text before inserting into innerHTML (prevents stored XSS)
+  function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  var escAttr = escHtml;
+  // Escape for JS string literals inside inline on*="..." handlers. HTML-escaping
+  // alone is NOT enough there: the parser decodes &#39; back to ' before the JS
+  // is compiled, so a quote in the value would still break out of the literal.
+  function escJs(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/</g,'\\x3C').replace(/\r/g,'\\r').replace(/\n/g,'\\n').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');}
+  function escJsAttr(s){return escAttr(escJs(s));}
+
   // Subscription gate — creating posts is a Pro feature
   (function() {
     const sub = JSON.parse(localStorage.getItem('es_sub_' + (session?.id || '')) || 'null');
@@ -399,9 +408,9 @@
     noPhotos.style.display = 'none';
     grid.innerHTML = media.map((m, i) => {
       const inner = m.type === 'video'
-        ? `<video src="${m.src}#t=0.1" muted preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
+        ? `<video src="${escAttr(m.src)}#t=0.1" muted preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
            <div class="vid-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><polygon points="6 4 20 12 6 20"/></svg></div>`
-        : `<img src="${m.src}" alt="Media ${i+1}" loading="lazy">`;
+        : `<img src="${escAttr(m.src)}" alt="Media ${i+1}" loading="lazy">`;
       return `<div class="photo-tile" id="tile-${i}" onclick="selectMedia(${i})">${inner}
         <div class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>`;
@@ -424,8 +433,8 @@
       document.getElementById('step-pick').style.display = 'none';
       document.getElementById('step-caption').style.display = 'block';
       document.getElementById('selected-preview').innerHTML = m.type === 'video'
-        ? `<video src="${m.src}" controls playsinline></video>`
-        : `<img src="${m.src}" alt="Selected media">`;
+        ? `<video src="${escAttr(m.src)}" controls playsinline></video>`
+        : `<img src="${escAttr(m.src)}" alt="Selected media">`;
       selectedTournament = null;
       renderTournamentPicker();
       renderPostSportPicker();
@@ -493,13 +502,13 @@
     empty.style.display = 'none';
     list.innerHTML = tournaments.map(t => `
       <div class="tourn-pill${selectedTournament === t.name ? ' selected' : ''}"
-           id="tourn-${t.id}" onclick="selectTournament('${t.name}', '${t.id}')">
+           id="tourn-${escAttr(t.id)}" onclick="selectTournament('${escJsAttr(t.name)}', '${escJsAttr(t.id)}')">
         <div style="display:flex;align-items:center;gap:10px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-          <span style="font-weight:600;">${t.name}</span>
-          ${t.sport ? `<span style="font-size:12px;color:rgba(255,255,255,0.7);">${t.sport}</span>` : ''}
+          <span style="font-weight:600;">${escHtml(t.name)}</span>
+          ${t.sport ? `<span style="font-size:12px;color:rgba(255,255,255,0.7);">${escHtml(t.sport)}</span>` : ''}
         </div>
-        <span class="tag-badge">#${t.name.replace(/\s+/g,'')}</span>
+        <span class="tag-badge">#${escHtml(t.name.replace(/\s+/g,''))}</span>
       </div>`).join('');
   }
 

@@ -655,6 +655,10 @@
   let session = JSON.parse(localStorage.getItem('es_session') || 'null');
   if (!session) window.location.href = 'login.html';
 
+  // Escape user-supplied text before inserting into innerHTML (prevents stored XSS)
+  function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  var escAttr = escHtml;
+
   // Sport(s) are chosen once at signup and can't be changed here — no sport
   // editor in settings (see the "Athlete Info" section above).
 
@@ -702,14 +706,14 @@
   // Profile photo
   const preview = document.getElementById('photo-preview');
   if (p.profilePhoto) {
-    preview.innerHTML = `<img src="${p.profilePhoto}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+    preview.innerHTML = `<img src="${escAttr(p.profilePhoto)}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
   }
 
   // Sidebar
   document.getElementById('sb-name').textContent   = `${p.athleteFirst || ''} ${p.athleteLast || ''}`.trim() || 'My Profile';
   document.getElementById('sb-handle').textContent = p.jersey ? `#${p.jersey} · ${p.sport || ''}`.replace(/ · $/, '') : '@eyescout';
   const sbAv = document.getElementById('sb-avatar-inner');
-  if (p.profilePhoto) sbAv.innerHTML = `<img alt="" src="${p.profilePhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  if (p.profilePhoto) sbAv.innerHTML = `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
 
   // Bio counter
   document.getElementById('s-bio').addEventListener('input', function() {
@@ -748,9 +752,9 @@
     const container = document.getElementById('stat-rows');
     container.innerHTML = statRows.map((s, i) => `
       <div class="stat-row">
-        <input class="field-input" type="text" placeholder="Label (e.g. 40-Yard Dash)" aria-label="Stat label" value="${s.label || ''}"
+        <input class="field-input" type="text" placeholder="Label (e.g. 40-Yard Dash)" aria-label="Stat label" value="${escAttr(s.label || '')}"
           oninput="statRows[${i}].label = this.value" style="flex:1.4;">
-        <input class="field-input" type="text" placeholder="Value (e.g. 4.45s)" aria-label="Stat value" value="${s.value || ''}"
+        <input class="field-input" type="text" placeholder="Value (e.g. 4.45s)" aria-label="Stat value" value="${escAttr(s.value || '')}"
           oninput="statRows[${i}].value = this.value" style="flex:1;">
         <button class="stat-remove-btn" onclick="removeStatRow(${i})" aria-label="Remove stat">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -790,7 +794,7 @@
       const url = await _sbUploadImage('avatars', session.id, cropped.file);
       pendingPhoto = url;
       removePhotoFlag = false;
-      preview.innerHTML = `<img src="${url}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+      preview.innerHTML = `<img src="${escAttr(url)}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
       status.textContent = '✓ Ready to save';
       status.style.color = '#39D353';
     } catch (err) {
@@ -958,7 +962,7 @@
       document.getElementById('s-bio').value      = fresh.bio           || '';
       document.getElementById('bio-count').textContent = (fresh.bio || '').length;
       if (fresh.profilePhoto) {
-        document.getElementById('photo-preview').innerHTML = `<img src="${fresh.profilePhoto}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+        document.getElementById('photo-preview').innerHTML = `<img src="${escAttr(fresh.profilePhoto)}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
       }
       statRows = Array.isArray(fresh.sportStats) ? [...fresh.sportStats] : statRows;
       renderStatRows();

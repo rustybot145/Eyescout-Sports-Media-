@@ -213,7 +213,7 @@
     if (inner) {
       inner.style.background = 'transparent';
       inner.innerHTML = coachSession.profilePhoto
-        ? `<img alt="" src="${coachSession.profilePhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        ? `<img alt="" src="${escAttr(coachSession.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
         : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(30,144,255,0.7)" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
     }
   } else if (session) {

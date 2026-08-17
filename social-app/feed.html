@@ -1047,6 +1047,9 @@
       <div id="tournament-list"></div>
       <script>
         (function() {
+          // Local escaper — escHtml() lives in a later <script> block, so it
+          // isn't defined yet when this first-paint snippet runs.
+          function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
           var data = JSON.parse(localStorage.getItem('es_tournaments') || '[]');
           var el = document.getElementById('tournament-list');
           // Filter to the viewer's sport (player or coach) so wrong-sport events
@@ -1069,8 +1072,8 @@
             el.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.7);padding:4px 0;">No tournaments yet.</p>';
           } else {
             el.innerHTML = '<div class="tournament-tags">' + data.map(function(t) {
-              var tag = (t.name || '');
-              return '<a class="t-tag" href="tournament.html?name=' + encodeURIComponent(t.name || '') + '"><span class="t-tag-name">' + tag + '</span><span class="t-tag-meta">' + (t.sport || '') + '</span></a>';
+              var tag = esc(t.name || '');
+              return '<a class="t-tag" href="tournament.html?name=' + encodeURIComponent(t.name || '') + '"><span class="t-tag-name">' + tag + '</span><span class="t-tag-meta">' + esc(t.sport || '') + '</span></a>';
 
             }).join('') + '</div>';
           }
@@ -1141,6 +1144,16 @@
   }
   // Escape for use inside a double-quoted HTML attribute (e.g. src="...")
   function escAttr(s) { return escHtml(s); }
+  // Escape for JS string literals inside inline on*="..." handlers. HTML-escaping
+  // alone is NOT enough there: the parser decodes &#39; back to ' before the JS
+  // is compiled, so a quote in the value would still break out of the literal.
+  function escJs(s) {
+    return String(s == null ? '' : s)
+      .replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"')
+      .replace(/</g, '\\x3C').replace(/\r/g, '\\r').replace(/\n/g, '\\n')
+      .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  }
+  function escJsAttr(s) { return escAttr(escJs(s)); }
 
   // Relative time — defined here (first script block) so renderLivePlayerPosts,
   // which runs on load, can use it. (Function decls don't hoist across <script> tags.)
@@ -1241,8 +1254,8 @@
             : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`}
         </div></div>
         <div>
-          <p class="suggest-name">${t.athleteFirst} ${t.athleteLast} · #${t.jersey}</p>
-          <p class="suggest-meta">${t.sport} · ${t.gradYear}</p>
+          <p class="suggest-name">${escHtml(t.athleteFirst)} ${escHtml(t.athleteLast)} · #${escHtml(t.jersey)}</p>
+          <p class="suggest-meta">${escHtml(t.sport)} · ${escHtml(t.gradYear)}</p>
         </div>
       </div>`).join('');
   }
@@ -1516,7 +1529,7 @@
       const followBtn   = showFollow
         ? `<button class="post-follow${following ? ' following' : ''}" data-follow="${escAttr(post.authorId)}" onclick="toggleFollow('${escAttr(post.authorId)}',this)">${following ? 'Following' : 'Follow'}</button>`
         : '';
-      const profileHref = isSubscribed() ? `profile.html?id=${post.authorId}` : 'subscription.html';
+      const profileHref = isSubscribed() ? `profile.html?id=${escAttr(post.authorId)}` : 'subscription.html';
 
       return `
       <article class="post" data-live="true">
@@ -1535,11 +1548,11 @@
             </div>
             <p class="post-meta">${[sport, sport ? 'Class of ' + gradYear : ''].filter(Boolean).join(' · ')}</p>
           </div>
-          <span class="post-more" onclick="openReportModal('${post.id}')" title="Report post">···</span>
+          <span class="post-more" onclick="openReportModal('${escJsAttr(post.id)}')" title="Report post">···</span>
         </div>
         ${post.mediaData ? `<div data-post-media style="overflow:hidden;">${mediaHTML}</div>` : mediaHTML}
         <div class="post-actions">
-          <button class="action-btn${isHyped ? ' hyped' : ''}" data-hype data-id="${post.id}">
+          <button class="action-btn${isHyped ? ' hyped' : ''}" data-hype data-id="${escAttr(post.id)}">
             <span class="hype-icon"></span>
             <span class="hype-count"><span class="hype-num">${count}</span></span>
           </button>
@@ -2486,8 +2499,8 @@
       }
       list.innerHTML = '<div class="tournament-tags">' + tournaments.map(function(t) {
         const name = t.name || 'Unnamed';
-        const tag  = name;
-        const sport = t.sport || '';
+        const tag  = escHtml(name);
+        const sport = escHtml(t.sport || '');
         return '<a class="t-tag" href="tournament.html?name=' + encodeURIComponent(name) + '"><span class="t-tag-name">' + tag + '</span><span class="t-tag-meta">' + sport + '</span></a>';
       }).join('') + '</div>';
     } catch(e) {}
@@ -2612,7 +2625,7 @@
         : (player.jersey
             ? `<span style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:15px;color:#fff;">#${escHtml(player.jersey)}</span>`
             : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`);
-      const onclick = locked ? "window.location.href='subscription.html'" : `openPlayerStory('${player.id}')`;
+      const onclick = locked ? "window.location.href='subscription.html'" : `openPlayerStory('${escJsAttr(player.id)}')`;
       return `
         <div class="story-item${locked ? ' story-locked' : ''}" onclick="${onclick}" style="cursor:pointer;">
           <div class="story-ring ${locked ? 'locked' : (allSeen ? 'seen' : '')}">

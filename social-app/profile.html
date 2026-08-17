@@ -1392,7 +1392,9 @@
 
     // Avatar / name — show every sport the athlete plays
     const pSports = (typeof getPlayerSports === 'function') ? getPlayerSports(p) : [p.sport];
-    document.getElementById('profile-jersey').textContent = `#${escHtml(p.jersey)}`;
+    // textContent does not parse HTML, so escaping here would double-escape:
+    // a jersey of `7&8` would render literally as `7&amp;8`. Assign raw.
+    document.getElementById('profile-jersey').textContent = `#${p.jersey == null ? '' : p.jersey}`;
     document.getElementById('profile-name').textContent = name;
     document.getElementById('profile-handle').textContent = `${pSports.join(' · ')}${p.position ? ' · ' + p.position : ''}`;
 

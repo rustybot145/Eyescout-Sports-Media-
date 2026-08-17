@@ -11,6 +11,11 @@
 <script>
   function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
   var escAttr = escHtml;
+  // Escape for JS string literals inside inline on*="..." handlers. HTML-escaping
+  // alone is NOT enough there: the parser decodes &#39; back to ' before the JS
+  // is compiled, so a quote in the value would still break out of the literal.
+  function escJs(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/</g,'\\x3C').replace(/\r/g,'\\r').replace(/\n/g,'\\n').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');}
+  function escJsAttr(s){return escAttr(escJs(s));}
 </script>
 <style>
   :root {
@@ -749,7 +754,7 @@
       const hw = hwParts.join(' · ');
       const following = isFollowingPlayer(p.id);
       return `
-        <div class="player-card fade-in" style="animation-delay:${i * 0.04}s;position:relative;" onclick="window.location.href='profile.html?id=${p.id}&coach=1'">
+        <div class="player-card fade-in" style="animation-delay:${i * 0.04}s;position:relative;" onclick="window.location.href='profile.html?id=${escJsAttr(p.id)}&coach=1'">
           ${following ? `<div style="position:absolute;top:8px;right:8px;z-index:2;background:linear-gradient(90deg,#1E90FF,#00C9A7);color:#fff;font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;">Following</div>` : ''}
           <div class="card-banner">
             <div class="card-avatar-wrap"><div class="card-avatar-inner">${avatarContent}</div></div>
@@ -763,7 +768,7 @@
               <span class="card-tag">Class of ${escHtml(p.gradYear)}</span>
               ${p.position ? `<span class="card-tag">${escHtml(p.position)}</span>` : ''}
             </div>
-            <button class="scout-btn" onclick="event.stopPropagation();openMsgModal('${p.id}')">Message →</button>
+            <button class="scout-btn" onclick="event.stopPropagation();openMsgModal('${escJsAttr(p.id)}')">Message →</button>
           </div>
         </div>`;
     }).join('');
@@ -837,12 +842,12 @@
 
     const isSaved = getSaved().includes(p.id);
     document.getElementById('drawer-footer').innerHTML = `
-      <button class="msg-draft-btn" onclick="openMsgModal('${p.id}')">Send Message →</button>
-      <a href="profile.html?id=${p.id}&coach=1" class="save-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <button class="msg-draft-btn" onclick="openMsgModal('${escJsAttr(p.id)}')">Send Message →</button>
+      <a href="profile.html?id=${escAttr(p.id)}&coach=1" class="save-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Full Profile
       </a>
-      <button class="save-btn" onclick="savePlayer('${p.id}', this)" style="${isSaved ? 'color:#ff4d6d;border-color:rgba(255,77,109,0.3);' : ''}">${isSaved ? '♥ Saved' : '♡ Save'}</button>`;
+      <button class="save-btn" onclick="savePlayer('${escJsAttr(p.id)}', this)" style="${isSaved ? 'color:#ff4d6d;border-color:rgba(255,77,109,0.3);' : ''}">${isSaved ? '♥ Saved' : '♡ Save'}</button>`;
 
     document.getElementById('drawer-overlay').classList.add('open');
   }

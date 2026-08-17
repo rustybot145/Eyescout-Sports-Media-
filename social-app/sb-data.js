@@ -1258,7 +1258,10 @@ function paintSidebarAvatar() {
   if (photo) {
     inner.style.background = 'transparent';
     inner.style.overflow = 'hidden';
-    inner.innerHTML = `<img src="${photo}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
+    // Escape — the photo URL comes off the profile row, i.e. user-controlled
+    // data going straight into an HTML attribute.
+    const src = String(photo).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    inner.innerHTML = `<img src="${src}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
   } else if (isCoach) {
     // Coach with no photo → blue person icon on a blue-tinted circle.
     const wrap = inner.closest('.sidebar-avatar, .sb-avatar') || inner;

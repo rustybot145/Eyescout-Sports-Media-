@@ -345,7 +345,7 @@
 </main>
 
 <script>
-  function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   var escAttr = escHtml;
 
   const session = JSON.parse(localStorage.getItem('es_session') || 'null');
@@ -480,9 +480,9 @@
     const photoCount = (p.deliveredPhotos || []).length;
     const avatarContent = p.profilePhoto
       ? `<img alt="" src="${escAttr(p.profilePhoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-      : `<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${playerInitials(p)}</span>`;
+      : `<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${escHtml(playerInitials(p))}</span>`;
     return `
-      <a class="player-card fade-in" href="profile.html?id=${p.id}" style="text-decoration:none;">
+      <a class="player-card fade-in" href="profile.html?id=${escAttr(p.id)}" style="text-decoration:none;">
         <div class="card-body">
           <div class="card-avatar-wrap"><div class="card-avatar-inner">${avatarContent}</div></div>
           <p class="card-name">${escHtml(p.athleteFirst)} ${escHtml(p.athleteLast)}</p>
