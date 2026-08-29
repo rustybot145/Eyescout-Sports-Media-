@@ -820,6 +820,19 @@
     // the profile now would run as anon and be rejected by RLS, and setting
     // es_session would drop them into a UI backed by no auth session at all.
     // _finishConfirmedSignup() picks it up from user_metadata after they click.
+    // An address that ALREADY has a confirmed account comes back as a fake
+    // success with an empty identities array — Supabase anti-enumeration. No
+    // email is ever sent for it, so the waiting page would sit forever telling
+    // this person to check an inbox nothing is coming to. Name the real problem.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      btn.disabled = false;
+      btn.textContent = 'Create Profile';
+      const el = document.getElementById('email-taken');
+      el.textContent = 'An account with this email already exists. Log in instead.';
+      el.style.display = 'block';
+      return;
+    }
+
     if (!data.session) {
       // Hand off to the waiting page. It polls until the link is clicked — from
       // any device — and then walks them straight into the app, so a confirmed
@@ -1022,6 +1035,19 @@
       el.textContent = error.message.includes('already registered')
         ? 'An account with this email already exists.'
         : error.message;
+      el.style.display = 'block';
+      return;
+    }
+
+    // An address that ALREADY has a confirmed account comes back as a fake
+    // success with an empty identities array — Supabase anti-enumeration. No
+    // email is ever sent for it, so the waiting page would sit forever telling
+    // this person to check an inbox nothing is coming to. Name the real problem.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      btn.disabled = false;
+      btn.textContent = 'Create Coach Account';
+      const el = document.getElementById('email-taken');
+      el.textContent = 'An account with this email already exists. Log in instead.';
       el.style.display = 'block';
       return;
     }
