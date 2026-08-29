@@ -478,6 +478,34 @@
 
   // Reuses the existing .err-msg element rather than adding markup; recoloured
   // per call because it carries both success and failure text.
+  // After a confirmation link is opened on an iPhone, the person almost always
+  // signed up in the mobile app and has no interest in this website. Hand them
+  // back to it.
+  //
+  // `eyescout://` with NO path on purpose: the app has no +not-found route, so a
+  // path Expo Router cannot match would error. Bare scheme opens index.tsx, which
+  // is the normal entry screen.
+  //
+  // Auto-attempt first, then leave a visible button standing. iOS shows an "Open
+  // in EyeScout?" prompt for the automatic jump, and if the person dismisses it —
+  // or the app is not installed — the button is still there to try again. Returns
+  // true when it handled the situation, so callers can stop.
+  function _returnToApp(msg) {
+    if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) return false;
+    const el = document.getElementById('login-error');
+    if (!el) return false;
+    if (typeof switchTab === 'function') switchTab('login');
+    el.style.color = '#1E90FF';
+    el.style.display = 'block';
+    el.innerHTML = msg +
+      ' <a href="eyescout://" style="display:inline-block;margin-top:8px;padding:10px 18px;' +
+      'background:#1E90FF;color:#fff;font-weight:700;border-radius:8px;text-decoration:none;">' +
+      'Open the EyeScout app</a>';
+    // Give the browser a beat to paint the button before the scheme prompt.
+    setTimeout(function () { window.location.href = 'eyescout://'; }, 400);
+    return true;
+  }
+
   function _showConfirmNotice(elId, msg, isError) {
     // The login-error slot lives in the log-in form, which isn't the visible tab
     // for someone arriving straight from an email link.
@@ -514,6 +542,7 @@
     if (!session) return;
     if (!pending || !pending.profileRow) {
       // Confirmed, but nothing to create (already set up, or an older account).
+      if (_returnToApp('Email confirmed.')) return;
       _showConfirmNotice('login-error', 'Email confirmed. Log in to continue.', false);
       return;
     }
@@ -534,6 +563,30 @@
     // and kept in auth.users forever — no reason to leave it there.
     // Wrapped: this is cleanup, and must never stop someone getting into the app.
     try { sb.auth.updateUser({ data: { es_signup: null } }).then(undefined, () => {}); } catch (e) {}
+
+    // Getting mobile signups back into the app instead of stranding them on this
+    // page. The account is already confirmed and the profile row created above —
+    // all that is left is where to send the person next.
+    //
+    // Two routes, because they became available at different times:
+    //
+    //   1. ?next=eyescout://… — the precise one. The app passes emailRedirectTo
+    //      on signUp, which reaches the email template as {{ .RedirectTo }}.
+    //      Only a mobile signup ever carries it, so we can jump without asking.
+    //      Requires an app build that sends it.
+    //
+    //   2. No `next`, but the browser is iOS — offer a button. This needs no app
+    //      change at all and works for builds shipped before route 1 existed. It
+    //      is a button rather than a jump on purpose: someone who signed up on
+    //      the mobile web portal may not have the app installed, and hijacking
+    //      them to a scheme that resolves to nothing would look broken.
+    //
+    // Anything else (desktop, Android web) falls through unchanged.
+    // Account confirmed and the profile row now exists, so the only question left
+    // is where this person goes. On an iPhone that is back to the app they signed
+    // up in; the localStorage bookkeeping below is for the web UI and means
+    // nothing to them.
+    if (_returnToApp('Your account is confirmed.')) return;
 
     if (pending.kind === 'coach') {
       localStorage.removeItem('es_session');
