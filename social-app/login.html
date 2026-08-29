@@ -490,20 +490,25 @@
   // in EyeScout?" prompt for the automatic jump, and if the person dismisses it —
   // or the app is not installed — the button is still there to try again. Returns
   // true when it handled the situation, so callers can stop.
-  function _returnToApp(msg) {
+  function _returnToApp(msg, appUrl) {
     if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) return false;
     const el = document.getElementById('login-error');
     if (!el) return false;
+    // The session tokens ride into the app in the URL fragment, so the app can
+    // call setSession() and land the person on the feed already signed in —
+    // the same handoff Supabase's own mobile deep-link flow uses. JWTs and
+    // refresh tokens are [A-Za-z0-9._-] only, so embedding in an href is safe.
+    const target = appUrl || 'eyescout://';
     if (typeof switchTab === 'function') switchTab('login');
     el.style.color = '#1E90FF';
     el.style.display = 'block';
     el.innerHTML = msg +
-      ' <a href="eyescout://" style="display:inline-block;margin-top:8px;padding:10px 18px;' +
+      ' <a href="' + target + '" style="display:inline-block;margin-top:8px;padding:10px 18px;' +
       'background:#1E90FF;color:#fff;font-weight:700;border-radius:8px;text-decoration:none;">' +
       'Open the EyeScout app</a>' +
       '<br><span style="font-size:13px;opacity:.85;">Or log in below to continue on the web.</span>';
     // Give the browser a beat to paint the button before the scheme prompt.
-    setTimeout(function () { window.location.href = 'eyescout://'; }, 400);
+    setTimeout(function () { window.location.href = target; }, 400);
     return true;
   }
 
@@ -548,7 +553,16 @@
       //   • an account that was already set up
       //   • an older account from before es_signup existed
       // The first is the common case and is exactly who wants the app back.
-      if (_returnToApp('Email confirmed.')) return;
+      // Hand the freshly-minted session along so the app can sign them straight
+      // in — without it they land on the app's login screen instead of the feed.
+      // The web copy of this session is left alone on purpose: signOut()'s
+      // default scope is global, which would revoke the very refresh token the
+      // app just received. The portal keys off es_session, which is never set
+      // on this path, so the leftover supabase-js session is inert here.
+      const appUrl = 'eyescout://#access_token=' +
+        encodeURIComponent(session.access_token) +
+        '&refresh_token=' + encodeURIComponent(session.refresh_token);
+      if (_returnToApp('Email confirmed.', appUrl)) return;
       _showConfirmNotice('login-error', 'Email confirmed. Log in to continue.', false);
       return;
     }
@@ -610,7 +624,9 @@
       const all = JSON.parse(localStorage.getItem('es_players') || '[]');
       all.unshift(localSession);
       localStorage.setItem('es_players', JSON.stringify(all));
-      window.location.href = 'profile.html?id=' + localSession.id;
+      // Feed, not profile: a confirmed signup should land in the app proper,
+      // the same place a normal login puts you, not on their own empty profile.
+      window.location.href = 'feed.html';
     }
   })();
 
