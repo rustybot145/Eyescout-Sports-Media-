@@ -83,11 +83,11 @@
   <div id="waiting-state">
     <img src="../logo-transparent.png" alt="EyeScout" class="logo">
     <h1>Check Your<br><span class="g-text">Email</span></h1>
-    <p>Enter the 6-digit code we sent to</p>
+    <p>Enter the code we sent to</p>
     <div class="addr" id="addr">your email</div>
 
     <input class="code-input" id="code" inputmode="numeric" autocomplete="one-time-code"
-           maxlength="6" placeholder="000000" aria-label="6-digit verification code">
+           maxlength="10" placeholder="000000" aria-label="Verification code from your email">
     <button class="btn" id="verify-btn" onclick="verifyCode()">Verify &amp; Continue</button>
 
     <p style="margin-top:18px;">If your email has a confirmation link instead, tapping it works too — this page will notice and let you in.</p>
@@ -177,15 +177,20 @@
   // account right here — no link, no tab-hopping, works the same on any device.
   // _sbCompleteConfirmedSignup (sb-data.js) then creates the profile row and the
   // portal session, exactly like login.html's link handler does.
-  async function verifyCode() {
+  // `quiet` = a background attempt fired by typing, not a button press. Those
+  // stay silent on failure: the code length is a Supabase project setting (6-10
+  // digits), so a shorter-than-complete code is just someone mid-type, not an
+  // error worth showing. Hard-coding 6 here is what rejected a valid 8-digit
+  // code the moment the sixth digit landed.
+  async function verifyCode(quiet) {
     const code = (document.getElementById('code').value || '').replace(/\D/g, '');
-    if (code.length !== 6) { say('Enter the 6-digit code from the email.', true); return; }
+    if (code.length < 6) { if (!quiet) say('Enter the code from the email.', true); return; }
     const btn = document.getElementById('verify-btn');
     btn.disabled = true;
     try {
       const { data, error } = await sb.auth.verifyOtp({ email, token: code, type: 'signup' });
       if (error || !data || !data.session) {
-        say('That code didn’t match — check the newest email and try again.', true);
+        if (!quiet) say('That code didn’t match — check the newest email and try again.', true);
         btn.disabled = false;
         return;
       }
@@ -200,12 +205,15 @@
       btn.disabled = false;
     }
   }
-  // Auto-verify the moment 6 digits are in — one less tap, and matches what
-  // one-time-code autofill expects.
+  // Auto-verify shortly after typing stops, so the last digit of a full code
+  // signs you in without a tap — and a pause at six digits inside an eight-digit
+  // code fails silently instead of shouting.
+  let codeTimer = null;
   document.getElementById('code').addEventListener('input', (e) => {
     const v = e.target.value.replace(/\D/g, '');
     if (v !== e.target.value) e.target.value = v;
-    if (v.length === 6) verifyCode();
+    clearTimeout(codeTimer);
+    if (v.length >= 6) codeTimer = setTimeout(() => verifyCode(true), 650);
   });
 
   // 1. Another tab finished the job.
