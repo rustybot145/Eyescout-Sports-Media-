@@ -1399,3 +1399,46 @@ if (typeof document !== 'undefined') {
     else start();
   })();
 }
+
+// ── Finish a just-confirmed web signup (verification-code flow) ──────────────
+// Called by confirm-email.html the moment verifyOtp succeeds with the 6-digit
+// code. Mirrors login.html's link-click confirm handler: the signup forms park
+// the profile row in user_metadata.es_signup (with a .profileRow wrapper — only
+// web signups write that shape), and this creates the row and the portal
+// session now that a real auth session exists.
+// Returns the page to send the person to, or null when there was nothing to
+// create (already set up, or a non-web signup) — caller decides what to show.
+async function _sbCompleteConfirmedSignup(session) {
+  if (!session || !session.user) return null;
+  const pending = session.user.user_metadata && session.user.user_metadata.es_signup;
+  if (!pending || !pending.profileRow) return null;
+
+  const profileRow   = { ...pending.profileRow,   id: session.user.id };
+  const localSession = { ...pending.localSession, id: session.user.id };
+
+  const { error } = await _SB.from('profiles').insert(profileRow);
+  // 23505 = row already there (link + code both used, or a retry). Not a failure.
+  if (error && error.code !== '23505') return null;
+
+  // profiles holds this now — drop the copy. It carries a minor's phone, zip and
+  // parent contacts, and user_metadata lives in auth.users forever. Cleanup only:
+  // never let it stop someone getting in.
+  try { _SB.auth.updateUser({ data: { es_signup: null } }).then(undefined, () => {}); } catch (e) {}
+
+  if (pending.kind === 'coach') {
+    localStorage.removeItem('es_session');
+    localStorage.setItem('es_coach_session', JSON.stringify(localSession));
+    const all = JSON.parse(localStorage.getItem('es_coaches') || '[]');
+    all.unshift(localSession);
+    localStorage.setItem('es_coaches', JSON.stringify(all));
+    return 'coach-pending.html';
+  }
+  localStorage.removeItem('es_coach_session');
+  localStorage.setItem('es_session', JSON.stringify(localSession));
+  if (typeof setPlayerSports === 'function') setPlayerSports(localSession.id, pending.sports || []);
+  const all = JSON.parse(localStorage.getItem('es_players') || '[]');
+  all.unshift(localSession);
+  localStorage.setItem('es_players', JSON.stringify(all));
+  // Feed, not profile: a confirmed signup lands in the app proper, same as login.
+  return 'feed.html';
+}

@@ -44,6 +44,16 @@
   .dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes pulse { 0%,100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
   .waiting-text { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 700; }
+  .code-input {
+    display: block; width: 100%; max-width: 280px; margin: 20px auto 0;
+    padding: 14px 0; border-radius: 12px; text-align: center;
+    font-size: 30px; font-weight: 800; letter-spacing: 0.35em; text-indent: 0.35em;
+    color: #fff; background: rgba(30,144,255,0.07);
+    border: 1px solid rgba(30,144,255,0.35); outline: none;
+    font-family: 'Courier New', ui-monospace, monospace;
+  }
+  .code-input:focus { border-color: #1E90FF; background: rgba(30,144,255,0.12); }
+  .code-input::placeholder { color: rgba(255,255,255,0.18); letter-spacing: 0.35em; }
   .btn {
     display: block; width: 100%; padding: 13px; border-radius: 11px; border: none;
     background: var(--grad); color: #fff; font-size: 13.5px; font-weight: 800;
@@ -73,16 +83,20 @@
   <div id="waiting-state">
     <img src="../logo-transparent.png" alt="EyeScout" class="logo">
     <h1>Check Your<br><span class="g-text">Email</span></h1>
-    <p>We sent a confirmation link to</p>
+    <p>Enter the 6-digit code we sent to</p>
     <div class="addr" id="addr">your email</div>
-    <p>Click the link in that email and this page will take you straight into EyeScout — no need to come back and log in.</p>
 
+    <input class="code-input" id="code" inputmode="numeric" autocomplete="one-time-code"
+           maxlength="6" placeholder="000000" aria-label="6-digit verification code">
+    <button class="btn" id="verify-btn" onclick="verifyCode()">Verify &amp; Continue</button>
+
+    <p style="margin-top:18px;">If your email has a confirmation link instead, tapping it works too — this page will notice and let you in.</p>
     <div class="waiting">
       <span class="dot"></span><span class="dot"></span><span class="dot"></span>
     </div>
     <div class="waiting-text">Waiting for confirmation</div>
 
-    <button class="btn" id="resend-btn" onclick="resend()">Resend Email</button>
+    <button class="btn" id="resend-btn" onclick="resend()" style="background:none;border:1px solid var(--border);">Resend Code</button>
     <div class="msg" id="msg"></div>
 
     <a class="link" href="login.html">Wrong email? Start over</a>
@@ -100,7 +114,7 @@
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#39D353" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
     <h1>You're <span class="g-text">In.</span></h1>
-    <p>Email confirmed — taking you to your profile…</p>
+    <p>Email confirmed — taking you to your feed…</p>
   </div>
 </div>
 
@@ -148,15 +162,51 @@
     done = true;
     document.getElementById('waiting-state').style.display = 'none';
     document.getElementById('done-state').style.display = 'block';
-    const session = JSON.parse(localStorage.getItem('es_session') || 'null');
     setTimeout(() => {
       if (role === 'coach' || localStorage.getItem('es_coach_session')) {
         window.location.href = 'coach-pending.html';
       } else {
-        window.location.href = session && session.id ? ('profile.html?id=' + session.id) : 'feed.html';
+        // Feed, not profile — a confirmed signup lands where a login lands.
+        window.location.href = 'feed.html';
       }
     }, 1100);
   }
+
+  // ── The 6-digit code ────────────────────────────────────────────────────────
+  // The primary path now: verifyOtp with the code from the email confirms the
+  // account right here — no link, no tab-hopping, works the same on any device.
+  // _sbCompleteConfirmedSignup (sb-data.js) then creates the profile row and the
+  // portal session, exactly like login.html's link handler does.
+  async function verifyCode() {
+    const code = (document.getElementById('code').value || '').replace(/\D/g, '');
+    if (code.length !== 6) { say('Enter the 6-digit code from the email.', true); return; }
+    const btn = document.getElementById('verify-btn');
+    btn.disabled = true;
+    try {
+      const { data, error } = await sb.auth.verifyOtp({ email, token: code, type: 'signup' });
+      if (error || !data || !data.session) {
+        say('That code didn’t match — check the newest email and try again.', true);
+        btn.disabled = false;
+        return;
+      }
+      const dest = await _sbCompleteConfirmedSignup(data.session);
+      if (dest) { finish(); return; }
+      // Confirmed, but there was no parked web signup to finish (already set
+      // up, or signed up elsewhere). Honest hand-off to a normal login.
+      say('Email confirmed — you can log in now.', false);
+      setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+    } catch (e) {
+      say('Could not verify — check your connection and try again.', true);
+      btn.disabled = false;
+    }
+  }
+  // Auto-verify the moment 6 digits are in — one less tap, and matches what
+  // one-time-code autofill expects.
+  document.getElementById('code').addEventListener('input', (e) => {
+    const v = e.target.value.replace(/\D/g, '');
+    if (v !== e.target.value) e.target.value = v;
+    if (v.length === 6) verifyCode();
+  });
 
   // 1. Another tab finished the job.
   window.addEventListener('storage', (e) => {
@@ -223,7 +273,7 @@
       left -= 1;
       if (left <= 0) {
         clearInterval(t); cooling = false;
-        btn.disabled = false; btn.textContent = 'Resend Email';
+        btn.disabled = false; btn.textContent = 'Resend Code';
       } else {
         btn.textContent = `Resend in ${left}s`;
       }
