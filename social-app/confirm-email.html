@@ -261,32 +261,63 @@
   checkConfirmed();
 
   // ── Resend ──────────────────────────────────────────────────────────────────
-  // Supabase rate-limits this server-side; the local cooldown stops people
-  // hammering it into an error they can do nothing about.
+  // Supabase refuses a second email to the same address within 60 seconds
+  // (429 over_email_send_rate_limit), and the SIGNUP email already started that
+  // clock. So the button opens already counting down — offering an enabled
+  // button that cannot possibly work is what made this look broken.
+  //
+  // The countdown is driven by the server's own "after N seconds" whenever it
+  // tells us, so a failed press never stacks a fresh penalty on top of the wait
+  // that was already running.
   let cooling = false;
-  async function resend() {
-    if (cooling) return;
-    if (!email) { say('Go back and sign up again so we know where to send it.', true); return; }
-    const btn = document.getElementById('resend-btn');
-    cooling = true; btn.disabled = true;
-    try {
-      const { error } = await sb.auth.resend({ type: 'signup', email });
-      say(error ? (error.message || 'Could not resend — try again shortly.') : 'Sent. Check your inbox.', !!error);
-    } catch (e) {
-      say('Could not resend — check your connection.', true);
-    }
-    let left = 60;
-    btn.textContent = `Resend in ${left}s`;
+  const resendBtn = document.getElementById('resend-btn');
+
+  function startCooldown(seconds) {
+    cooling = true;
+    resendBtn.disabled = true;
+    let left = Math.max(1, Math.ceil(seconds));
+    resendBtn.textContent = `Resend in ${left}s`;
     const t = setInterval(() => {
       left -= 1;
       if (left <= 0) {
         clearInterval(t); cooling = false;
-        btn.disabled = false; btn.textContent = 'Resend Code';
+        resendBtn.disabled = false; resendBtn.textContent = 'Resend Code';
       } else {
-        btn.textContent = `Resend in ${left}s`;
+        resendBtn.textContent = `Resend in ${left}s`;
       }
     }, 1000);
   }
+
+  // Seconds Supabase says to wait, pulled from its message. Falls back to a full
+  // minute when the wording changes.
+  function retryAfter(err) {
+    const m = /after (\d+) second/i.exec((err && err.message) || '');
+    return m ? parseInt(m[1], 10) : 60;
+  }
+
+  async function resend() {
+    if (cooling) return;
+    if (!email) { say('Go back and sign up again so we know where to send it.', true); return; }
+    resendBtn.disabled = true;
+    try {
+      const { error } = await sb.auth.resend({ type: 'signup', email });
+      if (error) {
+        const wait = retryAfter(error);
+        say(`Please wait ${wait}s before asking for another code.`, true);
+        startCooldown(wait);
+        return;
+      }
+      say('Sent. Check your inbox for the newest code.', false);
+      startCooldown(60);
+    } catch (e) {
+      resendBtn.disabled = false;
+      say('Could not resend — check your connection.', true);
+    }
+  }
+
+  // The signup email went out moments ago; start the clock so the first press
+  // is possible rather than pre-doomed.
+  startCooldown(60);
 </script>
 
 </body>
