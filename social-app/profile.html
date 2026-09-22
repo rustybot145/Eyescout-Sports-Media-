@@ -230,42 +230,28 @@
     padding-bottom: 80px;
   }
 
-  /* ── Cover ── */
-  .profile-cover {
-    width: 100%;
-    height: 220px;
-    background: linear-gradient(135deg, #0d0b14 0%, #0e1520 50%, #0a0d10 100%);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cover-grad-bar { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--grad); }
-  .cover-noise {
-    position: absolute; inset: 0;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-  }
-
-  /* Subtle glow orbs on cover */
-  .cover-orb-1 { position:absolute; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(123,47,190,0.12) 0%,transparent 70%); top:-150px; right:-50px; pointer-events:none; }
-  .cover-orb-2 { position:absolute; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,rgba(30,144,255,0.10) 0%,transparent 70%); bottom:-100px; left:100px; pointer-events:none; }
+  /* ── Theme wash (only when the player picked a colored theme) ── */
+  .main { position: relative; }
+  .profile-wash { position: absolute; top: 0; left: 0; right: 0; height: 320px; pointer-events: none; }
 
   /* ── Profile Section ── */
   .profile-section {
-    padding: 0 40px 0;
+    padding: 28px 40px 0;
     position: relative;
   }
 
+  /* Avatar with the counts beside it, Instagram-style */
+  .avatar-row { display: flex; align-items: center; gap: 32px; margin-bottom: 18px; }
+
   .profile-avatar-wrap {
-    width: 110px; height: 110px;
+    width: 110px; height: 110px; flex-shrink: 0;
     border-radius: 50%;
     padding: 3px;
-    background: var(--grad);
+    background: var(--ring, var(--grad));   /* story ring — only while they've posted in the last 24h */
     position: relative;
-    margin-top: -55px;
-    margin-bottom: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   }
+  .profile-avatar-wrap.no-ring { background: rgba(255,255,255,0.08); box-shadow: none; }
   .profile-avatar-inner {
     width: 100%; height: 100%;
     border-radius: 50%;
@@ -303,7 +289,8 @@
     margin-bottom: 6px;
   }
 
-  .profile-handle { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 14px; }
+  .profile-handle { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .profile-school { display: flex; align-items: center; gap: 6px; font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
 
   .name-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .hype-total {
@@ -343,6 +330,7 @@
     white-space: nowrap;
   }
   .btn-outline:hover { background: rgba(255,255,255,0.09); color: #fff; border-color: rgba(255,255,255,0.25); }
+  #btn-edit { color: var(--ink, rgba(255,255,255,0.75)); }
 
   .btn-grad {
     padding: 9px 20px; border-radius: 10px;
@@ -355,30 +343,23 @@
   }
   .btn-grad:hover { opacity: 0.88; transform: translateY(-1px); }
 
-  /* Stats row */
-  .stats-row {
-    display: flex; gap: 32px;
-    padding: 20px 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 0;
-  }
+  /* Counts (Posts / Followers / Following) beside the avatar */
+  .stats-row { display: flex; gap: 28px; }
   .stat { text-align: center; }
   .stat-num {
     font-family: Impact, 'Arial Narrow', Arial, sans-serif;
-    font-size: 24px; letter-spacing: 0.04em;
-    color: #fff;
+    font-size: 22px; letter-spacing: 0.04em;
+    color: var(--ink, #fff);
     line-height: 1; margin-bottom: 3px;
   }
-  .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+  .stat-label { font-size: 9.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
 
   /* ── Entrance reveal (page load) ── */
-  .profile-cover, .profile-avatar-wrap, .profile-header-row, .stats-row, .tab-bar {
+  .avatar-row, .profile-header-row, .tab-bar {
     animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
   }
-  .profile-avatar-wrap  { animation-delay: 0.05s; }
+  .avatar-row            { animation-delay: 0.05s; }
   .profile-header-row   { animation-delay: 0.1s; }
-  .stats-row             { animation-delay: 0.15s; }
   .tab-bar                { animation-delay: 0.2s; }
 
   /* ── Ripple click feedback (primary buttons) ── */
@@ -410,43 +391,12 @@
     transition: color 0.15s, border-color 0.15s;
   }
   .tab:hover { color: rgba(255,255,255,0.7); }
-  .tab.active { color: #fff; border-bottom-color: #1E90FF; }
+  .tab.active { color: var(--ink, #fff); border-bottom-color: var(--accent, #1E90FF); }
 
   /* ── Tab Content ── */
   .tab-content { padding: 32px 40px; }
   .tab-pane { display: none; }
   .tab-pane.active { display: block; animation: fadeUp 0.35s cubic-bezier(0.22,1,0.36,1) both; }
-
-  /* Posted Photos tab */
-  .posted-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-  .posted-card {
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 14px; overflow: hidden; break-inside: avoid;
-    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s, box-shadow 0.2s;
-    animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
-  }
-  .posted-card:hover { transform: translateY(-2px); border-color: rgba(30,144,255,0.25); box-shadow: 0 10px 30px -12px rgba(30,144,255,0.25); }
-  .posted-media { width: 100%; background: #111; line-height: 0; }
-  .posted-media img { width: 100%; height: auto; display: block; }
-  .posted-body { padding: 13px 15px 15px; }
-  .posted-desc { font-size: 13.5px; color: rgba(255,255,255,0.78); line-height: 1.55; margin-bottom: 11px; }
-  .posted-desc-empty { color: rgba(255,255,255,0.7); font-style: italic; }
-  .posted-desc-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
-  .posted-desc-row .posted-desc { margin-bottom: 0; min-width: 0; flex: 1; }
-  .posted-hype { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; padding-top: 1px; }
-  .posted-hype-icon {
-    width: 15px; height: 15px; flex-shrink: 0; background: #a855f7;
-    -webkit-mask: url('star.png') no-repeat center / contain;
-    mask: url('star.png') no-repeat center / contain;
-    filter: drop-shadow(0 0 6px rgba(168,85,247,0.45));
-  }
-  .posted-hype-num { font-size: 13px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
-  .posted-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
-    color: #1E90FF; background: rgba(30,144,255,0.1);
-    border: 1px solid rgba(30,144,255,0.22); padding: 5px 12px; border-radius: 20px;
-  }
 
   /* ── Photo states (preserved from original) ── */
   .g-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -465,7 +415,7 @@
   /* Discourage saving/dragging other athletes' media */
   .photo-grid img, .photo-grid video,
   .lightbox-overlay img, .lightbox-overlay video,
-  #tab-highlights video, .profile-video {
+  .profile-video {
     -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; user-drag: none;
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
@@ -720,10 +670,11 @@
     .mobile-header { display: flex; }
     .mobile-nav { display: flex; }
     .main { margin-left: 0 !important; padding-left: 12px !important; padding-right: 12px !important; padding-top: 68px !important; padding-bottom: 72px !important; }
-    /* Stats + tabs: scroll horizontally instead of overflowing off-screen */
-    .stats-row { gap: 22px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .stats-row::-webkit-scrollbar { display: none; }
-    .stat { flex: 0 0 auto; }
+    .profile-section { padding-left: 16px; padding-right: 16px; }
+    .tab-content { padding-left: 16px; padding-right: 16px; }
+    .avatar-row { gap: 18px; }
+    .stats-row { gap: 18px; }
+    .profile-avatar-wrap { width: 86px; height: 86px; }
     .tab-bar { padding: 0 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { flex: 0 0 auto; white-space: nowrap; padding: 16px 16px; }
@@ -732,8 +683,6 @@
     .photo-grid::after { display: none; }
     .photo-item { aspect-ratio: 1 / 1; }
     .photo-item img, .photo-item video { width: 100%; height: 100%; object-fit: cover; }
-    /* Posted content: 2-up as well */
-    .posted-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
   }
 
   /* ── Coach viewing a player profile ── */
@@ -837,19 +786,20 @@
 <!-- ── Main ── -->
 <main class="main" id="main-content" tabindex="-1">
 
-  <!-- Cover -->
-  <div class="profile-cover">
-    <div class="cover-orb-1"></div>
-    <div class="cover-orb-2"></div>
-    <div class="cover-noise"></div>
-    <div class="cover-grad-bar"></div>
-  </div>
+  <div class="profile-wash" id="profile-wash" aria-hidden="true"></div>
 
   <!-- Profile section -->
   <div class="profile-section">
-    <div class="profile-avatar-wrap" onclick="openEditModal()" style="cursor:pointer;" title="Edit profile photo">
-      <div class="profile-avatar-inner" id="profile-avatar-inner">
-        <span class="profile-jersey" id="profile-jersey">#7</span>
+    <div class="avatar-row">
+      <div class="profile-avatar-wrap no-ring" id="profile-avatar-wrap" onclick="openEditModal()" style="cursor:pointer;" title="Edit profile photo">
+        <div class="profile-avatar-inner" id="profile-avatar-inner">
+          <span class="profile-jersey" id="profile-jersey">#7</span>
+        </div>
+      </div>
+      <div class="stats-row" id="stats-row">
+        <div class="stat"><div class="stat-num" id="stat-photos">0</div><div class="stat-label">Posts</div></div>
+        <div class="stat" style="cursor:pointer;" onclick="showFollowers()"><div class="stat-num" id="stat-followers">0</div><div class="stat-label">Followers</div></div>
+        <div class="stat" style="cursor:pointer;" onclick="showFollowing()"><div class="stat-num" id="stat-following">0</div><div class="stat-label">Following</div></div>
       </div>
     </div>
 
@@ -863,15 +813,15 @@
           </span>
         </div>
         <p class="profile-handle" id="profile-handle">EyeScout Sports</p>
+        <p class="profile-school" id="profile-school" style="display:none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg>
+          <span id="profile-school-text"></span>
+        </p>
         <p class="profile-bio" id="profile-bio" style="display:none;"></p>
         <div class="profile-badges" id="profile-badges" style="margin-top:12px;"></div>
       </div>
       <div class="profile-actions" id="profile-actions">
         <button class="btn-outline" id="btn-edit" onclick="openEditModal()">Edit Profile</button>
-        <button class="btn-outline" id="btn-add-photos" style="display:none;" onclick="document.getElementById('own-photo-input-hdr').click()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Post
-        </button>
-        <input type="file" id="own-photo-input-hdr" aria-label="Upload photo or video" accept="image/*,video/*" multiple style="display:none;" onchange="handleAddPost(event)">
         <button class="btn-grad ripple-btn" id="btn-follow" style="display:none;" onclick="toggleFollow()">Follow</button>
         <button class="btn-outline" id="btn-coach-msg" style="display:none;" onclick="openCoachMsgModal()">Message</button>
         <button class="btn-grad ripple-btn" id="btn-coach-follow" onclick="coachToggleFollow()"
@@ -880,21 +830,11 @@
       </div>
     </div>
 
-    <div class="stats-row" id="stats-row">
-      <div class="stat"><div class="stat-num" id="stat-photos">0</div><div class="stat-label">Posts</div></div>
-      <div class="stat" style="cursor:pointer;" onclick="showFollowers()"><div class="stat-num" id="stat-followers">0</div><div class="stat-label">Followers</div></div>
-      <div class="stat" style="cursor:pointer;" onclick="showFollowing()"><div class="stat-num" id="stat-following">0</div><div class="stat-label">Following</div></div>
-      <div class="stat"><div class="stat-num" id="stat-year">—</div><div class="stat-label">Class</div></div>
-      <div class="stat" id="stat-school-wrap" style="display:none;"><div class="stat-label">School</div><div class="stat-num" id="stat-school" style="font-size:13px;letter-spacing:0.01em;font-family:system-ui,sans-serif;">—</div></div>
-      <div class="stat" id="stat-club-wrap" style="display:none;"><div class="stat-label">Club Team</div><div class="stat-num" id="stat-club" style="font-size:13px;letter-spacing:0.01em;font-family:system-ui,sans-serif;">—</div></div>
-    </div>
   </div>
 
   <!-- Tab bar -->
   <div class="tab-bar" id="profile-tabs">
     <button class="tab active" onclick="switchTab('photos', this)">Content</button>
-    <button class="tab" onclick="switchTab('posted', this)">Posted Content</button>
-    <button class="tab" onclick="switchTab('highlights', this)">Highlights</button>
     <button class="tab" onclick="switchTab('info', this)">Info</button>
     <button class="tab" id="tab-btn-stats" onclick="switchTab('stats', this)">Stats</button>
   </div>
@@ -903,14 +843,6 @@
   <div class="tab-content">
 
     <div class="tab-pane active" id="tab-photos">
-      <!-- populated by JS -->
-    </div>
-
-    <div class="tab-pane" id="tab-posted">
-      <!-- populated by JS -->
-    </div>
-
-    <div class="tab-pane" id="tab-highlights">
       <!-- populated by JS -->
     </div>
 
@@ -1369,7 +1301,6 @@
         document.getElementById('profile-handle').innerHTML = '<span class="skel" style="display:inline-block;width:110px;height:13px;"></span>';
         document.getElementById('profile-badges').innerHTML = '';
         document.getElementById('btn-edit').style.display = 'none';
-        document.getElementById('btn-add-photos').style.display = 'none';
         document.getElementById('btn-follow').style.display = '';
         document.getElementById('btn-follow').textContent = 'Follow';
         document.getElementById('btn-follow').disabled = true;
@@ -1394,7 +1325,10 @@
     const pSports = (typeof getPlayerSports === 'function') ? getPlayerSports(p) : [p.sport];
     // textContent does not parse HTML, so escaping here would double-escape:
     // a jersey of `7&8` would render literally as `7&amp;8`. Assign raw.
-    document.getElementById('profile-jersey').textContent = `#${p.jersey == null ? '' : p.jersey}`;
+    // The span is replaced by the photo once updateProfileVisuals runs, so it's
+    // gone on the post-sync re-render — guard, or render() dies right here.
+    const jerseyEl = document.getElementById('profile-jersey');
+    if (jerseyEl) jerseyEl.textContent = `#${p.jersey == null ? '' : p.jersey}`;
     document.getElementById('profile-name').textContent = name;
     document.getElementById('profile-handle').textContent = `${pSports.join(' · ')}${p.position ? ' · ' + p.position : ''}`;
 
@@ -1408,7 +1342,6 @@
 
     // Show/hide buttons based on own vs other
     document.getElementById('btn-edit').style.display        = isOwnProfile ? '' : 'none';
-    document.getElementById('btn-add-photos').style.display  = isOwnProfile && isSubscribed() ? '' : 'none';
     document.getElementById('btn-follow').style.display      = (!isOwnProfile && !isCoachView) ? '' : 'none';
     // Coaches can't message a non-Pro player either — you can't reach a private
     // (non-discoverable) profile to start a conversation. _viewedIsPro === false
@@ -1438,26 +1371,23 @@
       avatarWrap.onclick = isOwnProfile ? openEditModal : null;
     }
 
-    // Stats — "Posts" counts everything in the Content grid: delivered event
-    // photos + the player's own uploaded photos and highlight clips.
+    // Stats — "Posts" counts everything in the Content grid: their posts,
+    // delivered event photos, and media uploaded before Add Post went away.
     const ownPhotoCount = (Array.isArray(p.ownPhotos) && p.ownPhotos.length)
       ? p.ownPhotos.length
       : JSON.parse(localStorage.getItem('es_own_photos_' + p.id) || '[]').length;
-    const postCount = (p.deliveredPhotos || []).length + ownPhotoCount + getOwnClips(p.id).length;
+    const postCount = getPlayerPosts(p.id, 'photo').length + getPlayerPosts(p.id, 'video').length
+      + (p.deliveredPhotos || []).length + ownPhotoCount + getOwnClips(p.id).length;
     document.getElementById('stat-photos').textContent = postCount;
     document.getElementById('stat-followers').textContent = getFollowerCount(p.id);
     document.getElementById('stat-following').textContent = getFollowingCount(p.id);
-    document.getElementById('stat-year').textContent = p.gradYear || '—';
-    if (p.school) {
-      document.getElementById('stat-school').textContent = p.school;
-      document.getElementById('stat-school-wrap').style.display = '';
-    }
-    if (p.clubTeam) {
-      document.getElementById('stat-club').textContent = p.clubTeam;
-      document.getElementById('stat-club-wrap').style.display = '';
-    } else {
-      document.getElementById('stat-club-wrap').style.display = 'none';
-    }
+
+    // School · Class of YYYY on one line under the handle
+    const schoolLine = [p.school, p.gradYear ? 'Class of ' + p.gradYear : ''].filter(Boolean).join(' · ');
+    document.getElementById('profile-school-text').textContent = schoolLine;
+    document.getElementById('profile-school').style.display = schoolLine ? 'flex' : 'none';
+
+    applyProfileLook(p);
 
     // Private profile — when "Public Profile" is off, visitors can't see the content.
     if (!isOwnProfile && p.prefs && p.prefs['priv-public'] === false) {
@@ -1473,12 +1403,6 @@
 
     // Photos tab
     document.getElementById('tab-photos').innerHTML = isOwnProfile ? photosTabHTML(p) : publicPhotosTab(p);
-
-    // Posted Photos tab
-    document.getElementById('tab-posted').innerHTML = postedPhotosTabHTML(p.id);
-
-    // Highlights tab
-    document.getElementById('tab-highlights').innerHTML = highlightsTabHTML(viewId || session.id, isOwnProfile);
 
     // Info tab
     document.getElementById('info-content').innerHTML = infoTabHTML(
@@ -1529,148 +1453,52 @@
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
+  // Story ring only while they've posted in the last 24h; colors from the
+  // theme they picked in Settings (prefs.profile_color), hype-locked.
+  const STORY_WINDOW_MS = 24 * 60 * 60 * 1000;
+  function applyProfileLook(p) {
+    const wrap = document.getElementById('profile-avatar-wrap');
+    const recent = JSON.parse(localStorage.getItem('es_posts') || '[]')
+      .some(po => po.authorId === p.id && Date.parse(po.createdAt) > Date.now() - STORY_WINDOW_MS);
+    wrap.classList.toggle('no-ring', !recent);
+
+    const t = (typeof profileTheme === 'function') ? profileTheme(p.prefs, getTotalHype(p.id)) : null;
+    const root = document.documentElement.style;
+    if (!t) return;
+    root.setProperty('--ring', t.ring);
+    root.setProperty('--accent', t.accent);
+    if (t.ink) root.setProperty('--ink', t.ink); else root.removeProperty('--ink');
+    document.getElementById('profile-wash').style.background = t.wash ? `linear-gradient(180deg, ${t.wash}, transparent)` : 'none';
+  }
+
+  // Posts (photos + videos) as grid tiles, newest first — same media the feed shows.
+  function postTilesHTML(playerId) {
+    const vProtect = isOwnProfile ? '' : 'oncontextmenu="return false" controlslist="nodownload noremoteplayback" disablepictureinpicture';
+    return JSON.parse(localStorage.getItem('es_posts') || '[]')
+      .filter(po => po.authorId === playerId && (po.type === 'photo' || po.type === 'video') && po.mediaData)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map(po => po.type === 'video'
+        ? `<div class="photo-item"><video src="${escAttr(po.mediaData)}" class="profile-video" muted loop playsinline preload="metadata" ${vProtect} onclick="openMediaLightbox(this.currentSrc||this.src,'video')" style="cursor:zoom-in;"></video></div>`
+        : `<div class="photo-item"><img alt="Post" src="${escAttr(po.mediaData)}" loading="lazy"></div>`)
+      .join('');
+  }
+
   function publicPhotosTab(p) {
-    // Content tab = the player's own photos AND videos. Posted content lives
-    // exclusively in the Posted Content tab, so posts are NOT included here.
+    // Content tab = everything they've shared: posts, delivered event photos,
+    // and media uploaded before Add Post went away.
+    const posts = postTilesHTML(p.id);
     const delivered = p.deliveredPhotos || [];
     const ownPhotos = (Array.isArray(p.ownPhotos) && p.ownPhotos.length)
       ? p.ownPhotos
       : JSON.parse(localStorage.getItem('es_own_photos_' + p.id) || '[]');
     const ownClips = getOwnClips(p.id);
-    if (!delivered.length && !ownPhotos.length && !ownClips.length) {
+    if (!posts && !delivered.length && !ownPhotos.length && !ownClips.length) {
       return `<div class="empty-state"><div class="empty-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><p class="empty-label">No content yet</p></div>`;
     }
     const deliveredHTML = delivered.map(src => `<div class="photo-item"><img alt="Player photo" src="${escAttr(src)}" loading="lazy"></div>`).join('');
     const ownPhotoHTML = ownPhotos.map(ph => `<div class="photo-item"><img alt="Player photo" src="${escAttr(ph.url || ph.dataUrl)}" loading="lazy"></div>`).join('');
     const clipHTML = ownClips.map(clip => `<div class="photo-item"><video src="${escAttr(clip.url || clip.dataUrl)}" class="profile-video" muted loop playsinline preload="metadata" oncontextmenu="return false" controlslist="nodownload noremoteplayback" disablepictureinpicture onclick="openMediaLightbox(this.currentSrc||this.src,'video')" style="cursor:zoom-in;"></video></div>`).join('');
-    return `<div class="photo-grid">${deliveredHTML}${ownPhotoHTML}${clipHTML}</div>`;
-  }
-
-  // Posted Content tab: this player's posts (photos + videos), each with caption + a tag pill
-  function postedPhotosTabHTML(playerId) {
-    const posts = JSON.parse(localStorage.getItem('es_posts') || '[]')
-      .filter(p => p.authorId === playerId && (p.type === 'photo' || p.type === 'video'))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    if (!posts.length) {
-      return `<div class="empty-state"><div class="empty-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><p class="empty-label">No posted content yet</p></div>`;
-    }
-    const vProtect = isOwnProfile ? '' : 'oncontextmenu="return false" controlslist="nodownload noremoteplayback" disablepictureinpicture';
-    const hypeMap = JSON.parse(localStorage.getItem('es_hypes') || '{}');
-    const cards = posts.map(post => {
-      const cap  = post.caption ? escHtml(post.caption) : '';
-      const pill = post.tournament ? '#' + String(post.tournament).replace(/\s+/g, '') : (post.sport || '');
-      const hypeCount = hypeMap[post.id] !== undefined ? hypeMap[post.id] : (post.hypes || 0);
-      const media = post.type === 'video'
-        ? `<video src="${escAttr(post.mediaData)}" class="profile-video" muted loop playsinline ${vProtect} onclick="openMediaLightbox(this.currentSrc||this.src,'video')" style="width:100%;height:auto;display:block;background:#111;cursor:zoom-in;"></video>`
-        : `<img src="${escAttr(post.mediaData)}" alt="Posted content" loading="lazy">`;
-      return `
-        <div class="posted-card">
-          <div class="posted-media">${media}</div>
-          <div class="posted-body">
-            <div class="posted-desc-row">
-              <p class="posted-desc${cap ? '' : ' posted-desc-empty'}">${cap || 'No description'}</p>
-              <span class="posted-hype" title="${hypeCount} hype${hypeCount === 1 ? '' : 's'}"><span class="posted-hype-icon"></span><span class="posted-hype-num">${formatHype(hypeCount)}</span></span>
-            </div>
-            ${pill ? `<span class="posted-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>${escHtml(pill)}</span>` : ''}
-          </div>
-        </div>`;
-    }).join('');
-    return `<div class="posted-grid">${cards}</div>`;
-  }
-
-  // Highlights = uploaded highlight reels only. Posted videos live in Posted Content.
-  function highlightsTabHTML(playerId, isOwn) {
-    const ownClips   = getOwnClips(playerId);
-
-    // Upload bar — own profile only
-    let uploadSection = '';
-    if (isOwn) {
-      if (!isSubscribed()) {
-        uploadSection = `
-        <div style="text-align:center;padding:60px 24px;">
-          <div style="width:60px;height:60px;border-radius:16px;background:rgba(123,47,190,0.12);border:1px solid rgba(123,47,190,0.22);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <p style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;">Pro Feature</p>
-          <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.65;max-width:320px;margin:0 auto 24px;">Upload your own highlight clips to your profile. Requires EyeScout Pro.</p>
-          <button onclick="window.location.href='subscription.html'" style="padding:12px 28px;border-radius:10px;background:linear-gradient(90deg,#7B2FBE 0%,#1E90FF 38%,#00C9A7 70%,#39D353 100%);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">Upgrade to Pro — $15/mo</button>
-        </div>`;
-      } else {
-        const total = ownClips.length;
-        uploadSection = `
-        <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-          <p style="font-size:13px;color:rgba(255,255,255,0.7);">${total} clip${total !== 1 ? 's' : ''}</p>
-          <button onclick="document.getElementById('own-clip-input').click()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.2);color:#1E90FF;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(30,144,255,0.2)'" onmouseout="this.style.background='rgba(30,144,255,0.1)'">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Upload Clip
-          </button>
-          <input type="file" id="own-clip-input" aria-label="Upload highlight video" accept="video/*" multiple style="display:none;" onchange="handleOwnClips(event)">
-        </div>`;
-      }
-    }
-
-    if (!ownClips.length) {
-      const emptyLabel = isOwn && isSubscribed()
-        ? 'No clips yet.<br>Hit Upload Clip to add your first highlight.'
-        : isOwn
-          ? ''
-          : 'No highlight reels yet.<br>Clips will appear here once uploaded.';
-      return uploadSection + (emptyLabel ? `<div class="empty-state"><div class="empty-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><p class="empty-label">${emptyLabel}</p></div>` : '');
-    }
-
-    const hlProtect = isOwn ? '' : 'oncontextmenu="return false" controlslist="nodownload noremoteplayback" disablepictureinpicture';
-    const ownClipsHTML = ownClips.map((clip, i) => `
-      <div style="background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">
-        <div style="position:relative;">
-          <video src="${escAttr(clip.url || clip.dataUrl)}" class="profile-video" muted loop playsinline ${hlProtect} onclick="openMediaLightbox(this.currentSrc||this.src,'video')" style="width:100%;display:block;background:#000;cursor:zoom-in;"></video>
-          ${isOwn ? `<button onclick="deleteOwnClip(${i})" aria-label="Delete video" style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,77,109,0.85)'" onmouseout="this.style.background='rgba(0,0,0,0.7)'">×</button>` : ''}
-        </div>
-        <div style="padding:8px 16px 12px;">
-          <p style="font-size:11px;color:rgba(255,255,255,0.7);">${new Date(clip.uploadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>
-        </div>
-      </div>`).join('');
-
-    return uploadSection + `<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;">${ownClipsHTML}</div>`;
-  }
-
-  function hypeVideoPost(postId, btn) {
-    const hypes = JSON.parse(localStorage.getItem('es_hypes') || '{}');
-    const key   = 'es_player_hyped_' + (session?.id || 'guest');
-    const stored = JSON.parse(localStorage.getItem(key) || '[]');
-    const isHyped = stored.includes(postId);
-    const numEl = btn.querySelector('.vid-hype-num');
-    const ease  = 'cubic-bezier(0.22,1,0.36,1)';
-
-    if (isHyped) {
-      stored.splice(stored.indexOf(postId), 1);
-      hypes[postId] = Math.max(0, (hypes[postId] || 1) - 1);
-      btn.classList.remove('hyped');
-      rollVidCount(numEl, hypes[postId] || 0, 'down');
-    } else {
-      stored.push(postId);
-      hypes[postId] = (hypes[postId] || 0) + 1;
-      btn.classList.add('hyped');
-      rollVidCount(numEl, hypes[postId], 'up');
-    }
-    localStorage.setItem('es_hypes', JSON.stringify(hypes));
-    localStorage.setItem(key, JSON.stringify(stored));
-  }
-
-  function rollVidCount(numEl, newVal, direction) {
-    const container = numEl.parentElement;
-    if (!container) { numEl.textContent = newVal; return; }
-    const outgoing = numEl.cloneNode(true);
-    outgoing.style.cssText = 'position:absolute;top:0;left:0;width:100%;';
-    container.appendChild(outgoing);
-    numEl.textContent = newVal;
-    numEl.style.transform = `translateY(${direction === 'up' ? '100%' : '-100%'})`;
-    void numEl.offsetWidth;
-    const ease = 'cubic-bezier(0.22,1,0.36,1)';
-    outgoing.style.transition = `transform 0.24s ${ease}`;
-    outgoing.style.transform  = `translateY(${direction === 'up' ? '-120%' : '120%'})`;
-    numEl.style.transition    = `transform 0.24s ${ease}`;
-    numEl.style.transform     = 'translateY(0)';
-    setTimeout(() => { outgoing.remove(); numEl.style.transition = ''; numEl.style.transform = ''; }, 260);
+    return `<div class="photo-grid">${posts}${deliveredHTML}${ownPhotoHTML}${clipHTML}</div>`;
   }
 
   // ── Photos Tab ─────────────────────────────────────────────────────────────
@@ -1682,9 +1510,10 @@
     // a player who isn't on the Pro plan.
     let ownSection = '';
     {
+      const posts  = postTilesHTML(session.id);
       const photos = getOwnPhotos();
       const clips  = getOwnClips(session.id);
-      if (photos.length || clips.length) {
+      if (posts || photos.length || clips.length) {
         const delBtn = onclick => `<button onclick="${onclick}" style="position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.65);border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;z-index:2;" onmouseover="this.style.background='rgba(255,77,109,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'" aria-label="Delete photo">×</button>`;
         const photoHTML = photos.map((ph, i) => `
           <div class="photo-item">
@@ -1698,8 +1527,8 @@
           </div>`).join('');
         ownSection = `
           <div style="margin-bottom:28px;">
-            <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:14px;">My Content · ${photos.length + clips.length}</p>
-            <div class="photo-grid">${photoHTML}${clipHTML}</div>
+            <p style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:14px;">My Content · ${getPlayerPosts(session.id, 'photo').length + getPlayerPosts(session.id, 'video').length + photos.length + clips.length}</p>
+            <div class="photo-grid">${posts}${photoHTML}${clipHTML}</div>
             <div style="height:1px;background:rgba(255,255,255,0.06);margin-top:24px;"></div>
           </div>`;
       }
@@ -1708,7 +1537,9 @@
     // If photos have been delivered to this player, always show them — no matter
     // the purchase/selection state or Pro plan (the public view already does
     // this; keep the player's own view consistent).
-    const stateContent = (p.deliveredPhotos && p.deliveredPhotos.length) ? stateDelivered(p) :
+    const inPhotoFlow = (p.deliveredPhotos && p.deliveredPhotos.length) || p.selectionSubmitted || p.purchased;
+    const stateContent = !inPhotoFlow ? (ownSection ? '' : stateNoSelection(p)) :
+      (p.deliveredPhotos && p.deliveredPhotos.length) ? stateDelivered(p) :
       !p.selectionSubmitted ? stateNoSelection(p) :
       p.purchased ? stateTypeA(p) : stateTypeB(p);
 
@@ -1738,19 +1569,6 @@
 
   function stateDelivered(p) {
     const photos = p.deliveredPhotos || [];
-    const photoPosts = getPlayerPosts(p.id, 'photo');
-    const postGrid = photoPosts.length ? `
-      <div style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:14px;">My Posts</p>
-        <div class="photo-grid">
-          ${photoPosts.map(post => `
-            <div class="photo-card" style="position:relative;">
-              <img src="${escAttr(post.mediaData)}" alt="Post">
-              <div class="photo-overlay"></div>
-              ${post.caption ? `<div style="position:absolute;bottom:0;left:0;right:0;padding:20px 10px 8px;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);font-size:11px;color:rgba(255,255,255,0.85);line-height:1.4;">${escHtml(post.caption)}</div>` : ''}
-            </div>`).join('')}
-        </div>
-      </div>` : '';
     return `
     <div class="fade-in">
       <div class="status-banner ready" style="max-width:none;margin-bottom:28px;">
@@ -1773,7 +1591,6 @@
             </div>
           </div>`).join('')}
       </div>
-      ${postGrid}
     </div>`;
   }
 
@@ -2210,65 +2027,13 @@
   }
 
 
-  // Posting your own photos/videos is a Pro feature. The buttons are already
-  // hidden for non-subscribers, but guard the handlers too so there's no way in
-  // without Pro (defense-in-depth).
-  function requireProToPost() {
-    if (isSubscribed()) return true;
-    window.location.href = 'subscription.html';
-    return false;
-  }
-
-  async function handleOwnPhotos(event) {
-    if (!requireProToPost()) { event.target.value = ''; return; }
-    const files = Array.from(event.target.files);
-    event.target.value = '';
-    if (!files.length) return;
-    const existing = getOwnPhotos().slice();
-    for (const file of files) {
-      try {
-        const url = await _sbUploadImage('posts', session.id, file);
-        existing.push({ url, uploadedAt: new Date().toISOString() });
-      } catch (err) {
-        console.error('[own photo upload]', err);
-        alert('Photo upload failed: ' + (err.message || 'try again'));
-      }
-    }
-    saveOwnPhotos(existing);
-    document.getElementById('tab-photos').innerHTML = photosTabHTML(getLatestPlayer());
-  }
-
-  // Add Post — accepts photos and videos. Photos land in Content, videos in Highlights.
-  async function handleAddPost(event) {
-    if (!requireProToPost()) { event.target.value = ''; return; }
-    const files = Array.from(event.target.files);
-    event.target.value = '';
-    if (!files.length) return;
-    const images = files.filter(f => f.type.startsWith('image/'));
-    const videos = files.filter(f => f.type.startsWith('video/'));
-    const other  = files.filter(f => !f.type.startsWith('image/') && !f.type.startsWith('video/'));
-    if (other.length) alert('Only photos and videos can be added.');
-
-    // Photos → Content (uploaded to Supabase posts bucket)
-    if (images.length) {
-      const existing = getOwnPhotos().slice();
-      for (const file of images) {
-        try {
-          const url = await _sbUploadImage('posts', session.id, file);
-          existing.push({ url, uploadedAt: new Date().toISOString() });
-        } catch (err) {
-          console.error('[add post photo]', err);
-          alert('Photo upload failed: ' + (err.message || 'try again'));
-        }
-      }
-      saveOwnPhotos(existing);
-      document.getElementById('tab-photos').innerHTML = photosTabHTML(getLatestPlayer());
-    }
-
-    // Videos → Highlights (uploaded to Supabase Storage, 50 MB cap each)
-    if (videos.length) {
-      await uploadClips(videos);
-    }
+  // Re-paint the Content tab after a delete.
+  function rerenderContent() {
+    const content = document.getElementById('tab-photos');
+    if (content) content.innerHTML = photosTabHTML(getLatestPlayer());
+    if (typeof window.justifyGalleries === 'function') window.justifyGalleries();
+    initProfileVideoAutoplay();
+    syncActiveTabVideos();
   }
 
   // Reusable custom confirmation modal (replaces the browser confirm()).
@@ -2311,71 +2076,9 @@
         const photos = getOwnPhotos();
         photos.splice(index, 1);
         saveOwnPhotos(photos);  // persists to Supabase via _sbSavePlayer
-        document.getElementById('tab-photos').innerHTML = photosTabHTML(getLatestPlayer());
+        rerenderContent();
       },
     });
-  }
-
-  async function handleOwnClips(event) {
-    if (!requireProToPost()) { event.target.value = ''; return; }
-    const files = Array.from(event.target.files);
-    event.target.value = '';
-    if (!files.length) return;
-    await uploadClips(files);
-  }
-
-  // Upload highlight clips to Supabase Storage and store their URLs.
-  // (Videos are far too large to keep as base64 in localStorage — that silently
-  //  blows the ~5 MB quota, which is why uploads used to "do nothing".)
-  async function uploadClips(files) {
-    const MAX = 50 * 1024 * 1024; // 50 MB cap
-    const tooBig = files.filter(f => f.size > MAX);
-    if (tooBig.length) {
-      alert(`${tooBig.map(f => f.name).join(', ')} exceed${tooBig.length === 1 ? 's' : ''} the 50 MB limit. Please compress or trim before uploading.`);
-    }
-    const okVideos = files.filter(f => f.size <= MAX);
-    if (!okVideos.length) return;
-
-    // Show an uploading indicator — large clips take a few seconds to upload.
-    const hl = document.getElementById('tab-highlights');
-    if (hl) {
-      const note = document.createElement('div');
-      note.id = 'clip-uploading';
-      note.style.cssText = 'display:flex;align-items:center;gap:10px;padding:14px 16px;margin-bottom:16px;background:rgba(30,144,255,0.08);border:1px solid rgba(30,144,255,0.2);border-radius:12px;font-size:13px;color:rgba(255,255,255,0.7);';
-      note.innerHTML = `<span style="width:16px;height:16px;border:2px solid rgba(30,144,255,0.35);border-top-color:#1E90FF;border-radius:50%;display:inline-block;animation:spin 0.7s linear infinite;"></span>Uploading ${okVideos.length} clip${okVideos.length === 1 ? '' : 's'}…`;
-      hl.prepend(note);
-      if (!document.getElementById('spin-kf')) {
-        const kf = document.createElement('style'); kf.id = 'spin-kf';
-        kf.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-        document.head.appendChild(kf);
-      }
-    }
-
-    const existing = getOwnClips(session.id);
-    let failed = 0;
-    for (const file of okVideos) {
-      try {
-        const url = await _sbUploadImage('posts', session.id, file);
-        existing.push({ url, uploadedAt: new Date().toISOString(), name: file.name });
-      } catch (err) {
-        console.error('[clip upload]', err);
-        failed++;
-      }
-    }
-    saveOwnClips(session.id, existing);
-    refreshClipTabs();
-    if (failed) alert(`${failed} clip${failed === 1 ? '' : 's'} failed to upload. Please try again.`);
-  }
-
-  // Clips live in both the Highlights tab and the Content tab, so refresh both.
-  function refreshClipTabs() {
-    const hl = document.getElementById('tab-highlights');
-    if (hl) hl.innerHTML = highlightsTabHTML(session.id, true);
-    const content = document.getElementById('tab-photos');
-    if (content) content.innerHTML = photosTabHTML(getLatestPlayer());
-    if (typeof window.justifyGalleries === 'function') window.justifyGalleries();
-    initProfileVideoAutoplay();
-    syncActiveTabVideos();
   }
 
   function deleteOwnClip(index) {
@@ -2389,7 +2092,7 @@
         const clips = getOwnClips(session.id);
         clips.splice(index, 1);
         saveOwnClips(session.id, clips);  // persists to Supabase via _sbSavePlayer
-        refreshClipTabs();
+        rerenderContent();
       },
     });
   }

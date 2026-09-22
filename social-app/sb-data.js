@@ -17,7 +17,7 @@ const ES_SPORTS = [
   'Football', 'Boys Basketball', 'Girls Basketball', 'Baseball', 'Softball',
   'Boys Soccer', 'Girls Soccer', 'Boys Volleyball', 'Girls Volleyball',
   'Track & Field', 'Wrestling', 'Boys Lacrosse', 'Girls Lacrosse',
-  'Tennis', 'Swimming', 'Cross Country', 'Other',
+  'Tennis', 'Swimming', 'Cross Country',
 ];
 function _esSportsMap() { try { return JSON.parse(localStorage.getItem('es_player_sports') || '{}'); } catch (e) { return {}; } }
 // The list of sports for a player object. Prefers the durable local map, then an
@@ -41,6 +41,32 @@ function postMatchesSports(postSport, sportsArr) {
   if (!sportsArr || !sportsArr.length) return true;
   const s = (postSport || '').toLowerCase();
   return sportsArr.some(sp => sp.toLowerCase() === s);
+}
+
+// ── Profile colors ───────────────────────────────────────────────────────────
+// A player's chosen look for their profile page, stored as
+// profiles.prefs.profile_color and visible to everyone who opens it. Same table
+// and hype locks as the mobile app; a theme they haven't earned (or no longer
+// have the hype for) falls back to the default, so the lock holds everywhere.
+const ES_PROFILE_THEMES = [
+  { key: 'eyescout', label: 'EyeScout', ring: 'linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%)', accent: '#1E90FF', unlockHype: 0 },
+  { key: 'purple',   label: 'Purple',   ring: 'linear-gradient(90deg, #7B2FBE, #a855f7)',          accent: '#a855f7', wash: 'rgba(168,85,247,0.45)', ink: '#c084fc', unlockHype: 0 },
+  { key: 'green',    label: 'Green',    ring: 'linear-gradient(90deg, #00C9A7, #39D353)',          accent: '#39D353', wash: 'rgba(57,211,83,0.38)',  ink: '#4ade80', unlockHype: 5 },
+  { key: 'ocean',    label: 'Ocean',    ring: 'linear-gradient(90deg, #1E90FF, #22d3ee)',          accent: '#1E90FF', wash: 'rgba(30,144,255,0.45)', ink: '#38bdf8', unlockHype: 10 },
+  { key: 'fire',     label: 'Fire',     ring: 'linear-gradient(90deg, #ef4444, #f97316)',          accent: '#f97316', wash: 'rgba(249,115,22,0.42)', ink: '#fb923c', unlockHype: 50 },
+  { key: 'pink',     label: 'Pink',     ring: 'linear-gradient(90deg, #db2777, #f9a8d4)',          accent: '#ec4899', wash: 'rgba(236,72,153,0.42)', ink: '#f9a8d4', unlockHype: 100 },
+  { key: 'mint',     label: 'Mint',     ring: 'linear-gradient(90deg, #14b8a6, #a7f3d0)',          accent: '#2dd4bf', wash: 'rgba(45,212,191,0.38)', ink: '#5eead4', unlockHype: 150 },
+  { key: 'sunset',   label: 'Sunset',   ring: 'linear-gradient(90deg, #f43f5e, #fb923c, #facc15)', accent: '#fb7185', wash: 'rgba(251,113,133,0.42)', ink: '#fda4af', unlockHype: 200 },
+  { key: 'indigo',   label: 'Indigo',   ring: 'linear-gradient(90deg, #3730a3, #818cf8)',          accent: '#6366f1', wash: 'rgba(99,102,241,0.45)', ink: '#a5b4fc', unlockHype: 300 },
+  { key: 'crimson',  label: 'Crimson',  ring: 'linear-gradient(90deg, #7f1d1d, #ef4444)',          accent: '#ef4444', wash: 'rgba(239,68,68,0.42)',  ink: '#f87171', unlockHype: 400 },
+  { key: 'aurora',   label: 'Aurora',   ring: 'linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6)', accent: '#a78bfa', wash: 'rgba(167,139,250,0.45)', ink: '#c4b5fd', unlockHype: 495 },
+  { key: 'gold',     label: 'Gold',     ring: 'linear-gradient(90deg, #f59e0b, #fde047)',          accent: '#f59e0b', wash: 'rgba(245,158,11,0.42)', ink: '#fbbf24', unlockHype: 500 },
+];
+// Unknown/missing key → default. Pass total hype to enforce the lock.
+function profileTheme(prefs, hype) {
+  const t = ES_PROFILE_THEMES.find(x => x.key === (prefs && prefs.profile_color));
+  if (!t) return ES_PROFILE_THEMES[0];
+  return (hype === undefined || hype >= t.unlockHype) ? t : ES_PROFILE_THEMES[0];
 }
 
 // ── Row → legacy localStorage object conversions ─────────────────────────────
@@ -1123,7 +1149,10 @@ function _reportToRow(r) {
     created_at:    r.createdAt     || new Date().toISOString(),
   };
 }
-function _sbSaveReport(r)   { _SB.from('reports').upsert(_reportToRow(r)).then(undefined, () => {}); }
+// insert, not upsert: ON CONFLICT DO UPDATE makes RLS demand SELECT+UPDATE
+// policies on reports, and granting those would expose reporter identities.
+// Report ids are freshly minted, so there is never anything to merge.
+function _sbSaveReport(r)   { _SB.from('reports').insert(_reportToRow(r)).then(undefined, () => {}); }
 function _sbDeleteReport(id){ _SB.from('reports').delete().eq('id', id).then(undefined, () => {}); }
 
 // ── Shared "Report post" flow (Instagram-style sheet) ─────────────────────────

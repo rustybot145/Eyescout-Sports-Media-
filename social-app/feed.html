@@ -707,6 +707,15 @@
     margin-bottom: 16px;
   }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grad); flex-shrink:0; }
+  .feed-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .feed-head .section-pill { margin-bottom: 0; }
+  /* Hype leaderboard link — purple trophy, no box */
+  .trophy-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    color: #a855f7; text-decoration: none; transition: background 0.15s, transform 0.15s;
+  }
+  .trophy-link:hover { background: rgba(168,85,247,0.12); transform: translateY(-1px); }
   #coach-lock {
     display: none;
     position: fixed;
@@ -847,7 +856,10 @@
 <div class="mobile-header">
   <img src="../logo-transparent.png" alt="EyeScout" class="mobile-logo">
   <span class="mobile-header-title">EyeScout</span>
-  <button class="mobile-new-post" onclick="window.location.href='create-post.html'">+ Post</button>
+  <span style="display:flex;align-items:center;gap:8px;">
+    <a class="trophy-link" href="leaderboard.html" aria-label="Hype leaderboard" title="Hype leaderboard"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 14v7"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2.5A1.5 1.5 0 0 1 21 6.5c0 2.2-1.8 4-4 4"/><path d="M7 5H4.5A1.5 1.5 0 0 0 3 6.5c0 2.2 1.8 4 4 4"/></svg></a>
+    <button class="mobile-new-post" onclick="window.location.href='create-post.html'">+ Post</button>
+  </span>
 </div>
 
 <!-- ── Mobile Bottom Nav ── -->
@@ -1004,7 +1016,10 @@
       </div>
     </div>
 
-    <div class="section-pill" id="feed-pill"><div class="dot"></div>Feed</div>
+    <div class="feed-head">
+      <div class="section-pill" id="feed-pill"><div class="dot"></div>Feed</div>
+      <a class="trophy-link" href="leaderboard.html" aria-label="Hype leaderboard" title="Hype leaderboard"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 14v7"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2.5A1.5 1.5 0 0 1 21 6.5c0 2.2-1.8 4-4 4"/><path d="M7 5H4.5A1.5 1.5 0 0 0 3 6.5c0 2.2 1.8 4 4 4"/></svg></a>
+    </div>
 
     <!-- Sport switcher — only shown for multi-sport athletes (populated by JS) -->
     <div id="feed-sport-tabs" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 18px;"></div>

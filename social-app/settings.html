@@ -111,6 +111,25 @@
   .section-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 1px; }
   .section-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 
+  /* ── Profile colors ── */
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 14px 8px; }
+  .color-opt {
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    background: none; border: none; cursor: pointer; padding: 0;
+    color: rgba(255,255,255,0.7); font-family: inherit; font-size: 11px; font-weight: 600;
+  }
+  .color-circle {
+    width: 54px; height: 54px; border-radius: 50%; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .color-opt:hover .color-circle { transform: scale(1.06); }
+  .color-opt.on .color-circle { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px #fff; }
+  .color-opt.on { color: #fff; }
+  .color-opt.locked .color-circle { opacity: 0.35; }
+  .color-opt.locked:hover .color-circle { transform: none; }
+  .color-lock { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: -3px; }
+
   /* ── Fields ── */
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .field-group { display: flex; flex-direction: column; gap: 6px; }
@@ -417,6 +436,23 @@
           <p id="photo-status" style="font-size:11px;color:rgba(255,255,255,0.7);"></p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ── Profile Colors ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(168,85,247,0.1);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Profile Colors</p>
+        <p class="section-sub">Pick the look of your profile page — everyone sees it. Earn hype to unlock more.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="color-grid" id="color-grid" role="radiogroup" aria-label="Profile color"></div>
+      <p id="color-status" style="font-size:11px;color:rgba(255,255,255,0.7);min-height:14px;margin-top:-4px;"></p>
     </div>
   </div>
 
@@ -745,6 +781,48 @@
     btn.setAttribute('aria-checked', btn.classList.contains('on') ? 'true' : 'false');
   }
 
+  // ── Profile colors — saves on tap (no Save Changes needed) ────────────────
+  // Same hype total the profile page shows: stars across all of your posts.
+  function totalHype(playerId) {
+    const hypes = JSON.parse(localStorage.getItem('es_hypes') || '{}');
+    return JSON.parse(localStorage.getItem('es_posts') || '[]')
+      .filter(po => po.authorId === playerId)
+      .reduce((sum, po) => sum + (hypes[po.id] !== undefined ? hypes[po.id] : (po.hypes || 0)), 0);
+  }
+  function renderColorGrid() {
+    const grid = document.getElementById('color-grid');
+    if (!grid || typeof ES_PROFILE_THEMES === 'undefined') return;
+    const hype = totalHype(session.id);
+    const current = profileTheme(prefs, hype).key;
+    grid.innerHTML = '';
+    ES_PROFILE_THEMES.forEach(t => {
+      const locked = hype < t.unlockHype;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'color-opt' + (t.key === current ? ' on' : '') + (locked ? ' locked' : '');
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', t.key === current ? 'true' : 'false');
+      btn.setAttribute('aria-label', t.label + (locked ? ' — locked, needs ' + t.unlockHype + ' hype' : ''));
+      // t.* values come from the fixed table in sb-data.js, never from user input.
+      btn.innerHTML = `<span class="color-circle" style="background:${t.ring};">${locked
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+        : ''}</span><span>${t.label}</span>${locked ? `<span class="color-lock">${t.unlockHype} hype</span>` : ''}`;
+      btn.onclick = () => pickColor(t, locked);
+      grid.appendChild(btn);
+    });
+  }
+  async function pickColor(t, locked) {
+    const status = document.getElementById('color-status');
+    if (locked) { status.textContent = `${t.label} unlocks at ${t.unlockHype} hype — you have ${totalHype(session.id)}.`; return; }
+    prefs.profile_color = t.key;   // Save Changes spreads `prefs`, so this survives it
+    localStorage.setItem('es_prefs_' + session.id, JSON.stringify(prefs));
+    renderColorGrid();
+    status.textContent = 'Saving…';
+    const { error } = await savePatch({ prefs: { ...prefs } });
+    status.textContent = error ? 'Couldn’t save: ' + (error.message || 'server error') : `✓ ${t.label} saved`;
+  }
+  renderColorGrid();
+
   // ── Custom Stats ─────────────────────────────────────────────────────────
   let statRows = Array.isArray(p.sportStats) ? [...p.sportStats] : [];
 
@@ -946,7 +1024,8 @@
   (async () => {
     try {
       if (typeof _sbSync !== 'function') return;
-      await _sbSync({ players: true, subscription: true });
+      await _sbSync({ players: true, posts: true, hypes: true, subscription: true });
+      renderColorGrid();
       // Refresh form with fresher data
       const fresh = getPlayer();
       document.getElementById('s-first').value    = fresh.athleteFirst  || '';

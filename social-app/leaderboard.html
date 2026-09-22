@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeScout — Hype Leaderboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sb-data.js"></script>
+<style>
+  :root {
+    --grad: linear-gradient(90deg, #7B2FBE 0%, #1E90FF 38%, #00C9A7 70%, #39D353 100%);
+    --bg: #0d0d0d;
+    --border: rgba(255,255,255,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: #fff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+    background: rgba(13,13,13,0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .back {
+    width: 36px; height: 36px; border-radius: 50%; border: none; background: none;
+    color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .back:hover { background: rgba(255,255,255,0.08); }
+  .title { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .trophy { margin-left: auto; color: #a855f7; display: flex; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 6px 16px 80px; }
+  .sub { font-size: 12px; color: rgba(255,255,255,0.7); padding: 14px 4px 6px; line-height: 1.5; }
+  .row {
+    display: flex; align-items: center; gap: 14px; padding: 12px 6px;
+    border-bottom: 1px solid var(--border); text-decoration: none; color: #fff;
+    transition: background 0.12s;
+  }
+  .row:hover { background: rgba(255,255,255,0.03); }
+  .rank { width: 26px; text-align: center; font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 18px; color: rgba(255,255,255,0.45); flex-shrink: 0; }
+  .rank.r1 { color: #f59e0b; } .rank.r2 { color: #cbd5e1; } .rank.r3 { color: #cd7f32; }
+  .av {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+    background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 14px;
+  }
+  .av img { width: 100%; height: 100%; object-fit: cover; }
+  .who { min-width: 0; }
+  .name { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+  .hype { margin-left: auto; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .star {
+    width: 16px; height: 16px; background: #a855f7;
+    -webkit-mask: url('star.png') no-repeat center / contain; mask: url('star.png') no-repeat center / contain;
+    filter: drop-shadow(0 0 6px rgba(168,85,247,0.45));
+  }
+  .empty { text-align: center; color: rgba(255,255,255,0.7); padding: 64px 16px; font-size: 14px; line-height: 1.6; }
+  .skel { height: 44px; border-radius: 8px; background: rgba(255,255,255,0.05); margin: 12px 0; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+</style>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <button class="back" onclick="goBack()" aria-label="Back">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="title">Hype Leaderboard</span>
+  <span class="trophy" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 14v7"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2.5A1.5 1.5 0 0 1 21 6.5c0 2.2-1.8 4-4 4"/><path d="M7 5H4.5A1.5 1.5 0 0 0 3 6.5c0 2.2 1.8 4 4 4"/></svg>
+  </span>
+</div>
+<main class="wrap" id="main-content">
+  <p class="sub">The most hyped athletes on EyeScout — total stars across all of their posts.</p>
+  <div id="list" aria-live="polite">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </div>
+</main>
+
+<script>
+  const coach  = JSON.parse(localStorage.getItem('es_coach_session') || 'null');
+  const player = JSON.parse(localStorage.getItem('es_session') || 'null');
+  if (!coach && !player) window.location.href = 'login.html';
+
+  function goBack() {
+    if (history.length > 1) history.back();
+    else window.location.href = coach ? 'coach-news-feed.html' : 'feed.html';
+  }
+  function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  function formatHype(n){ return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k' : String(n); }
+
+  // Same number the profile page shows (rows in `hypes` across a player's posts),
+  // aggregated for everyone at once.
+  // ponytail: pulls every hypes + posts row and counts client-side (PostgREST
+  // caps each at 1000 rows); move to a DB view/RPC when either table gets big.
+  async function load() {
+    const list = document.getElementById('list');
+    try {
+      const [{ data: hypes }, { data: posts }] = await Promise.all([
+        _SB.from('hypes').select('post_id'),
+        _SB.from('posts').select('id, author_id'),
+      ]);
+      const authorOf = new Map((posts || []).map(p => [p.id, p.author_id]));
+      const totals = {};
+      (hypes || []).forEach(h => { const a = authorOf.get(h.post_id); if (a) totals[a] = (totals[a] || 0) + 1; });
+      const top = Object.entries(totals).sort((x, y) => y[1] - x[1]).slice(0, 50);
+      if (!top.length) { list.innerHTML = '<p class="empty">No hype yet — be the first to post.</p>'; return; }
+
+      const { data: profiles } = await _SB.from('profiles')
+        .select('id, athlete_first, athlete_last, jersey, sport, profile_photo')
+        .in('id', top.map(([id]) => id));
+      const byId = new Map((profiles || []).map(p => [p.id, p]));
+
+      let rank = 0;
+      list.innerHTML = top.map(([id, hype]) => {
+        const p = byId.get(id);
+        if (!p) return '';   // deleted account — its hype has no one to credit
+        rank++;
+        const href = 'profile.html?id=' + encodeURIComponent(id) + (coach ? '&coach=1' : '');
+        const name = `${p.athlete_first || ''} ${p.athlete_last || ''}`.trim() || 'Player';
+        const meta = [p.jersey ? '#' + p.jersey : '', p.sport || ''].filter(Boolean).join(' · ');
+        const av = p.profile_photo ? `<img alt="" src="${escHtml(p.profile_photo)}">` : `#${escHtml(p.jersey || '')}`;
+        return `<a class="row" href="${href}">
+          <span class="rank r${rank}">${rank}</span>
+          <span class="av">${av}</span>
+          <span class="who"><div class="name">${escHtml(name)}</div><div class="meta">${escHtml(meta)}</div></span>
+          <span class="hype"><span class="star" aria-hidden="true"></span>${formatHype(hype)}</span>
+        </a>`;
+      }).join('') || '<p class="empty">No hype yet — be the first to post.</p>';
+    } catch (e) {
+      console.warn('[leaderboard]', e);
+      list.innerHTML = '<p class="empty">Couldn’t load the leaderboard.<br>Check your connection and try again.</p>';
+    }
+  }
+  load();
+</script>
+</body>
+</html>
