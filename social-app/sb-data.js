@@ -1471,3 +1471,60 @@ async function _sbCompleteConfirmedSignup(session) {
   // Feed, not profile: a confirmed signup lands in the app proper, same as login.
   return 'feed.html';
 }
+
+// ── Instagram auto-posting ───────────────────────────────────────────────────
+// Thin wrappers over the /api/instagram-* serverless functions. Everything
+// secret (the app secret, the athlete's Instagram token) lives on the server;
+// the browser only ever learns whether a connection exists and what the
+// username is. Each call proves who it is with the Supabase access token, the
+// same way delete-user has always worked.
+
+async function _igAuthHeaders() {
+  let token = '';
+  try { const { data } = await _SB.auth.getSession(); token = (data && data.session && data.session.access_token) || ''; }
+  catch (e) {}
+  return token ? { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token } : null;
+}
+
+async function _igCall(path, body) {
+  const headers = await _igAuthHeaders();
+  if (!headers) return { ok: false, error: 'Please sign in again.' };
+  try {
+    const r = await fetch('/api/' + path, { method: 'POST', headers, body: JSON.stringify(body || {}) });
+    return await r.json();
+  } catch (e) {
+    return { ok: false, error: 'Network problem — check your connection.' };
+  }
+}
+
+/** → { connected, username }. Never throws; treats any failure as "not connected"
+ *  so the post screen quietly falls back instead of showing a server error. */
+async function igStatus() {
+  const r = await _igCall('instagram-status');
+  return { connected: !!(r && r.ok && r.connected), username: (r && r.username) || null };
+}
+
+/** Sends the athlete to Instagram's own permission screen. */
+async function igConnect() {
+  const r = await _igCall('instagram-start', { platform: 'web' });
+  if (r && r.ok && r.url) { window.location.href = r.url; return { ok: true }; }
+  return { ok: false, error: (r && r.error) || 'Could not start the Instagram connection.' };
+}
+
+async function igDisconnect() { return _igCall('instagram-disconnect'); }
+
+/**
+ * Publish one post to the athlete's Instagram.
+ * Video containers take longer than a serverless function may run, so the
+ * server hands back `pending` + a container id and we call again until it is
+ * done. Capped so a stuck video cannot spin forever.
+ */
+async function igPublish({ mediaUrl, kind, caption, target }) {
+  let r = await _igCall('instagram-publish', { mediaUrl, kind, caption, target: target || 'story' });
+  for (let i = 0; i < 20 && r && r.ok && r.pending; i++) {
+    await new Promise((res) => setTimeout(res, 3000));
+    r = await _igCall('instagram-publish', { containerId: r.containerId });
+  }
+  if (r && r.ok && r.pending) return { ok: false, error: 'Instagram is still processing that video. It may appear shortly.' };
+  return r || { ok: false, error: 'Could not post to Instagram.' };
+}

@@ -295,6 +295,12 @@
           <div id="post-sport-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
         </div>
 
+        <!-- Instagram — only appears once the athlete has connected in Settings -->
+        <label id="ig-row" style="display:none;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;">
+          <input type="checkbox" id="ig-toggle" style="width:16px;height:16px;accent-color:#E4405F;cursor:pointer;">
+          <span style="font-size:13px;color:rgba(255,255,255,0.85);">Also post to my Instagram story <span id="ig-handle" style="color:rgba(255,255,255,0.6);"></span></span>
+        </label>
+
         <button class="post-btn" id="post-btn" onclick="submitPost()">Share Post →</button>
         <p id="post-err" style="display:none;font-size:12px;color:#f87171;margin-top:10px;"></p>
       </div>
@@ -309,6 +315,7 @@
     </div>
     <h2 style="font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:32px;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:10px;">Posted!</h2>
     <p style="font-size:14px;color:rgba(255,255,255,0.7);">Taking you to your profile…</p>
+    <p id="ig-result" style="display:none;font-size:13px;color:rgba(255,255,255,0.7);margin-top:10px;"></p>
   </div>
 
 </main>
@@ -372,6 +379,15 @@
     renderPostSportPicker();
     document.getElementById('caption-input').focus();
   }
+
+  // ── Instagram: show the switch only if they've connected in Settings ───────
+  (async () => {
+    if (typeof igStatus !== 'function') return;
+    const { connected, username } = await igStatus();
+    if (!connected) return;                       // stays hidden; nothing to explain
+    document.getElementById('ig-row').style.display = 'flex';
+    if (username) document.getElementById('ig-handle').textContent = '@' + username;
+  })();
 
   // ── Which sport is this post for? (multi-sport athletes) ───────────────────
   const _mySports = (typeof getPlayerSports === 'function') ? getPlayerSports(session) : [session.sport];
@@ -442,6 +458,29 @@
 
     document.getElementById('step-caption').style.display = 'none';
     document.getElementById('step-done').style.display = 'block';
+
+    // Instagram last, and never in a way that can lose the EyeScout post — that
+    // is already saved by this point. A failure here is reported, not fatal.
+    const igOn = document.getElementById('ig-toggle');
+    if (igOn && igOn.checked && typeof igPublish === 'function') {
+      const note = document.getElementById('ig-result');
+      if (note) { note.textContent = 'Posting to Instagram…'; note.style.display = 'block'; }
+      const r = await igPublish({
+        mediaUrl: selectedPhoto,
+        kind: selectedType === 'video' ? 'video' : 'photo',
+        caption: posts[0].caption,
+        target: 'story',
+      });
+      if (note) {
+        note.textContent = r.ok
+          ? 'Posted to your Instagram story.'
+          : 'Posted to EyeScout, but Instagram failed: ' + (r.error || 'try sharing it manually.');
+        note.style.color = r.ok ? 'rgba(255,255,255,0.7)' : '#f87171';
+      }
+      setTimeout(() => { window.location.href = 'profile.html'; }, r.ok ? 1600 : 4200);
+      return;
+    }
+
     setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
   }
 

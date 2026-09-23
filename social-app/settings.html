@@ -456,6 +456,29 @@
     </div>
   </div>
 
+  <!-- ── Instagram ── -->
+  <div class="settings-section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(228,64,95,0.12);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E4405F" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+      </div>
+      <div>
+        <p class="section-title">Instagram</p>
+        <p class="section-sub">Connect once, then post to your story straight from EyeScout</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <p id="ig-state" style="font-size:13px;color:rgba(255,255,255,0.7);">Checking…</p>
+      <div>
+        <button class="photo-upload-btn" id="ig-btn" onclick="igToggleConnection()" style="display:none;"></button>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.6;">
+        Instagram only allows apps to post to <strong>Business or Creator</strong> accounts, not personal ones.
+        Switching is free in Instagram under Account type and tools.
+      </p>
+    </div>
+  </div>
+
   <!-- ── Personal Info ── -->
   <div class="settings-section">
     <div class="section-header">
@@ -822,6 +845,35 @@
     status.textContent = error ? 'Couldn’t save: ' + (error.message || 'server error') : `✓ ${t.label} saved`;
   }
   renderColorGrid();
+
+  // ── Instagram connection ─────────────────────────────────────────────────
+  let _igConnected = false;
+  async function paintIg() {
+    const stateEl = document.getElementById('ig-state');
+    const btn = document.getElementById('ig-btn');
+    if (!stateEl || !btn || typeof igStatus !== 'function') return;
+    const { connected, username } = await igStatus();
+    _igConnected = connected;
+    stateEl.textContent = connected
+      ? (username ? 'Connected as @' + username : 'Connected')
+      : 'Not connected';
+    btn.textContent = connected ? 'Disconnect' : 'Connect Instagram';
+    btn.style.display = '';
+  }
+  async function igToggleConnection() {
+    const btn = document.getElementById('ig-btn');
+    btn.disabled = true;
+    if (_igConnected) {
+      await igDisconnect();
+      showToast('Instagram disconnected');
+      await paintIg();
+    } else {
+      const r = await igConnect();            // navigates away to Instagram on success
+      if (!r.ok) showToast(r.error, true);
+    }
+    btn.disabled = false;
+  }
+  paintIg();
 
   // ── Custom Stats ─────────────────────────────────────────────────────────
   let statRows = Array.isArray(p.sportStats) ? [...p.sportStats] : [];
