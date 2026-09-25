@@ -1528,3 +1528,17 @@ async function igPublish({ mediaUrl, kind, caption, target }) {
   if (r && r.ok && r.pending) return { ok: false, error: 'Instagram is still processing that video. It may appear shortly.' };
   return r || { ok: false, error: 'Could not post to Instagram.' };
 }
+
+/**
+ * Shrink an uploaded video, and optionally produce the branded copy that goes
+ * to Instagram. Returns { cleanUrl, brandedUrl } on success.
+ *
+ * NEVER throws and never rejects: if processing fails or is not configured, the
+ * caller keeps the original upload and posts that. A smaller file is an
+ * optimisation, and losing someone's post over it would be a bad trade.
+ */
+async function processVideo(sourceUrl, brand) {
+  const r = await _igCall('process-video', { sourceUrl, brand: !!brand });
+  if (r && r.ok && r.cleanUrl) return r;
+  return { ok: false, cleanUrl: sourceUrl, brandedUrl: null };
+}

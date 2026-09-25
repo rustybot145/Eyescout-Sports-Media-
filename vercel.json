@@ -29,5 +29,14 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/process-video.js": {
+      "maxDuration": 300,
+      "memory": 3008
+    },
+    "api/instagram-publish.js": {
+      "maxDuration": 60
+    }
+  }
 }

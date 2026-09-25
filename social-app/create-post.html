@@ -347,7 +347,9 @@
   let selectedPhoto = null;   // uploaded URL once the upload finishes
   let selectedType  = 'photo';
   let uploadPromise = null;   // in flight while the caption is being written
+  let processPromise = null;  // video compression, started as soon as the upload lands
   let previewUrl    = null;
+  let igReady       = false;  // Instagram connected → also build the branded copy
 
   const MAX_VIDEO = 50 * 1024 * 1024;
 
@@ -373,6 +375,14 @@
     uploadPromise = _sbUploadImage('posts', session.id, file).then(url => { selectedPhoto = url; return url; });
     uploadPromise.catch(() => {});
 
+    // Video gets compressed straight away, in parallel with the caption being
+    // typed, so the wait is hidden instead of landing on the Share button. The
+    // branded copy is built at the same time when Instagram is connected —
+    // deciding later would mean a second, slower pass.
+    processPromise = isVideo
+      ? uploadPromise.then((url) => processVideo(url, igReady)).catch(() => null)
+      : null;
+
     document.getElementById('step-pick').style.display = 'none';
     document.getElementById('step-caption').style.display = 'block';
     document.getElementById('post-err').style.display = 'none';
@@ -384,6 +394,7 @@
   (async () => {
     if (typeof igStatus !== 'function') return;
     const { connected, username } = await igStatus();
+    igReady = connected;
     if (!connected) return;                       // stays hidden; nothing to explain
     document.getElementById('ig-row').style.display = 'flex';
     if (username) document.getElementById('ig-handle').textContent = '@' + username;
@@ -436,6 +447,18 @@
     }
     if (!selectedPhoto) return;
 
+    // Wait for compression if it is still running. It started when the file was
+    // picked, so by now it is usually finished. On any failure `processed` is
+    // null and we simply post the original.
+    let processed = null;
+    if (processPromise) {
+      btn.textContent = 'Optimising video…';
+      processed = await processPromise;
+      btn.textContent = 'Posting…';
+    }
+    const postUrl = (processed && processed.cleanUrl) || selectedPhoto;
+    const igUrl = (processed && processed.brandedUrl) || postUrl;
+
     const posts = JSON.parse(localStorage.getItem('es_posts') || '[]');
     const newPostId = Date.now().toString();
     // Flag so the feed floats this brand-new post to the very top next time it opens.
@@ -447,7 +470,7 @@
       authorJersey: session.jersey,
       sport: selectedPostSport || session.sport,
       type: selectedType,
-      mediaData: selectedPhoto,
+      mediaData: postUrl,
       caption: document.getElementById('caption-input').value.trim(),
       tournament: null,
       likes: [],
@@ -466,7 +489,7 @@
       const note = document.getElementById('ig-result');
       if (note) { note.textContent = 'Posting to Instagram…'; note.style.display = 'block'; }
       const r = await igPublish({
-        mediaUrl: selectedPhoto,
+        mediaUrl: igUrl,
         kind: selectedType === 'video' ? 'video' : 'photo',
         caption: posts[0].caption,
         target: 'story',
