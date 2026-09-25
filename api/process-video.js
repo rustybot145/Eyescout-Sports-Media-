@@ -89,15 +89,6 @@ async function upload(bucket, key, file, contentType) {
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodeURI(key)}`;
 }
 
-async function removeObject(bucket, key) {
-  try {
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${encodeURI(key)}`, {
-      method: 'DELETE',
-      headers: { apikey: serviceKey(), Authorization: `Bearer ${serviceKey()}` },
-    });
-  } catch (e) { /* the compressed copy is already safe; a stray original is not worth failing over */ }
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
   if (!serviceKey()) return res.status(200).json({ ok: false, skipped: true, error: 'Not configured' });
@@ -163,13 +154,17 @@ module.exports = async function handler(req, res) {
 
     await run(args, 280000); // leave headroom inside the 300s function limit
 
+    // Written back OVER the original key, not to a new one.
+    //
+    // The first version uploaded to "<name>-c.mp4" and deleted the original.
+    // That quietly made the post depend on this request finishing: if the
+    // caller navigated away mid-encode, the server still completed, deleted the
+    // original, and the post kept a URL that no longer existed. Overwriting in
+    // place means the URL a post was saved with stays valid no matter what
+    // happens here, and there is nothing to delete.
+    const cleanUrl = await upload(loc.bucket, loc.key, clean, 'video/mp4');
     const base = loc.key.replace(/\.[^./]+$/, '');
-    const cleanUrl = await upload(loc.bucket, `${base}-c.mp4`, clean, 'video/mp4');
     const brandedUrl = brand ? await upload(loc.bucket, `${base}-ig.mp4`, branded, 'video/mp4') : null;
-
-    // The whole point is to stop storage filling up, so the bloated original
-    // goes — but only once the compressed copy is safely uploaded.
-    await removeObject(loc.bucket, loc.key);
 
     const sizes = { before: fs.statSync(src).size, after: fs.statSync(clean).size };
     cleanup();

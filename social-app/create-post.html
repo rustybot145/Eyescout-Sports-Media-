@@ -447,17 +447,13 @@
     }
     if (!selectedPhoto) return;
 
-    // Wait for compression if it is still running. It started when the file was
-    // picked, so by now it is usually finished. On any failure `processed` is
-    // null and we simply post the original.
-    let processed = null;
-    if (processPromise) {
-      btn.textContent = 'Optimising video…';
-      processed = await processPromise;
-      btn.textContent = 'Posting…';
-    }
-    const postUrl = (processed && processed.cleanUrl) || selectedPhoto;
-    const igUrl = (processed && processed.brandedUrl) || postUrl;
+    // The post is saved FIRST, before waiting on anything else.
+    //
+    // It used to wait for video compression before saving, which meant closing
+    // the page mid-encode lost the post completely — the server finished the
+    // work and nobody ever heard about it. Compression writes back over the
+    // same file, so this URL stays correct either way.
+    const postUrl = selectedPhoto;
 
     const posts = JSON.parse(localStorage.getItem('es_posts') || '[]');
     const newPostId = Date.now().toString();
@@ -482,11 +478,21 @@
     document.getElementById('step-caption').style.display = 'none';
     document.getElementById('step-done').style.display = 'block';
 
-    // Instagram last, and never in a way that can lose the EyeScout post — that
-    // is already saved by this point. A failure here is reported, not fatal.
+    // Everything below is a bonus. The EyeScout post is already saved, so a
+    // failure here is reported and never undoes it.
     const igOn = document.getElementById('ig-toggle');
+    const note = document.getElementById('ig-result');
+
+    // Compression finishes in its own time; for Instagram we want the branded
+    // copy, so wait for it only when the switch is on.
+    let processed = null;
+    if (processPromise && igOn && igOn.checked) {
+      if (note) { note.textContent = 'Preparing your video…'; note.style.display = 'block'; }
+      processed = await processPromise;
+    }
+    const igUrl = (processed && processed.brandedUrl) || postUrl;
+
     if (igOn && igOn.checked && typeof igPublish === 'function') {
-      const note = document.getElementById('ig-result');
       if (note) { note.textContent = 'Posting to Instagram…'; note.style.display = 'block'; }
       const r = await igPublish({
         mediaUrl: igUrl,
