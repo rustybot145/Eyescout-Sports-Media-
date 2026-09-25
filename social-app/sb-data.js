@@ -1486,14 +1486,26 @@ async function _igAuthHeaders() {
   return token ? { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token } : null;
 }
 
-async function _igCall(path, body) {
+async function _igCall(path, body, timeoutMs) {
   const headers = await _igAuthHeaders();
   if (!headers) return { ok: false, error: 'Please sign in again.' };
+  // A hung request used to surface as a bare "network problem", which told us
+  // nothing about WHICH step died. Each failure now names its step, and a
+  // request that never answers is cut off rather than hanging indefinitely.
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs || 90000) : null;
   try {
-    const r = await fetch('/api/' + path, { method: 'POST', headers, body: JSON.stringify(body || {}) });
+    const r = await fetch('/api/' + path, {
+      method: 'POST', headers, body: JSON.stringify(body || {}),
+      signal: ctrl ? ctrl.signal : undefined,
+    });
+    if (timer) clearTimeout(timer);
+    if (!r.ok && r.status >= 500) return { ok: false, error: `${path} failed on the server (${r.status})` };
     return await r.json();
   } catch (e) {
-    return { ok: false, error: 'Network problem — check your connection.' };
+    if (timer) clearTimeout(timer);
+    const aborted = e && (e.name === 'AbortError');
+    return { ok: false, error: aborted ? `${path} timed out` : `${path} could not be reached` };
   }
 }
 
@@ -1520,10 +1532,10 @@ async function igDisconnect() { return _igCall('instagram-disconnect'); }
  * done. Capped so a stuck video cannot spin forever.
  */
 async function igPublish({ mediaUrl, kind, caption, target }) {
-  let r = await _igCall('instagram-publish', { mediaUrl, kind, caption, target: target || 'story' });
+  let r = await _igCall('instagram-publish', { mediaUrl, kind, caption, target: target || 'story' }, 300000);
   for (let i = 0; i < 20 && r && r.ok && r.pending; i++) {
     await new Promise((res) => setTimeout(res, 3000));
-    r = await _igCall('instagram-publish', { containerId: r.containerId });
+    r = await _igCall('instagram-publish', { containerId: r.containerId }, 300000);
   }
   if (r && r.ok && r.pending) return { ok: false, error: 'Instagram is still processing that video. It may appear shortly.' };
   return r || { ok: false, error: 'Could not post to Instagram.' };
@@ -1538,7 +1550,7 @@ async function igPublish({ mediaUrl, kind, caption, target }) {
  * optimisation, and losing someone's post over it would be a bad trade.
  */
 async function processVideo(sourceUrl, brand) {
-  const r = await _igCall('process-video', { sourceUrl, brand: !!brand });
+  const r = await _igCall('process-video', { sourceUrl, brand: !!brand }, 300000);
   if (r && r.ok && r.cleanUrl) return r;
   return { ok: false, cleanUrl: sourceUrl, brandedUrl: null };
 }

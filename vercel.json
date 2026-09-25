@@ -36,7 +36,7 @@
       "memory": 3008
     },
     "api/instagram-publish.js": {
-      "maxDuration": 60
+      "maxDuration": 300
     }
   }
 }
