@@ -295,7 +295,15 @@
           <div id="post-sport-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
         </div>
 
-        <!-- Instagram — only appears once the athlete has connected in Settings -->
+        <!-- Not connected yet: show the offer here rather than hiding the feature
+             somewhere in Settings where nobody finds it. Opens a popup so this
+             half-written post, and the video already uploaded for it, survive. -->
+        <button type="button" id="ig-connect-row" onclick="igConnectFromPost()" style="display:none;align-items:center;gap:10px;margin-bottom:18px;width:100%;text-align:left;cursor:pointer;background:#141414;border:1px solid rgba(228,64,95,0.35);border-radius:12px;padding:12px 14px;font-family:inherit;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E4405F" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          <span id="ig-connect-text" style="font-size:13px;color:rgba(255,255,255,0.85);">Connect Instagram to post to Instagram</span>
+        </button>
+
+        <!-- Instagram — the switch itself, once connected -->
         <label id="ig-row" style="display:none;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;">
           <input type="checkbox" id="ig-toggle" style="width:16px;height:16px;accent-color:#E4405F;cursor:pointer;">
           <span style="font-size:13px;color:rgba(255,255,255,0.85);">Also post to my Instagram story <span id="ig-handle" style="color:rgba(255,255,255,0.6);"></span></span>
@@ -394,11 +402,33 @@
   (async () => {
     if (typeof igStatus !== 'function') return;
     const { connected, username } = await igStatus();
-    igReady = connected;
-    if (!connected) return;                       // stays hidden; nothing to explain
-    document.getElementById('ig-row').style.display = 'flex';
-    if (username) document.getElementById('ig-handle').textContent = '@' + username;
+    paintIgRow(connected, username);
   })();
+
+  function paintIgRow(connected, username) {
+    igReady = connected;
+    document.getElementById('ig-row').style.display = connected ? 'flex' : 'none';
+    document.getElementById('ig-connect-row').style.display = connected ? 'none' : 'flex';
+    if (connected && username) document.getElementById('ig-handle').textContent = '@' + username;
+  }
+
+  async function igConnectFromPost() {
+    const btn = document.getElementById('ig-connect-row');
+    const label = document.getElementById('ig-connect-text');
+    btn.disabled = true;
+    label.textContent = 'Waiting for Instagram…';
+    const r = await igConnectPopup((st) => paintIgRow(true, st.username));
+    btn.disabled = false;
+    if (r.ok) {
+      // Connected mid-post: tick it for them, since tapping Connect said what
+      // they wanted. The video was uploaded before we knew, so there is no
+      // branded copy this time — Instagram gets the plain one.
+      document.getElementById('ig-toggle').checked = true;
+    } else {
+      label.textContent = r.error || 'Connect Instagram to post to Instagram';
+      setTimeout(() => { label.textContent = 'Connect Instagram to post to Instagram'; }, 5000);
+    }
+  }
 
   // ── Which sport is this post for? (multi-sport athletes) ───────────────────
   const _mySports = (typeof getPlayerSports === 'function') ? getPlayerSports(session) : [session.sport];

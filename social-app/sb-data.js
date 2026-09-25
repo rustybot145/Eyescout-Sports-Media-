@@ -1516,11 +1516,44 @@ async function igStatus() {
   return { connected: !!(r && r.ok && r.connected), username: (r && r.username) || null };
 }
 
-/** Sends the athlete to Instagram's own permission screen. */
-async function igConnect() {
+/** The Instagram permission URL, without going anywhere. Used by the post page,
+ *  which opens it in a popup so an in-progress post is not thrown away. */
+async function igConnectUrl() {
   const r = await _igCall('instagram-start', { platform: 'web' });
-  if (r && r.ok && r.url) { window.location.href = r.url; return { ok: true }; }
-  return { ok: false, error: (r && r.error) || 'Could not start the Instagram connection.' };
+  return (r && r.ok && r.url) ? { ok: true, url: r.url }
+                              : { ok: false, error: (r && r.error) || 'Could not start the Instagram connection.' };
+}
+
+/** Sends the athlete to Instagram's own permission screen (Settings page). */
+async function igConnect() {
+  const r = await igConnectUrl();
+  if (r.ok) { window.location.href = r.url; return { ok: true }; }
+  return r;
+}
+
+/**
+ * Connect from a page you must not navigate away from. Opens Instagram in a
+ * popup and watches until the connection appears, so a half-written post with
+ * an uploaded video stays exactly where it is.
+ */
+async function igConnectPopup(onDone) {
+  const r = await igConnectUrl();
+  if (!r.ok) return r;
+  const w = window.open(r.url, 'eyescout_ig', 'width=520,height=720');
+  if (!w) return { ok: false, error: 'Your browser blocked the Instagram window. Allow pop-ups and try again.' };
+  // Poll rather than trust the popup: it lands on our own callback page, and
+  // the token is saved server-side before that page ever renders.
+  for (let i = 0; i < 100; i++) {
+    await new Promise((res) => setTimeout(res, 2500));
+    const st = await igStatus();
+    if (st.connected) { try { w.close(); } catch (e) {} if (onDone) onDone(st); return { ok: true, status: st }; }
+    if (w.closed) {
+      const late = await igStatus();
+      if (late.connected) { if (onDone) onDone(late); return { ok: true, status: late }; }
+      return { ok: false, error: 'Instagram was not connected.' };
+    }
+  }
+  return { ok: false, error: 'Timed out waiting for Instagram.' };
 }
 
 async function igDisconnect() { return _igCall('instagram-disconnect'); }
