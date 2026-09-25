@@ -164,7 +164,14 @@ async function toLongLived(shortToken) {
   });
   const r = await fetch(`https://graph.instagram.com/access_token?${q.toString()}`);
   const j = await r.json().catch(() => ({}));
-  if (!r.ok || !j.access_token) throw new Error('Instagram would not issue a long-lived token');
+  // Say what Instagram actually said. A bare "would not issue a long-lived
+  // token" cost a debugging round: it hides the difference between an account
+  // with no role on the app (Standard Access) and a personal account, which
+  // need completely different fixes.
+  if (!r.ok || !j.access_token) {
+    const why = (j.error && j.error.message) || j.error_message || j.error_description || '';
+    throw new Error(why ? `Instagram refused: ${why}` : 'Instagram would not issue a long-lived token');
+  }
   return { token: j.access_token, expiresIn: Number(j.expires_in || 0) };
 }
 

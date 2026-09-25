@@ -1539,7 +1539,16 @@ async function igConnect() {
 async function igConnectPopup(onDone) {
   const r = await igConnectUrl();
   if (!r.ok) return r;
-  const w = window.open(r.url, 'eyescout_ig', 'width=520,height=720');
+  // Go via our own domain. A direct instagram.com link gets claimed by the
+  // Instagram app on a phone, which has no page for the permission screen, so
+  // the athlete lands on their feed and nothing happens. Falls back to the
+  // direct URL if the state cannot be read, which is no worse than before.
+  let openUrl = r.url;
+  try {
+    const st = new URL(r.url).searchParams.get('state');
+    if (st) openUrl = `/api/instagram-go?state=${encodeURIComponent(st)}`;
+  } catch (e) {}
+  const w = window.open(openUrl, 'eyescout_ig', 'width=520,height=720');
   if (!w) return { ok: false, error: 'Your browser blocked the Instagram window. Allow pop-ups and try again.' };
   // Poll rather than trust the popup: it lands on our own callback page, and
   // the token is saved server-side before that page ever renders.
